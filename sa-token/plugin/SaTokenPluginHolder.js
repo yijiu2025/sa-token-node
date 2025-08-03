@@ -136,31 +136,6 @@ class SaTokenPluginHolder {
 	 * @return /
 	 * @param <T> /
 	 */
-	// async function discoverPlugins() {
-	// 	const plugins = [];
-	// 	// 1. 扫描node_modules中符合命名规范的包
-	// 	const pkgDirs = await glob('node_modules/sa-token-plugin-*', { absolute: true });
-	// 	for (const dir of pkgDirs) {
-	// 		try {
-	// 		// 2. 读取插件的package.json
-	// 		const pkgPath = path.join(dir, 'package.json');
-	// 		const pkg = require(pkgPath);
-	// 		// 3. 验证是否为sa-token插件
-	// 		if (pkg.keywords && pkg.keywords.includes('sa-token-plugin')) {
-	// 			// 4. 加载插件主模块
-	// 			const mainModule = path.join(dir, pkg.main || 'index.js');
-	// 			const PluginClass = require(mainModule);
-	// 			// 5. 实例化并添加到插件列表
-	// 			plugins.push(new PluginClass());
-	// 		}
-	// 		} catch (e) {
-	// 		console.warn(`加载插件失败: ${dir}, 错误: ${e.message}`);
-	// 		}
-	// 	}
-	// 	return plugins;
-	// }
-
-
 
 	// async _loaderPluginsBySpi(serviceInterface, dirName) {
 
@@ -213,8 +188,24 @@ class SaTokenPluginHolder {
         try {
             // 在 Node.js 环境中模拟类加载器行为
             // 实际项目中可能需要调整此部分以适应具体的模块加载机制
-            const files = await glob(spiPath, { root: process.cwd() });
-            for (const file of files) {
+            // 1. 查找所有SPI配置文件
+			const files = await glob(
+				spiPath, 
+				{
+					root: process.cwd(),
+					nodir: true,
+					ignore: ['**/node_modules/**']
+				});
+			// 2. 同时查找node_modules中的SPI配置
+			const moduleFiles = await glob(
+				`node_modules/**/${spiPath}`, 
+				{
+					root: process.cwd(),
+					nodir: true
+				});
+			// 合并所有文件
+    		const allFiles = [...files, ...moduleFiles];
+            for (const file of allFiles) {
                 const content = await readFile(file, 'utf8');
                 const lines = content.split('\n');
                 for (let line of lines) {
