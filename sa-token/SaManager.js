@@ -16,29 +16,29 @@
 
 import SaTokenConfig from "./config/SaTokenConfig";
 import SaTokenConfigFactory from "./config/SaTokenConfigFactory";
-import SaTokenContext from "./config/SaTokenConfig";
-import SaTokenContextForThreadLocal from "./config/SaTokenConfig";
-import SaTokenDao from "./config/SaTokenConfig";
-import SaTokenDaoDefaultImpl from "./config/SaTokenConfig";
-import SaErrorCode from "./config/SaTokenConfig";
-import SaTokenException from "./config/SaTokenConfig";
-import SaHttpTemplate from "./config/SaTokenConfig";
-import SaHttpTemplateDefaultImpl from "./config/SaTokenConfig";
-import SaJsonTemplate from "./config/SaTokenConfig";
-import SaJsonTemplateDefaultImpl from "./config/SaTokenConfig";
-import SaTokenEventCenter from "./config/SaTokenConfig";
-import SaLog from "./config/SaTokenConfig";
-import SaLogForConsole from "./config/SaTokenConfig";
-import SaSameTemplate from "./config/SaTokenConfig";
-import SaTotpTemplate from "./config/SaTokenConfig";
-import SaSerializerTemplate from "./config/SaTokenConfig";
-import SaSerializerTemplateForJson from "./config/SaTokenConfig";
-import StpInterface from "./config/SaTokenConfig";
-import StpInterfaceDefaultImpl from "./config/SaTokenConfig";
-import StpLogic from "./config/SaTokenConfig";
-import StpUtil from "./config/SaTokenConfig";
-import SaStrategy from "./config/SaTokenConfig";
-import SaTempTemplate from "./config/SaTokenConfig";
+import SaTokenContext from "./context/SaTokenContext";
+import SaTokenContextForThreadLocal from "./context/SaTokenContextForThreadLocal";
+import SaTokenDao from "./dao/SaTokenDao";
+import SaTokenDaoDefaultImpl from "./dao/SaTokenDaoDefaultImpl";
+import SaErrorCode from "./error/SaErrorCode";
+import SaTokenException from "./exception/SaTokenException";
+import SaHttpTemplate from "./http/SaHttpTemplate";
+import SaHttpTemplateDefaultImpl from "./http/SaHttpTemplateDefaultImpl";
+import SaJsonTemplate from "./json/SaJsonTemplate";
+import SaJsonTemplateDefaultImpl from "./json/SaJsonTemplateDefaultImpl";
+import SaTokenEventCenter from "./listener/SaTokenEventCenter";
+import SaLog from "./log/SaLog";
+import SaLogForConsole from "./log/SaLogForConsole";
+import SaSameTemplate from "./same/SaSameTemplate.js";
+import SaTotpTemplate from "./secure/totp/SaTotpTemplate";
+import SaSerializerTemplate from "./serializer/SaSerializerTemplate";
+import SaSerializerTemplateForJson from "./serializer/impl/SaSerializerTemplateForJson";
+import StpInterface from "./stp/StpInterface";
+import StpInterfaceDefaultImpl from "./stp/StpInterfaceDefaultImpl";
+import StpLogic from "./stp/StpLogic";
+import StpUtil from "./stp/StpUtil";
+import SaStrategy from "./strategy/SaStrategy";
+import SaTempTemplate from "./temp/SaTempTemplate";
 import SaFoxUtil from "./util/SaFoxUtil.js";
 
 
@@ -50,53 +50,13 @@ import SaFoxUtil from "./util/SaFoxUtil.js";
  */
 class SaManager {
 
-    constructor() {
-        // 确保单例
-        if (!SaManager.instance) {
-          // 全局配置对象
-          this.config = null;
-          
-          // 持久化组件
-          this.saTokenDao = null;
-          
-          // 权限数据源组件
-          this.stpInterface = null;
-          
-          // 上下文对象
-          this.saTokenContext = null;
-          
-          // 临时 token 认证模块
-          this.saTempTemplate = null;
-          
-          // JSON 转换器
-          this.saJsonTemplate = null;
-          
-          // HTTP 转换器
-          this.saHttpTemplate = null;
-          
-          // 序列化器
-          this.saSerializerTemplate = null;
-          
-          // Same-Token 同源系统认证模块
-          this.saSameTemplate = null;
-          
-          // 日志输出器 (默认为控制台输出)
-          this.log = new SaLogForConsole();
-          
-          // TOTP 算法类
-          this.totpTemplate = null;
-          
-          // StpLogic 集合, 记录框架所有成功初始化的 StpLogic
-          this.stpLogicMap = new Map();
-          
-          SaManager.instance = this;
-        }
-        return SaManager.instance;
-    }
-
-
     // ------------------- 配置相关 -------------------
   
+    /**
+     * 全局配置对象
+     */
+    static config = null; 
+
     /**
      * 设置全局配置
      * @param {SaTokenConfig} config 配置对象
@@ -147,6 +107,11 @@ class SaManager {
     // ------------------- 持久化组件 -------------------
   
     /**
+     * 持久化组件
+     */
+    static saTokenDao = null;
+
+    /**
      * 设置持久化组件
      * @param {SaTokenDao} saTokenDao 持久化组件实例
      */
@@ -154,7 +119,6 @@ class SaManager {
         this.setSaTokenDaoMethod(saTokenDao);
         SaTokenEventCenter.doRegisterComponent("SaTokenDao", saTokenDao);
     }
-
 
     /**
      * 内部方法 - 设置持久化组件
@@ -186,6 +150,11 @@ class SaManager {
     // ------------------- 权限数据源组件 -------------------
     
     /**
+     * 权限数据源组件
+     */
+    static stpInterface = null;
+
+    /**
      * 设置权限数据源组件
      * @param {StpInterface} stpInterface 权限数据源实例
      */
@@ -208,6 +177,11 @@ class SaManager {
     // ------------------- 上下文对象 -------------------
     
     /**
+     * 上下文 SaTokenContext
+     */
+    static saTokenContext = null;
+
+    /**
      * 设置上下文对象
      * @param {SaTokenContext} saTokenContext 上下文实例
      */
@@ -229,6 +203,11 @@ class SaManager {
 
     // ------------------- 临时 token 认证模块 -------------------
   
+    /**
+     * 临时 token 认证模块
+     */
+    static saTempTemplate = null;
+
     /**
      * 设置临时 token 认证模块
      * @param {SaTempTemplate} saTempTemplate 临时 token 认证实例
@@ -253,6 +232,11 @@ class SaManager {
     // ------------------- JSON 转换器 -------------------
   
     /**
+     * JSON 转换器
+     */
+    static saJsonTemplate = null;
+
+    /**
      * 设置 JSON 转换器
      * @param {SaJsonTemplate} saJsonTemplate JSON 转换器实例
      */
@@ -275,6 +259,11 @@ class SaManager {
 
     // ------------------- HTTP 转换器 -------------------
   
+    /**
+     * HTTP 转换器
+     */
+    static saHttpTemplate = null;
+
     /**
      * 设置 HTTP 转换器
      * @param {SaHttpTemplate} saHttpTemplate HTTP 转换器实例
@@ -299,6 +288,11 @@ class SaManager {
     // ------------------- 序列化器 -------------------
   
     /**
+     * 序列化器
+     */
+    static saSerializerTemplate = null;
+
+    /**
      * 设置序列化器
      * @param {SaSerializerTemplate} saSerializerTemplate 序列化器实例
      */
@@ -320,7 +314,12 @@ class SaManager {
 
 
     // ------------------- Same-Token 同源系统认证模块 -------------------
-  
+
+    /**
+     * Same-Token 同源系统认证模块
+     */
+    static saSameTemplate = null;
+
     /**
      * 设置 Same-Token 认证模块
      * @param {SaSameTemplate} saSameTemplate Same-Token 实例
@@ -345,6 +344,11 @@ class SaManager {
     // ------------------- 日志输出器 -------------------
   
     /**
+     * 日志输出器 
+     */
+    static log = new SaLogForConsole();
+
+    /**
      * 设置日志输出器
      * @param {SaLog} log 日志输出器实例
      */
@@ -365,6 +369,11 @@ class SaManager {
     // ------------------- TOTP 算法类 -------------------
     //支持 生成/验证 动态一次性密码
   
+    /**
+     * TOTP 算法类，支持 生成/验证 动态一次性密码
+     */
+    static totpTemplate = null;
+
     /**
      * 设置 TOTP 算法类
      * @param {SaTotpTemplate} totpTemplate TOTP 实例
@@ -389,6 +398,11 @@ class SaManager {
 
     // ------------------- StpLogic 相关 -------------------
   
+    /**
+     * StpLogic 集合, 记录框架所有成功初始化的 StpLogic
+     */
+    static stpLogicMap = new Map();
+
     /**
      * 向全局集合中添加 StpLogic 向全局集合中 put 一个 StpLogic 
      * @param {StpLogic} stpLogic StpLogic 实例
@@ -449,7 +463,4 @@ class SaManager {
     }
 }
 
-const saManager = new SaManager();
-export const log = saManager.log;
-Object.freeze(saManager);
-export default saManager;
+export default SaManager;
