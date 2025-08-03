@@ -125,12 +125,12 @@ class SaRouterStaff {
 
 		// 情况3: match(pattern) 或 match(...patterns) - 匹配 URI 路径
         else if (args.every(arg => typeof arg === 'string') && this._isPathPattern(args)) {
-            this.isHit = SaRouter.isMatchCurrURI(args);
+            this.isHit = SaRouter.isMatchCurrURI(...args);
         }
 
         // 情况4: match(...methods) - 匹配 HTTP 方法（如 GET, POST）
         else if (args.every(arg => typeof arg === 'string') && this._isHttpMethod(args)) {
-            this.isHit = SaRouter.isMatchCurrMethod(args);
+            this.isHit = SaRouter.isMatchCurrMethod(...args);
         }
 
 		return this;
@@ -169,9 +169,9 @@ class SaRouterStaff {
         else if (args.every(arg => typeof arg === 'string')) {
 
 			if (this._isHttpMethod(args)) {
-				this.isHit = !SaRouter.isMatchCurrMethod(args);
+				this.isHit = !SaRouter.isMatchCurrMethod(...args);
 			} else {
-				this.isHit = !SaRouter.isMatchCurrURI(args);
+				this.isHit = !SaRouter.isMatchCurrURI(...args);
 			}
         }
 

@@ -73,6 +73,16 @@ class SaHttpMethod {
 	// 	}
 	// }
 
+
+    /**
+     * 检查给定的方法是否为有效的HTTP方法
+     * @param {string} method 请求类型 
+     * @return {boolean} 是否为有效的HTTP方法
+     */
+    static isValidMethod(method) {
+        return this.#validMethods.has(method.toUpperCase());
+    }
+
 	/**
 	 * String 转 enum 
 	 * @param {string} method 请求类型 
@@ -83,7 +93,7 @@ class SaHttpMethod {
 			throw new SaTokenException("Method 不可以是 null").setCode(SaErrorCode.CODE_10321);
 		}
         if (this.#validMethods.has(method.toUpperCase())) {
-            return upperMethod; // 直接返回标准化字符串
+            return method; // 直接返回标准化字符串
         }
         throw new SaTokenException("无效Method：" + method).setCode(SaErrorCode.CODE_10321);
 	}

@@ -43,32 +43,63 @@ class SaRouter {
 
 	// -------------------- 路由匹配相关 -------------------- 
 	
+	// /**
+	//  * 路由匹配
+	//  * @param {string|Array<string>|[]|SaHttpMethod[]} patternOrMethods 路由匹配符 
+	//  * @param {String} pathOrMethodString 被匹配的路由  
+	//  * @return {boolean} 是否匹配成功 
+	//  */
+
+	// 单个路由匹配
 	/**
 	 * 路由匹配
-	 * @param {string|Array<string>|[]|SaHttpMethod[]} patternOrMethods 路由匹配符 
-	 * @param {String} pathOrMethodString 被匹配的路由  
-	 * @return {boolean} 是否匹配成功 
+	 * @param pattern 路由匹配符 
+	 * @param path 被匹配的路由  
+	 * @return 是否匹配成功 
 	 */
-    static isMatch(patternOrMethods, pathOrMethodString) {
-        if(patternOrMethods == null) {
-            return false;
-        }
-        if(typeof patternOrMethods === 'string' || patternOrMethods instanceof String) {
-            return SaStrategy.instance.routeMatcher(patternOrMethods, pathOrMethodString);
-        } else {
-            const targetMethod = pathOrMethodString.toLowerCase();
-            for (const pOrm of patternOrMethods) {
-                if(pOrm == SaHttpMethod.ALL || (pOrm != null && pOrm.toString().toLowerCase() === targetMethod)) {
-                    return true;
-                }
-                if(this.isMatch(pOrm, pathOrMethodString)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
+    static matchRoute(pattern, path) {
+        return SaStrategy.instance.routeMatcher(pattern, path);
     }
+
+	// 多个路由匹配
+	/**
+	 * 路由匹配   
+	 * @param patterns 路由匹配符集合 
+	 * @param path 被匹配的路由  
+	 * @return 是否匹配成功 
+	 */
+    static matchRoutes(patterns, path) {
+        return patterns?.some(pattern => this.matchRoute(pattern, path)) ?? false;
+    }
+
+	// HTTP方法匹配
+	/**
+	 * Http请求方法匹配 
+	 * @param methods Http请求方法断言数组  
+	 * @param methodString Http请求方法
+	 * @return 是否匹配成功 
+	 */
+    static matchMethods(methods, methodString) {
+        if (!methods) return false;
+        const target = methodString?.toLowerCase();
+        return methods.some(method => 
+            method === SaHttpMethod.ALL || 
+            (method && method.toString().toLowerCase() === target)
+        );
+    }
+
+	// 兼容Java API的通用方法
+    static isMatch(patternsOrMethods, pathOrMethod) {
+        if (Array.isArray(patternsOrMethods)) {
+            if (patternsOrMethods.length > 0 && SaHttpMethod.isValidMethod(patternsOrMethods[0])) {
+                return this.matchMethods(patternsOrMethods, pathOrMethod);
+            }
+            return this.matchRoutes(patternsOrMethods, pathOrMethod);
+        }
+        return this.matchRoute(patternsOrMethods, pathOrMethod);
+    }
+
+
 
 	// ------ 使用当前URI匹配 
 	
@@ -113,39 +144,83 @@ class SaRouter {
 	 * 3. @param {SaParamRetFunction<Object, Boolean>} fun 自定义匹配方法
 	 * @return {SaRouterStaff} SaRouterStaff
 	 */
+
 	static match(...args) {
-        return new SaRouterStaff().match(...args);
-    }
+		const len = args.length;
 
-	/**
-	 * 路由匹配排除 
-	 * @param {String...} patterns 路由匹配符排除数组  
-	 * @return {SaRouterStaff} SaRouterStaff
-	 */
-	static notMatch(...patterns) {
-        return new SaRouterStaff().notMatch(...patterns);
-    }
+		// 1. 情况1: match(pattern, fun) 或 match(pattern, SaParamFunction) 路由匹配，如果匹配成功则执行认证函数
+		if(len === 2 && typeof args[0] === 'string' && typeof args[1] === 'function') {
+			return new SaRouterStaff().match(args[0], args[1]);
+		}
+		// 2. 情况2: match(pattern, excludePattern, fun) 路由匹配 (并指定排除匹配符)，如果匹配成功则执行认证函数
+		else if (len === 3 && typeof args[0] === 'string' && typeof args[1] === 'string' && typeof args[2] === 'function') {
+			return new SaRouterStaff().match(args[0], args[1], args[2]);
+		}
 
-	/**
-	 * 路由匹配 
-	 * @param {Array<string>} patterns 路由匹配符集合 
-	 * @return {SaRouterStaff} SaRouterStaff对象自身 
-	 */
-	static match(patterns) {
-        return new SaRouterStaff().match(patterns);
-    }
+		// 3. 根据 boolean 值进行匹配 
+		if (len === 1 && typeof args[0] === 'boolean') {
+            return new SaRouterStaff().match(args[0]);
+        }
+		// 4. 根据自定义方法进行匹配 (lazy) 
+		else if (len === 1 && typeof args[0] === 'function') {
+            return new SaRouterStaff().match(args[0]);
+        }
 
-	/**
-	 * 路由匹配排除 
-	 * @param {Array<string>} patterns 路由匹配符排除集合 
-	 * @return {SaRouterStaff} SaRouterStaff对象自身 
-	 */
-	static notMatch(patterns) {
-		return new SaRouterStaff().notMatch(patterns);
+		// 情况5: match(...methods) - 匹配 HTTP 方法（如 GET, POST）
+		else if (args.every(arg => typeof arg === 'string') && this._isHttpMethod(args)) {
+			return new SaRouterStaff().match(...args);
+		}
+
+		// 情况6: match(pattern) 或 match(...patterns) - 匹配 URI 路径
+        else if (args.every(arg => typeof arg === 'string')) {
+            return new SaRouterStaff().match(...args);
+        }
 	}
 
-	// ----------------- Method匹配 
-	
+
+	/**
+     * notMatch 多态实现：根据参数类型执行不同的排除逻辑
+     * @param {...*} args
+     * @returns {SaRouterStaff}
+     */
+    notMatch(...args) {
+
+        const len = args.length;
+
+        // 1. 根据 boolean 值进行匹配排除 
+        if (len === 1 && typeof args[0] === 'boolean') {
+            return new SaRouterStaff().notMatch(args[0]);
+        }
+
+        // 2. 根据自定义方法进行匹配排除 (lazy) 
+        else if (len === 1 && typeof args[0] === 'function') {
+            return new SaRouterStaff().notMatch(args[0]);
+        }
+
+        // 3. notMatch(...patterns) 或 notMatch(...methods)
+        else if (args.every(arg => typeof arg === 'string')) {
+
+			if (this._isHttpMethod(args)) {
+				return new SaRouterStaff().notMatch(...args);
+			} else {
+				return new SaRouterStaff().notMatch(...args);
+			}
+        }
+
+    }
+
+	// 辅助方法：判断是否是路径匹配模式（比如包含 /user/:id）
+    _isPathPattern(patterns) {
+        return patterns.some(p => p.includes('*') || p.includes(':') || p.includes('/'));
+    }
+
+    // 辅助方法：判断是否是 HTTP 方法（全大写）
+    _isHttpMethod(methods) {
+        const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS',"TRACE", "CONNECT", "ALL"];
+        return methods.every(m => validMethods.includes(m.toUpperCase()));
+    }
+
+
 	/**
 	 * Http请求方法匹配 (String)  
 	 * @param {...String} methods Http请求方法断言数组  
@@ -157,111 +232,12 @@ class SaRouter {
 
 	/**
 	 * Http请求方法匹配排除 (String) 
-	 * @param {...String} methods Http请求方法断言排除数组  
+	 * @param {...String} methods Http请求方法断言数组  排除数组  
 	 * @return {SaRouterStaff} SaRouterStaff
 	 */
 	static notMatchMethod(...methods) {
 		return new SaRouterStaff().notMatchMethod(...methods);
 	}
-	
-	// ----------------- 条件匹配 
-
-	/**
-	 * 多功能匹配方法，支持多种参数类型:
-	 * 1. @param {...SaHttpMethod} methods Http请求方法断言数组
-	 * 2. @param {boolean} flag 布尔值条件
-	 * 3. @param {SaParamRetFunction<Object, Boolean>} fun 自定义匹配方法
-	 * @return {SaRouterStaff} SaRouterStaff
-	 */
-	static match(...args) {
-		const arg = args[0];
-		// 判断参数类型决定调用方式
-		if (args.length === 1) {
-			if (typeof arg === 'boolean') {
-				return new SaRouterStaff().match(arg);
-			} else if (typeof arg === 'function') {
-				return new SaRouterStaff().match(arg);
-			} else if (Array.isArray(arg) && arg.length > 0 && arg[0] instanceof SaHttpMethod) {
-				return new SaRouterStaff().match(arg);
-			}
-		}
-		// 默认当作Http请求方法数组处理
-		return new SaRouterStaff().match(args);
-	}
-
-	/**
-	 * 多功能匹配排除方法，支持多种参数类型:
-	 * 1. @param {...SaHttpMethod} methods Http请求方法断言排除数组
-	 * 2. @param {boolean} flag 布尔值条件
-	 * 3. @param {SaParamRetFunction<Object, Boolean>} fun 自定义匹配排除方法
-	 * @return {SaRouterStaff} SaRouterStaff
-	 */
-	static notMatch(...args) {
-		const arg = args[0];
-		// 判断参数类型决定调用方式
-		if (args.length === 1) {
-			if (typeof arg === 'boolean') {
-				return new SaRouterStaff().notMatch(arg);
-			} else if (typeof arg === 'function') {
-				return new SaRouterStaff().notMatch(arg);
-			} else if (Array.isArray(arg) && arg.length > 0 && arg[0] instanceof SaHttpMethod) {
-				return new SaRouterStaff().notMatch(arg);
-			}
-		}
-		// 默认当作Http请求方法数组处理
-		return new SaRouterStaff().notMatch(args);
-	}
-
-	
-	// -------------------- 直接指定check函数 -------------------- 
-	
-	/**
-	 * 路由匹配，如果匹配成功则执行认证函数
-	 * 支持多种参数组合:
-	 * 1. @param {String} pattern 路由匹配符
-	 *    @param {SaFunction|SaParamFunction<SaRouterStaff>} fun 要执行的校验方法
-	 * 2. @param {String} pattern 路由匹配符
-	 *    @param {String} excludePattern 要排除的路由匹配符
-	 *    @param {SaFunction|SaParamFunction<SaRouterStaff>} fun 要执行的校验方法
-	 * @return {SaRouterStaff} SaRouterStaff
-	 */
-	static match(pattern, arg1, arg2) {
-		// 根据参数数量和类型决定调用方式
-		if (typeof arg2 !== 'undefined') {
-			return new SaRouterStaff().match(pattern, arg1, arg2);
-		} else {
-			return new SaRouterStaff().match(pattern, arg1);
-		}
-	}
-
-	/**
-	 * 路由匹配 (并指定排除匹配符)，如果匹配成功则执行认证函数 
-	 * @param {String} pattern 路由匹配符 
-	 * @param {String} excludePattern 要排除的路由匹配符 
-	 * @param {SaFunction} fun 要执行的方法 
-	 * @param {SaFunction|SaParamFunction<SaRouterStaff>} fun 要执行的方法
-	 * @return {SaRouterStaff} SaRouterStaff
-	 * @deprecated 请使用 match(pattern, excludePattern, fun) 替代
-	 */
-	static matchWithExclude(pattern, excludePattern, fun) {
-		return new SaRouterStaff().match(pattern, excludePattern, fun);
-	}
-
-	/**
-	 * 路由匹配 (并指定排除匹配符)，如果匹配成功则执行认证函数 
-	 * @param {String} pattern 路由匹配符 
-	 * @param {String} excludePattern 要排除的路由匹配符 
-	 * @param {SaParamFunction<SaRouterStaff>} fun 要执行的方法 
-	 * @return {SaRouterStaff} SaRouterStaff
-	 */
-	static match(pattern, excludePattern, fun) {
-		return new SaRouterStaff().match(pattern, excludePattern, fun);
-	}
-
-	
-
-
-
 
 	// -------------------- 提前退出 -------------------- 
 	
