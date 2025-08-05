@@ -1,6 +1,7 @@
 {
   "name": "sa-token-node",
   "version": "1.0.0",
+  "type": "module",
   "description": "sa-token to json",
   "main": "app/starter.js",
   "scripts": {
@@ -21,7 +22,11 @@
   "author": "Chen",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "hi-base32": "^0.5.1",
+    "jssha": "^3.3.1",
     "koa": "^3.0.0",
     "properties-reader": "^2.3.0"
   },

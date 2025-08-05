@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import SaErrorCode from "../error/SaErrorCode";
-import SaFoxUtil from "../util/SaFoxUtil";
+import SaErrorCode from "../error/SaErrorCode.js";
+import SaFoxUtil from "../util/SaFoxUtil.js";
 
 /**
  * Sa-Token 框架内部逻辑发生错误抛出的异常

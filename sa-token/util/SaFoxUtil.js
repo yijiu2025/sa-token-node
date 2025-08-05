@@ -1,4 +1,4 @@
-import SaTokenException from '../exception.SaTokenException';
+import SaTokenException from '../exception/SaTokenException.js';
 import dayjs from 'dayjs'
 
 /**

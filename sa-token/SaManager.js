@@ -30,7 +30,7 @@ import SaTokenEventCenter from "./listener/SaTokenEventCenter";
 import SaLog from "./log/SaLog";
 import SaLogForConsole from "./log/SaLogForConsole";
 import SaSameTemplate from "./same/SaSameTemplate.js";
-import SaTotpTemplate from "./secure/totp/SaTotpTemplate";
+import SaTotpTemplate from "./secure/totp/SaTotpTemplate.js";
 import SaSerializerTemplate from "./serializer/SaSerializerTemplate";
 import SaSerializerTemplateForJson from "./serializer/impl/SaSerializerTemplateForJson";
 import StpInterface from "./stp/StpInterface";
