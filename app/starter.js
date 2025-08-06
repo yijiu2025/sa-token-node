@@ -5,8 +5,11 @@ import path from 'path';
 // const path = require('path');
 
 import SaSecureUtil from '../sa-token/secure/SaSecureUtil.js';
-// import SaTotpTemplate from '../sa-token/secure/totp/SaTotpTemplate.js';
+import SaTotpTemplate from '../sa-token/secure/totp/SaTotpTemplate.js';
 
+// console.log(new SaTotpTemplate().generateGoogleSecretKey('account', 'issuer', 'VDWZWD5QPE5UE4ISJKE24XLCKA'));
+// console.log(new SaTotpTemplate().generateGoogleSecretKey('account', 'VDWZWD5QPE5UE4ISJKE24XLCKA'));
+// console.log(new SaTotpTemplate().generateGoogleSecretKey('account'));
 // const mima = new SaTotpTemplate()._generateTOTP("444LEXVPRC673WWZ53QCX3JUFM")
 
 

@@ -131,10 +131,10 @@ class SaTotpTemplate {
 	 * @param {string} secretKey  TOTP 秘钥
 	 * @return {string} /
 	 */
-	generateGoogleSecretKey(account, secretKey = this.generateSecretKey()) {
-		return `otpauth://totp/${encodeURIComponent(account)}?secret=${secretKey}`;
-		//return StrFormatter.format("otpauth://totp/{}?secret={}", account, secretKey);
-	}
+	// generateGoogleSecretKey(account, secretKey = this.generateSecretKey()) {
+	// 	return `otpauth://totp/${encodeURIComponent(account)}?secret=${secretKey}`;
+	// 	//return StrFormatter.format("otpauth://totp/{}?secret={}", account, secretKey);
+	// }
 
 	/**
 	 * 生成谷歌认证器的扫码字符串 (形如：otpauth://totp/{issuer}:{account}?secret={secretKey}&issuer={issuer})
@@ -146,7 +146,7 @@ class SaTotpTemplate {
 	 */
 	generateGoogleSecretKey(account, issuer, secretKey = this.generateSecretKey()) {
 		// 如果第二个参数是secretKey（没有issuer的情况）
-		if (arguments.length === 2 && typeof issuer !== 'string') {
+		if (arguments.length === 2) {
 			secretKey = issuer;
 			issuer = undefined;
 		}
