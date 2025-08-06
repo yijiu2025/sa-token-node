@@ -16,10 +16,10 @@
 
 
 
-import SaErrorCode from "../../error/SaErrorCode";
-import SaTokenException from "../../exception/SaTokenException";
-import SaHttpMethod from "../../router/SaHttpMethod";
-import SaFoxUtil from "../../util/SaFoxUtil";
+import SaErrorCode from "../../error/SaErrorCode.js";
+import SaTokenException from "../../exception/SaTokenException.js";
+import SaHttpMethod from "../../router/SaHttpMethod.js";
+import SaFoxUtil from "../../util/SaFoxUtil.js";
 
 /**
  * Request 请求对象 包装类

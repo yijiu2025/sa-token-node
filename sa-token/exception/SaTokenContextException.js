@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import InvalidContextException from "./InvalidContextException";
+import InvalidContextException from "./InvalidContextException.js";
 
 /**
  * 一个异常：代表框架未能获取有效的上下文

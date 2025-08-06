@@ -15,7 +15,7 @@
  */
 
 
-import SaManager from '../SaManager';
+import SaManager from '../SaManager.js';
 import SaApplication from '../application/SaApplication.js';
 import SaRequest from './model/SaRequest.js';
 import SaResponse from './model/SaResponse.js';

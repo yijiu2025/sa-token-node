@@ -34,7 +34,7 @@ class SaHttpTemplateDefaultImpl extends SaHttpTemplate {
 	 * @param url /
 	 * @return /
 	 */
-	@Override
+	// @Override
 	get(url) {
 		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10004);
 	}
@@ -42,7 +42,7 @@ class SaHttpTemplateDefaultImpl extends SaHttpTemplate {
 	/**
 	 * post 请求，form-data 格式参数
 	 */
-	@Override
+	// @Override
 	postByFormData(url, params) {
 		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10004);
 	}

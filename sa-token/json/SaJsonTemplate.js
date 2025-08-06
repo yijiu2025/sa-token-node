@@ -41,15 +41,15 @@ class SaJsonTemplate {
 	 */
 	jsonToObject(jsonStr, type) {};
 
-	/**
-	 * 反序列化：json 字符串 → 对象 (自动判断类型)
-	 *
-	 * @param {String} jsonStr /
-	 * @return {Object} /
-	 */
-	jsonToObject(jsonStr) {
-		return jsonToObject(jsonStr, Object.class);
-	};
+	// /**
+	//  * 反序列化：json 字符串 → 对象 (自动判断类型)
+	//  *
+	//  * @param {String} jsonStr /
+	//  * @return {Object} /
+	//  */
+	// jsonToObject(jsonStr) {
+	// 	return jsonToObject(jsonStr, Object.class);
+	// };
 
 	/**
 	 * 反序列化：json 字符串 → Map
@@ -58,7 +58,7 @@ class SaJsonTemplate {
 	 * @return  {Map<String, Object>}/
 	 */
 	jsonToMap(jsonStr) {
-		return jsonToObject(jsonStr, Map.class);
+		return this.jsonToObject(jsonStr, Map);
 	};
 	
 }

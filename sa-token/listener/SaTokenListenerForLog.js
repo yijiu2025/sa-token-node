@@ -39,7 +39,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {String} tokenValue token值 
      * @param {SaLoginParameter} loginParameter 登录参数
 	 */
-	@Override
+	// @Override
 	doLogin(loginType, loginId, tokenValue, loginParameter) {
 		log.info("账号 {} 登录成功 (loginType={}), 会话凭证 token={}", loginId, loginType, tokenValue);
 	}
@@ -50,7 +50,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {Object} loginId 账号id
      * @param {String} tokenValue token值
 	 */
-	@Override
+	// @Override
 	doLogout(loginType, loginId, tokenValue) {
 		log.info("账号 {} 注销登录 (loginType={}), 会话凭证 token={}", loginId, loginType, tokenValue);
 	}
@@ -61,7 +61,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {Object} loginId 账号id
      * @param {String} tokenValue token值
 	 */
-	@Override
+	// @Override
 	doKickout(loginType, loginId, tokenValue) {
 		log.info("账号 {} 被踢下线 (loginType={}), 会话凭证 token={}", loginId, loginType, tokenValue);
 	}
@@ -72,7 +72,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {Object} loginId 账号id
      * @param {String} tokenValue token值
 	 */
-	@Override
+	// @Override
 	doReplaced(loginType, loginId, tokenValue) {
 		log.info("账号 {} 被顶下线 (loginType={}), 会话凭证 token={}", loginId, loginType, tokenValue);
 	}
@@ -85,7 +85,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {int} level 封禁等级 
      * @param {long} disableTime 封禁时长，单位: 秒
 	 */
-	@Override
+	// @Override
 	doDisable(loginType, loginId, service, level, disableTime) {
 		log.info("账号 {} [{}服务] 被封禁 (loginType={}), 封禁等级={}, 解封时间为 {}", loginId, loginType, service, level, SaFoxUtil.formatAfterDate(disableTime * 1000));
 	}
@@ -96,7 +96,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {Object} loginId 账号id
      * @param {String} service 指定服务
 	 */
-	@Override
+	// @Override
 	doUntieDisable(loginType, loginId, service) {
 		log.info("账号 {} [{}服务] 解封成功 (loginType={})", loginId, service, loginType);
 	}
@@ -108,7 +108,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {String} service 指定服务 
      * @param {long} safeTime 认证时间，单位：秒
 	 */
-	@Override
+	// @Override
 	doOpenSafe(loginType, tokenValue, service, safeTime) {
 		log.info("token 二级认证成功, 业务标识={}, 有效期={}秒, Token值={}", service, safeTime, tokenValue);
 	}
@@ -119,7 +119,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {String} tokenValue token值
      * @param {String} service 指定服务
 	 */
-	@Override
+	// @Override
 	doCloseSafe(loginType, tokenValue, service) {
 		log.info("token 二级认证关闭, 业务标识={}, Token值={}", service, tokenValue);
 	}
@@ -128,7 +128,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * 每次创建Session时触发
      * @param {String} id 会话id
 	 */
-	@Override
+	// @Override
 	doCreateSession(id) {
 		log.info("SaSession [{}] 创建成功", id);
 	}
@@ -137,7 +137,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * 每次注销Session时触发
      * @param {String} id 会话id
 	 */
-	@Override
+	// @Override
 	doLogoutSession(id) {
 		log.info("SaSession [{}] 注销成功", id);
 	}
@@ -149,7 +149,7 @@ class SaTokenListenerForLog extends SaTokenListener {
      * @param {String} tokenValue token值
      * @param {long} timeout 到期时间，单位 秒
 	 */
-	@Override
+	// @Override
 	doRenewTimeout(loginType, loginId, tokenValue, timeout) {
 		log.info("token 续期成功, {} 秒后到期, 帐号={}, token值={} ", timeout, loginId, tokenValue);
 	}
@@ -159,7 +159,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * @param { String } compName 组件名称
 	 * @param { Object } compObj 组件对象
 	 */
-	@Override
+	// @Override
 	doRegisterComponent(compName, compObj) {
 		const canonicalName = compObj == null ? null : compObj.getClass().getCanonicalName();
 		log.info("全局组件 {} 载入成功: {}", compName, canonicalName);
@@ -169,7 +169,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * 注册了自定义注解处理器
 	 * @param { SaAnnotationHandlerInterface<?> } handler 注解处理器
 	 */
-	@Override
+	// @Override
 	doRegisterAnnotationHandler(handler) {
 		if(handler != null) {
 			log.info("注解扩展 @{} (处理器: {})", handler.getHandlerAnnotationClass().getSimpleName(), handler.getClass().getCanonicalName());
@@ -180,7 +180,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * StpLogic 对象替换 
 	 * @param { StpLogic }stpLogic / 
 	 */
-	@Override
+	// @Override
 	doSetStpLogic(stpLogic) {
 		if(stpLogic != null) {
 			log.info("会话组件 StpLogic(type={}) 重置成功: {}", stpLogic.getLoginType(), stpLogic.getClass());
@@ -191,7 +191,7 @@ class SaTokenListenerForLog extends SaTokenListener {
 	 * 载入全局配置 
 	 * @param { SaTokenConfig }config / 
 	 */
-	@Override
+	// @Override
 	doSetConfig(config) {
 		if(config != null) {
 			log.info("全局配置 {} ", config);

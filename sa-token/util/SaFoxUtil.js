@@ -1,5 +1,6 @@
 import SaTokenException from '../exception/SaTokenException.js';
 import dayjs from 'dayjs'
+import _ from "lodash";
 
 /**
  * SaFoxUtil 工具类，提供常用的工具方法。
@@ -101,7 +102,7 @@ class SaFoxUtil {
      * @returns {boolean} 是否相等
      */
     static equals(a, b) {
-        return a === b || (a != null && a.equals(b));
+        return a === b || (a !== null && a !== undefined && _.isEqual(a, b));
     }
 
     /**

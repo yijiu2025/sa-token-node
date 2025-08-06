@@ -31,22 +31,22 @@ class SaJsonTemplateDefaultImpl extends SaJsonTemplate {
 
 	static ERROR_MESSAGE = "未实现具体的 json 转换器";
 
-	@Override
+	// @Override
 	objectToJson(obj) {
 		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10003);
 	}
 
-	@Override
-	jsonToObject(jsonStr) {
+	// @Override
+	// jsonToObject(jsonStr) {
+	// 	throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10003);
+	// }
+
+	// @Override
+	static jsonToObject(jsonStr, type) {
 		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10003);
 	}
 
-	@Override
-	jsonToObject(jsonStr, type) {
-		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10003);
-	}
-
-	@Override
+	// @Override
 	jsonToMap(jsonStr) {
 		throw new NotImplException(ERROR_MESSAGE).setCode(SaErrorCode.CODE_10003);
 	}

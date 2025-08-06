@@ -15,7 +15,7 @@
  */
 
 
-import SaSetValueInterface from "../../application/SaSetValueInterface";
+import SaSetValueInterface from "../../application/SaSetValueInterface.js";
 
 /**
  * Storage Model，请求作用域的读取值对象。

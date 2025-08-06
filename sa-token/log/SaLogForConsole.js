@@ -72,7 +72,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	trace(str, ...args) {
 		this.println(SaLogForConsole.TRACE, SaLogForConsole.TRACE_COLOR, SaLogForConsole.TRACE_PREFIX, str, args);
 	}
@@ -82,7 +82,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	debug(str, ...args) {
 		println(SaLogForConsole.DEBUG, SaLogForConsole.DEBUG_COLOR, SaLogForConsole.DEBUG_PREFIX, str, args);
 	}
@@ -92,7 +92,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	info(str, ...args) {
 		println(SaLogForConsole.INFO, SaLogForConsole.INFO_COLOR, SaLogForConsole.INFO_PREFIX, str, args);
 	}
@@ -102,7 +102,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	warn(str, ...args) {
 		println(SaLogForConsole.WARN, SaLogForConsole.WARN_COLOR, SaLogForConsole.WARN_PREFIX, str, args);
 	}
@@ -112,7 +112,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	error(str, ...args) {
 		println(SaLogForConsole.ERROR, SaLogForConsole.ERROR_COLOR, SaLogForConsole.ERROR_PREFIX, str, args);
 	}
@@ -122,7 +122,7 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 日志内容
      * @param {...any} args 参数
      */
-	@Override
+	// @Override
 	fatal(str, ...args) {
 		println(SaLogForConsole.FATAL, SaLogForConsole.FATAL_COLOR, SaLogForConsole.FATAL_PREFIX, str, args);
 	}

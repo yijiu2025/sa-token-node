@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import SaErrorCode from "../../error/SaErrorCode";
-import SaTokenException from "../../exception/SaTokenException";
-import SaFoxUtil from "../../util/SaFoxUtil";
+import SaErrorCode from "../../error/SaErrorCode.js";
+import SaTokenException from "../../exception/SaTokenException.js";
+import SaFoxUtil from "../../util/SaFoxUtil.js";
 
 /**
  * Cookie Model，代表一个 Cookie 应该具有的所有参数

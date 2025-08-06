@@ -20,11 +20,11 @@
 
 
 
-import SaErrorCode from '../error/SaErrorCode';
-import SaTokenException from '../exception.SaTokenException';
-import SaFoxUtil from '../utils/SaFoxUtil';
+import SaErrorCode from '../error/SaErrorCode.js';
+import SaTokenException from '../exception/SaTokenException.js';
+import SaFoxUtil from '../util/SaFoxUtil.js';
 
-import SaTokenConfig from './SaTokenConfig';
+import SaTokenConfig from './SaTokenConfig.js';
 
 /**
  * Sa-Token配置文件的构建工厂类

@@ -18,10 +18,10 @@
  * 对应 Java 中的 `cn.dev33.satoken.config.SaTokenConfig` 类。
  */
 
-import SaFoxUtil from "./utils/SaFoxUtil";
+import SaFoxUtil from "../util/SaFoxUtil.js";
 import SaReplacedRange from "../stp/parameter/enums/SaReplacedRange.js";
-import SaLogoutMode from "../stp/parameter/enums/SaLogoutMode";
-import SaLogoutRange from "../stp/parameter/enums/SaLogoutRange";
+import SaLogoutMode from "../stp/parameter/enums/SaLogoutMode.js";
+import SaLogoutRange from "../stp/parameter/enums/SaLogoutRange.js";
 import SaCookieConfig from "./SaCookieConfig.js";
 
 /**

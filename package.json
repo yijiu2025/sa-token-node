@@ -28,6 +28,7 @@
     "hi-base32": "^0.5.1",
     "jssha": "^3.3.1",
     "koa": "^3.0.0",
+    "lodash": "^4.17.21",
     "properties-reader": "^2.3.0"
   },
   "devDependencies": {
