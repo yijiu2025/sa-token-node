@@ -16,6 +16,7 @@
 
 import SaErrorCode from '../error/SaErrorCode.js';
 import NotImplException from '../exception/NotImplException.js';
+import SaJsonTemplate from './SaJsonTemplate.js';
 
 /**
  * JSON 转换器，默认实现类

@@ -62,3 +62,5 @@ class SaJsonTemplate {
 	};
 	
 }
+
+export default SaJsonTemplate;

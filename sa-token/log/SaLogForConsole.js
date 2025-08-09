@@ -194,5 +194,5 @@ class SaLogForConsole extends SaLog {
 }
 
 // 导出单例实例
-const saLogForConsole = new SaLogForConsole();
-export default saLogForConsole;
+//const saLogForConsole = new SaLogForConsole();
+export default SaLogForConsole;
