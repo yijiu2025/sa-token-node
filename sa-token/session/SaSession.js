@@ -20,7 +20,7 @@ import SaTokenDao from "../dao/SaTokenDao.js";
 import SaTwoParamFunction from "../fun/SaTwoParamFunction.js";
 import SaTokenEventCenter from "../listener/SaTokenEventCenter.js";
 import SaFoxUtil from "../util/SaFoxUtil.js";
-
+import SaTerminalInfo from "./SaTerminalInfo.js"
 
 /**
  * Session Model，会话作用域的读取值对象

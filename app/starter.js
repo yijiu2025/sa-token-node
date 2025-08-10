@@ -13,6 +13,26 @@ import SaTokenConsts from '../sa-token/util/SaTokenConsts.js';
 
 const aaa = new SaTokenConsts("aaa","bbbb");
 console.log(typeof aaa);
+
+function logValues(a, b = "xx", c) {
+  console.log(a, b, c);
+}
+logValues("aa", "bb", "cc" , "dd");
+logValues("aa", "bb");
+logValues("aa");
+
+
+function abc(aa, bb) {
+  logValues(aa,bb);
+}
+
+abc("aa");
+
+
+
+
+
+
 // const aaa = new SaSession("111");
 // const bytes = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);
 // const hexStr = SaHexUtil.bytesToHex(bytes);

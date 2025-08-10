@@ -44,7 +44,11 @@ import SaTokenInfo from "./SaTokenInfo.js";
 
 import NotLoginException from "../exception/NotLoginException.js";
 import ApiDisabledException from "../exception/ApiDisabledException.js";
+import NotRoleException from "../exception/NotRoleException.js";
 import SaTokenException from "../exception/SaTokenException.js";
+import NotPermissionException from "../exception/NotPermissionException.js";
+import DisableServiceException from "../exception/DisableServiceException.js";
+import NotSafeException from "../exception/NotSafeException.js";
 //import static cn.dev33.satoken.exception.NotLoginException.*;
 
 
@@ -2168,26 +2172,59 @@ class StpLogic {
 		}
 	}
 
-	/**
-	 * 对当前 token 的 timeout 值进行续期
-	 *
-	 * @param {Long} timeout 要修改成为的有效时间 (单位: 秒)
-	 */
-	renewTimeout(timeout) {
-		// 1、续期缓存数据
-		const tokenValue = this.getTokenValue();
-		this.renewTimeout(tokenValue, timeout);
 
-		// 2、续期客户端 Cookie 有效期
-		if(this.getConfigOrGlobal().getIsReadCookie()) {
-			// 如果 timeout = -1，代表永久，但是一般浏览器不支持永久 Cookie，所以此处设置为 int 最大值
-			// 如果 timeout 大于 int 最大值，会造成数据溢出，所以也要将其设置为 int 最大值
-			if(timeout == SaTokenDao.NEVER_EXPIRE || timeout > Integer.MAX_VALUE) {
-				timeout = Integer.MAX_VALUE;
+	/**
+	 * 对指定 token 的 timeout 值进行续期
+	 *
+	 * @param {String|Long} tokenOrTimeout token值或超时时间
+	 * @param {Long} [timeout] 要修改成为的有效时间 (单位: 秒，填 -1 代表要续为永久有效)  
+	 */
+	renewTimeout(tokenOrTimeout, timeout) {
+		// 情况1: renewTimeout(timeout) - 续期当前token
+		if(typeof tokenOrTimeout === 'number') {
+			timeout = tokenOrTimeout;
+			const tokenValue = this.getTokenValue();
+			
+			// 1、续期缓存数据
+			this._renewTimeout(tokenValue, timeout);
+
+			// 2、续期客户端 Cookie 有效期
+			if(this.getConfigOrGlobal().getIsReadCookie()) {
+				// 如果 timeout = -1，代表永久，但是一般浏览器不支持永久 Cookie，所以此处设置为 int 最大值
+				// 如果 timeout 大于 int 最大值，会造成数据溢出，所以也要将其设置为 int 最大值
+				if(timeout == SaTokenDao.NEVER_EXPIRE || timeout > Number.MAX_SAFE_INTEGER) {
+					timeout = Number.MAX_SAFE_INTEGER;
+				}
+				this.setTokenValueToCookie(tokenValue, timeout);
 			}
-			this.setTokenValueToCookie(tokenValue, timeout);
+			return;
 		}
-	}
+
+		// 情况2: renewTimeout(tokenValue, timeout) - 续期指定token
+		const tokenValue = tokenOrTimeout;
+		this._renewTimeout(tokenValue, timeout);
+}
+
+	// /**
+	//  * 对当前 token 的 timeout 值进行续期
+	//  *
+	//  * @param {Long} timeout 要修改成为的有效时间 (单位: 秒)
+	//  */
+	// renewTimeout(timeout) {
+	// 	// 1、续期缓存数据
+	// 	const tokenValue = this.getTokenValue();
+	// 	this.renewTimeout(tokenValue, timeout);
+
+	// 	// 2、续期客户端 Cookie 有效期
+	// 	if(this.getConfigOrGlobal().getIsReadCookie()) {
+	// 		// 如果 timeout = -1，代表永久，但是一般浏览器不支持永久 Cookie，所以此处设置为 int 最大值
+	// 		// 如果 timeout 大于 int 最大值，会造成数据溢出，所以也要将其设置为 int 最大值
+	// 		if(timeout == SaTokenDao.NEVER_EXPIRE || timeout > Number.MAX_SAFE_INTEGER) {
+	// 			timeout = Number.MAX_SAFE_INTEGER;
+	// 		}
+	// 		this.setTokenValueToCookie(tokenValue, timeout);
+	// 	}
+	// }
 
 	/**
 	 * 对指定 token 的 timeout 值进行续期
@@ -2195,16 +2232,16 @@ class StpLogic {
 	 * @param {String} tokenValue 指定 token
 	 * @param {Long} timeout 要修改成为的有效时间 (单位: 秒，填 -1 代表要续为永久有效)
 	 */
-	renewTimeout(tokenValue, timeout) {
+	_renewTimeout(tokenValue, timeout) {
 
 		// 1、如果 token 指向的 loginId 为空，或者属于异常项时，不进行续期操作
-		const loginId = getLoginIdByToken(tokenValue);
+		const loginId = this.getLoginIdByToken(tokenValue);
 		if(loginId == null) {
 			return;
 		}
 
 		// 2、检查 token 合法性
-		const session = getSessionByLoginId(loginId);
+		const session = this.getSessionByLoginId(loginId);
 		if(session == null) {
 			throw new SaTokenException("未能查询到对应 Access-Session 会话，无法续期");
 		}
@@ -2213,11 +2250,11 @@ class StpLogic {
 		}
 
 		// 3、续期此 token 本身的有效期 （改 ttl）
-		const dao = getSaTokenDao();
-		dao.updateTimeout(splicingKeyTokenValue(tokenValue), timeout);
+		const dao = this.getSaTokenDao();
+		dao.updateTimeout(this.splicingKeyTokenValue(tokenValue), timeout);
 
 		// 4、续期此 token 的 Token-Session 有效期
-		const tokenSession = getTokenSessionByToken(tokenValue, false);
+		const tokenSession = this.getTokenSessionByToken(tokenValue, false);
 		if(tokenSession != null) {
 			tokenSession.updateTimeout(timeout);
 		}
@@ -2226,8 +2263,8 @@ class StpLogic {
 		session.updateMinTimeout(timeout);
 
 		// 6、更新此 token 的最后活跃时间
-		if(isOpenCheckActiveTimeout()) {
-			dao.updateTimeout(splicingKeyLastActiveTime(tokenValue), timeout);
+		if(this.isOpenCheckActiveTimeout()) {
+			dao.updateTimeout(this.splicingKeyLastActiveTime(tokenValue), timeout);
 		}
 
 		// 7、$$ 发布事件：某某 token 被续期了
@@ -2237,14 +2274,14 @@ class StpLogic {
 
 	// ------------------- 角色认证操作 -------------------
 
-	/**
-	 * 获取：当前账号的角色集合
-	 *
-	 * @return {List<String>} /
-	 */
-	getRoleList() {
-		return getRoleList(getLoginId());
-	}
+	// /**
+	//  * 获取：当前账号的角色集合
+	//  *
+	//  * @return {List<String>} /
+	//  */
+	// getRoleList() {
+	// 	return this.getRoleList(this.getLoginId());
+	// }
 
 	/**
 	 * 获取：指定账号的角色集合
@@ -2252,34 +2289,56 @@ class StpLogic {
 	 * @param {Object} loginId 指定账号id
 	 * @return {List<String>} /
 	 */
-	getRoleList(loginId) {
+	getRoleList(loginId = this.getLoginId()) {
 		return SaManager.getStpInterface().getRoleList(loginId, this.loginType);
 	}
 
-	/**
-	 * 判断：当前账号是否拥有指定角色, 返回 true 或 false
-	 *
-	 * @param {String} role 角色
-	 * @return {Boolean} /
-	 */
-	hasRole(role) {
-		try {
-			return hasRole(getLoginId(), role);
-		} catch (e) {
-			return false;
-		}
-	}
 
 	/**
-	 * 判断：指定账号是否含有指定角色标识, 返回 true 或 false
-	 *
-	 * @param {Object} loginId 账号id
-	 * @param {String} role 角色标识
-	 * @return {Boolean} /是否含有指定角色标识
+	 * 判断账号是否拥有指定角色
+	 * 
+	 * @param {String|Object} roleOrLoginId 角色标识或账号id
+	 * @param {String} [role] 角色标识(当第一个参数为账号id时使用) 
+	 * @return {Boolean} 是否含有指定角色
 	 */
-	hasRole(loginId, role) {
-		return hasElement(getRoleList(loginId), role);
+	hasRole(roleOrLoginId, role) {
+		// 情况1: hasRole(role) - 判断当前账号是否拥有角色
+		if(typeof roleOrLoginId === 'string' && role === undefined) {
+			try {
+				return this.hasElement(this.getRoleList(this.getLoginId()), roleOrLoginId);
+			} catch(e) {
+				return false;
+			}
+		}
+		
+		// 情况2: hasRole(loginId, role) - 判断指定账号是否含有角色
+		return this.hasElement(this.getRoleList(roleOrLoginId), role);
 	}
+
+	// /**
+	//  * 判断：当前账号是否拥有指定角色, 返回 true 或 false
+	//  *
+	//  * @param {String} role 角色
+	//  * @return {Boolean} /
+	//  */
+	// hasRole(role) {
+	// 	try {
+	// 		return this.hasRole(this.getLoginId(), role);
+	// 	} catch (e) {
+	// 		return false;
+	// 	}
+	// }
+
+	// /**
+	//  * 判断：指定账号是否含有指定角色标识, 返回 true 或 false
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {String} role 角色标识
+	//  * @return {Boolean} /是否含有指定角色标识
+	//  */
+	// hasRole(loginId, role) {
+	// 	return this.hasElement(this.getRoleList(loginId), role);
+	// }
 
 	/**
 	 * 判断：当前账号是否含有指定角色标识 [ 指定多个，必须全部验证通过 ]
@@ -2289,11 +2348,14 @@ class StpLogic {
 	 */
 	hasRoleAnd(...roleArray){
 		try {
-			checkRoleAnd(...roleArray);
+			this.checkRoleAnd(...roleArray);
 			return true;
-		} catch ( e) {
-			return false;
-		}
+		} catch (e) {
+			if (e instanceof NotLoginException || e instanceof NotRoleException) {
+                return false;
+            }
+            throw e;
+        }
 	}
 
 	/**
@@ -2304,10 +2366,13 @@ class StpLogic {
 	 */
 	hasRoleOr(...roleArray){
 		try {
-			checkRoleOr(...roleArray);
+			this.checkRoleOr(...roleArray);
 			return true;
 		} catch (e) {
-			return false;
+			if (e instanceof NotLoginException || e instanceof NotRoleException) {
+                return false;
+            }
+            throw e;
 		}
 	}
 
@@ -2317,7 +2382,7 @@ class StpLogic {
 	 * @param {String} role 角色标识
 	 */
 	checkRole(role) {
-		if( ! hasRole(getLoginId(), role)) {
+		if( ! this.hasRole(this.getLoginId(), role)) {
 			throw new NotRoleException(role, this.loginType).setCode(SaErrorCode.CODE_11041);
 		}
 	}
@@ -2329,17 +2394,17 @@ class StpLogic {
 	 */
 	checkRoleAnd(...roleArray){
 		// 先获取当前是哪个账号id
-		const loginId = getLoginId();
+		const loginId = this.getLoginId();
 
 		// 如果没有指定要校验的角色，那么直接跳过
-		if(roleArray == null || roleArray.length == 0) {
+		if(roleArray == null || roleArray.length === 0) {
 			return;
 		}
 
 		// 开始校验
-		List<String> roleList = getRoleList(loginId);
-		for (String role : roleArray) {
-			if(!hasElement(roleList, role)) {
+		const roleList = this.getRoleList(loginId);
+		for (const role of roleArray) {
+			if(!this.hasElement(roleList, role)) {
 				throw new NotRoleException(role, this.loginType).setCode(SaErrorCode.CODE_11041);
 			}
 		}
@@ -2352,17 +2417,17 @@ class StpLogic {
 	 */
 	checkRoleOr(...roleArray){
 		// 先获取当前是哪个账号id
-		const loginId = getLoginId();
+		const loginId = this.getLoginId();
 
 		// 如果没有指定权限，那么直接跳过
-		if(roleArray == null || roleArray.length == 0) {
+		if(roleArray == null || roleArray.length === 0) {
 			return;
 		}
 
 		// 开始校验
-		List<String> roleList = getRoleList(loginId);
-		for (String role : roleArray) {
-			if(hasElement(roleList, role)) {
+		const roleList = this.getRoleList(loginId);
+		for (const role of roleArray) {
+			if(this.hasElement(roleList, role)) {
 				// 有的话提前退出
 				return;
 			}
@@ -2375,14 +2440,14 @@ class StpLogic {
 
 	// ------------------- 权限认证操作 -------------------
 
-	/**
-	 * 获取：当前账号的权限码集合
-	 *
-	 * @return {List<String>} /
-	 */
-	getPermissionList() {
-		return getPermissionList(getLoginId());
-	}
+	// /**
+	//  * 获取：当前账号的权限码集合
+	//  *
+	//  * @return {List<String>} /
+	//  */
+	// getPermissionList() {
+	// 	return this.getPermissionList(this.getLoginId());
+	// }
 
 	/**
 	 * 获取：指定账号的权限码集合
@@ -2390,34 +2455,56 @@ class StpLogic {
 	 * @param {Object} loginId 指定账号id
 	 * @return {List<String>} /
 	 */
-	getPermissionList(loginId) {
+	getPermissionList(loginId = this.getLoginId()) {
 		return SaManager.getStpInterface().getPermissionList(loginId, this.loginType);
 	}
 
-	/**
-	 * 判断：当前账号是否含有指定权限, 返回 true 或 false
-	 *
-	 * @param {String} permission 权限码
-	 * @return {Boolean} 是否含有指定权限
-	 */
-	hasPermission(permission) {
-		try {
-			return hasPermission(getLoginId(), permission);
-		} catch (e) {
-			return false;
-		}
-	}
 
 	/**
-	 * 判断：指定账号 id 是否含有指定权限, 返回 true 或 false
-	 *
-	 * @param {Object} loginId 账号 id
-	 * @param {String} permission 权限码
+	 * 判断账号是否拥有指定权限
+	 * 
+	 * @param {String|Object} permissionOrLoginId 权限码或账号id 
+	 * @param {String} [permission] 权限码(当第一个参数为账号id时使用)
 	 * @return {Boolean} 是否含有指定权限
 	 */
-	hasPermission(loginId, permission) {
-		return hasElement(getPermissionList(loginId), permission);
+	hasPermission(permissionOrLoginId, permission) {
+		// 情况1: hasPermission(permission) - 判断当前账号是否拥有权限
+		if(typeof permissionOrLoginId === 'string' && permission === undefined) {
+			try {
+				return this.hasElement(this.getPermissionList(this.getLoginId()), permissionOrLoginId);
+			} catch(e) {
+				return false;
+			}
+		}
+		
+		// 情况2: hasPermission(loginId, permission) - 判断指定账号是否含有权限
+		return this.hasElement(this.getPermissionList(permissionOrLoginId), permission);
 	}
+
+	// /**
+	//  * 判断：当前账号是否含有指定权限, 返回 true 或 false
+	//  *
+	//  * @param {String} permission 权限码
+	//  * @return {Boolean} 是否含有指定权限
+	//  */
+	// hasPermission(permission) {
+	// 	try {
+	// 		return this.hasPermission(this.getLoginId(), permission);
+	// 	} catch (e) {
+	// 		return false;
+	// 	}
+	// }
+
+	// /**
+	//  * 判断：指定账号 id 是否含有指定权限, 返回 true 或 false
+	//  *
+	//  * @param {Object} loginId 账号 id
+	//  * @param {String} permission 权限码
+	//  * @return {Boolean} 是否含有指定权限
+	//  */
+	// hasPermission(loginId, permission) {
+	// 	return this.hasElement(this.getPermissionList(loginId), permission);
+	// }
 
 	/**
 	 * 判断：当前账号是否含有指定权限 [ 指定多个，必须全部具有 ]
@@ -2427,10 +2514,13 @@ class StpLogic {
 	 */
 	hasPermissionAnd(...permissionArray){
 		try {
-			checkPermissionAnd(...permissionArray);
+			this.checkPermissionAnd(...permissionArray);
 			return true;
 		} catch (e) {
-			return false;
+			if (e instanceof NotLoginException || e instanceof NotPermissionException) {
+                return false;
+            }
+            throw e;
 		}
 	}
 
@@ -2442,10 +2532,13 @@ class StpLogic {
 	 */
 	hasPermissionOr(...permissionArray){
 		try {
-			checkPermissionOr(...permissionArray);
+			this.checkPermissionOr(...permissionArray);
 			return true;
 		} catch (e) {
-			return false;
+			if (e instanceof NotLoginException || e instanceof NotPermissionException) {
+                return false;
+            }
+            throw e;
 		}
 	}
 
@@ -2455,7 +2548,7 @@ class StpLogic {
 	 * @param {String} permission 权限码
 	 */
 	checkPermission(permission) {
-		if( ! hasPermission(getLoginId(), permission)) {
+		if( ! this.hasPermission(this.getLoginId(), permission)) {
 			throw new NotPermissionException(permission, this.loginType).setCode(SaErrorCode.CODE_11051);
 		}
 	}
@@ -2467,17 +2560,17 @@ class StpLogic {
 	 */
 	checkPermissionAnd(...permissionArray){
 		// 先获取当前是哪个账号id
-		const loginId = getLoginId();
+		const loginId = this.getLoginId();
 
 		// 如果没有指定权限，那么直接跳过
-		if(permissionArray == null || permissionArray.length == 0) {
+		if(permissionArray == null || permissionArray.length === 0) {
 			return;
 		}
 
 		// 开始校验
-		const permissionList = getPermissionList(loginId);
-		for (String permission : permissionArray) {
-			if(!hasElement(permissionList, permission)) {
+		const permissionList = this.getPermissionList(loginId);
+		for (const permission of permissionArray) {
+			if(!this.hasElement(permissionList, permission)) {
 				throw new NotPermissionException(permission, this.loginType).setCode(SaErrorCode.CODE_11051);
 			}
 		}
@@ -2490,17 +2583,17 @@ class StpLogic {
 	 */
 	checkPermissionOr(...permissionArray){
 		// 先获取当前是哪个账号id
-		const loginId = getLoginId();
+		const loginId = this.getLoginId();
 
 		// 如果没有指定要校验的权限，那么直接跳过
-		if(permissionArray == null || permissionArray.length == 0) {
+		if(permissionArray == null || permissionArray.length === 0) {
 			return;
 		}
 
 		// 开始校验
-		List<String> permissionList = getPermissionList(loginId);
-		for (String permission : permissionArray) {
-			if(hasElement(permissionList, permission)) {
+		const permissionList = this.getPermissionList(loginId);
+		for (const permission of permissionArray) {
+			if(this.hasElement(permissionList, permission)) {
 				// 有的话提前退出
 				return;
 			}
@@ -2514,19 +2607,19 @@ class StpLogic {
 
 	// ------------------- id 反查 token 相关操作 -------------------
 
-	/**
-	 * 获取指定账号 id 的 token
-	 * <p>
-	 * 		在配置为允许并发登录时，此方法只会返回队列的最后一个 token，
-	 * 		如果你需要返回此账号 id 的所有 token，请调用 getTokenValueListByLoginId
-	 * </p>
-	 *
-	 * @param {Object} loginId 账号id
-	 * @return {String} token值
-	 */
-	getTokenValueByLoginId(loginId) {
-		return getTokenValueByLoginId(loginId, null);
-	}
+	// /**
+	//  * 获取指定账号 id 的 token
+	//  * <p>
+	//  * 		在配置为允许并发登录时，此方法只会返回队列的最后一个 token，
+	//  * 		如果你需要返回此账号 id 的所有 token，请调用 getTokenValueListByLoginId
+	//  * </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {String} token值
+	//  */
+	// getTokenValueByLoginId(loginId) {
+	// 	return this.getTokenValueByLoginId(loginId, null);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的 token
@@ -2539,20 +2632,20 @@ class StpLogic {
 	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
 	 * @return {String} token值
 	 */
-	getTokenValueByLoginId(loginId, deviceType) {
-		List<String> tokenValueList = getTokenValueListByLoginId(loginId, deviceType);
-		return tokenValueList.isEmpty() ? null : tokenValueList.get(tokenValueList.size() - 1);
+	getTokenValueByLoginId(loginId, deviceType = null) {
+		const tokenValueList = this.getTokenValueListByLoginId(loginId, deviceType);
+		return tokenValueList.length > 0 ? tokenValueList[tokenValueList.length - 1] : null;
 	}
 
-	/**
-	 * 获取指定账号 id 的 token 集合
-	 *
-	 * @param {Object} loginId 账号id
-	 * @return {List<String>} 此 loginId 的所有相关 token
-	 */
-	getTokenValueListByLoginId(loginId) {
-		return getTokenValueListByLoginId(loginId, null);
-	}
+	// /**
+	//  * 获取指定账号 id 的 token 集合
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {List<String>} 此 loginId 的所有相关 token
+	//  */
+	// getTokenValueListByLoginId(loginId) {
+	// 	return this.getTokenValueListByLoginId(loginId, null);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的 token 集合
@@ -2561,26 +2654,26 @@ class StpLogic {
 	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
 	 * @return {List<String>} 此 loginId 的所有登录 token
 	 */
-	getTokenValueListByLoginId(loginId, deviceType) {
+	getTokenValueListByLoginId(loginId, deviceType = null) {
 		// 如果该账号的 Account-Session 为 null，说明此账号尚没有客户端在登录，此时返回空集合
-		const session = getSessionByLoginId(loginId, false);
+		const session = this.getSessionByLoginId(loginId, false);
 		if(session == null) {
-			return new [];
+			return [];
 		}
 
 		// 按照设备类型进行筛选
 		return session.getTokenValueListByDeviceType(deviceType);
 	}
 
-	/**
-	 * 获取指定账号 id 已登录设备信息集合
-	 *
-	 * @param {Object} loginId 账号id
-	 * @return {List<SaTerminalInfo>} 此 loginId 的所有登录 token
-	 */
-	getTerminalListByLoginId(loginId) {
-		return getTerminalListByLoginId(loginId, null);
-	}
+	// /**
+	//  * 获取指定账号 id 已登录设备信息集合
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {List<SaTerminalInfo>} 此 loginId 的所有登录 token
+	//  */
+	// getTerminalListByLoginId(loginId) {
+	// 	return this.getTerminalListByLoginId(loginId, null);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的已登录设备信息集合
@@ -2589,11 +2682,11 @@ class StpLogic {
 	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
 	 * @return {List<SaTerminalInfo>} 此 loginId 的所有登录 token
 	 */
-	getTerminalListByLoginId(loginId, deviceType) {
+	getTerminalListByLoginId(loginId, deviceType = null) {
 		// 如果该账号的 Account-Session 为 null，说明此账号尚没有客户端在登录，此时返回空集合
-		const session = getSessionByLoginId(loginId, false);
+		const session = this.getSessionByLoginId(loginId, false);
 		if(session == null) {
-			return new [];
+			return [];
 		}
 
 		// 按照设备类型进行筛选
@@ -2608,7 +2701,7 @@ class StpLogic {
 	 */
 	forEachTerminalList(loginId, func) {
 		// 如果该账号的 Account-Session 为 null，说明此账号尚没有客户端在登录，此时无需遍历
-		const session = getSessionByLoginId(loginId, false);
+		const session = this.getSessionByLoginId(loginId, false);
 		if(session == null) {
 			return;
 		}
@@ -2623,7 +2716,7 @@ class StpLogic {
 	 * @return {SaTerminalInfo} /
 	 */
 	getTerminalInfo() {
-		return getTerminalInfoByToken(getTokenValue());
+		return this.getTerminalInfoByToken(this.getTokenValue());
 	}
 
 	/**
@@ -2639,26 +2732,26 @@ class StpLogic {
 		}
 
 		// 2、判断 Token 是否有效
-		const loginId = getLoginIdNotHandle(tokenValue);
-		if( ! isValidLoginId(loginId)) {
+		const loginId = this.getLoginIdNotHandle(tokenValue);
+		if( ! this.isValidLoginId(loginId)) {
 			return null;
 		}
 
 		// 3、判断 Account-Session 是否存在
-		const session = getSessionByLoginId(loginId, false);
+		const session = this.getSessionByLoginId(loginId, false);
 		if(session == null) {
 			return null;
 		}
 
 		// 4、判断 Token 是否已被冻结
-		if(isFreeze(tokenValue)) {
+		if(this.isFreeze(tokenValue)) {
 			return null;
 		}
 
 		// 5、遍历 Account-Session 上的客户端 token 列表，寻找当前 token 对应的设备类型
 		const terminalList = session.terminalListCopy();
-		for (SaTerminalInfo terminal : terminalList) {
-			if(terminal.getTokenValue().equals(tokenValue)) {
+		for (const terminal of terminalList) {
+			if(terminal.getTokenValue()===tokenValue) {
 				return terminal;
 			}
 		}
@@ -2673,7 +2766,7 @@ class StpLogic {
 	 * @return {String} 当前令牌的登录设备类型
 	 */
 	getLoginDeviceType() {
-		return getLoginDeviceTypeByToken(getTokenValue());
+		return this.getLoginDeviceTypeByToken(this.getTokenValue());
 	}
 
 	/**
@@ -2683,7 +2776,7 @@ class StpLogic {
 	 * @return {String} 当前令牌的登录设备类型
 	 */
 	getLoginDeviceTypeByToken(tokenValue) {
-		const terminalInfo = getTerminalInfoByToken(tokenValue);
+		const terminalInfo = this.getTerminalInfoByToken(tokenValue);
 		return terminalInfo == null ? null : terminalInfo.getDeviceType();
 	}
 
@@ -2693,7 +2786,7 @@ class StpLogic {
 	 * @return {String}  /
 	 */
 	getLoginDeviceId() {
-		return getLoginDeviceIdByToken(getTokenValue());
+		return this.getLoginDeviceIdByToken(this.getTokenValue());
 	}
 
 	/**
@@ -2703,7 +2796,7 @@ class StpLogic {
 	 * @return {String} /
 	 */
 	getLoginDeviceIdByToken(tokenValue) {
-		const terminalInfo = getTerminalInfoByToken(tokenValue);
+		const terminalInfo = this.getTerminalInfoByToken(tokenValue);
 		return terminalInfo == null ? null : terminalInfo.getDeviceId();
 	}
 
@@ -2716,7 +2809,7 @@ class StpLogic {
 	 */
 	isTrustDeviceId(userId, deviceId) {
 		// 先查询此账号的 Account-Session，如果连 Account-Session 都没有，那么此账号尚未登录，直接返回 false
-		const session = getSessionByLoginId(userId, false);
+		const session = this.getSessionByLoginId(userId, false);
 		if(session == null) {
 			return false;
 		}
@@ -2739,7 +2832,7 @@ class StpLogic {
 	 * @return token集合
 	 */
 	searchTokenValue(keyword, start, size, sortType) {
-		return getSaTokenDao().searchData(splicingKeyTokenValue(""), (keyword == null ? "" : keyword), start, size, sortType);
+		return this.getSaTokenDao().searchData(this.splicingKeyTokenValue(""), (keyword == null ? "" : keyword), start, size, sortType);
 	}
 
 	/**
@@ -2753,7 +2846,7 @@ class StpLogic {
 	 * @return {List<String} sessionId集合
 	 */
 	searchSessionId(keyword, start, size, sortType) {
-		return getSaTokenDao().searchData(splicingKeySession(""), (keyword == null ? "" : keyword), start, size, sortType);
+		return this.getSaTokenDao().searchData(this.splicingKeySession(""), (keyword == null ? "" : keyword), start, size, sortType);
 	}
 
 	/**
@@ -2767,64 +2860,28 @@ class StpLogic {
 	 * @return {List<String} sessionId集合
 	 */
 	searchTokenSessionId(keyword, start, size, sortType) {
-		return getSaTokenDao().searchData(splicingKeyTokenSession(""), (keyword == null ? "" : keyword), start, size, sortType);
+		return this.getSaTokenDao().searchData(this.splicingKeyTokenSession(""), (keyword == null ? "" : keyword), start, size, sortType);
 	}
 
 
 	// ------------------- 账号封禁 -------------------
-
-	/**
-	 * 封禁：指定账号
-	 * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
-	 *
-	 * @param {Object} loginId  账号id指定账号id
-	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
-	 */
-	disable(loginId, time) {
-		disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
-	}
-
-	/**
-	 * 判断：指定账号是否已被封禁 (true=已被封禁, false=未被封禁)
-	 *
-	 * @param {Object} loginId 账号id
-	 * @return {boolean} /
-	 */
-	isDisable(loginId) {
-		return isDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.MIN_DISABLE_LEVEL);
-	}
-
-	/**
-	 * 校验：指定账号是否已被封禁，如果被封禁则抛出异常
-	 *
-	 * @param {Object} loginId 账号id
-	 */
-	checkDisable(loginId) {
-		checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.MIN_DISABLE_LEVEL);
-	}
-
-	/**
-	 * 获取：指定账号剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
-	 *
-	 * @param {Object} loginId 账号id
-	 * @return {long} /
-	 */
-	getDisableTime(loginId) {
-		return getDisableTime(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
-	}
-
-	/**
-	 * 解封：指定账号
-	 *
-	 * @param {Object} loginId 账号id
-	 */
-	untieDisable(loginId) {
-		untieDisable(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
-	}
-
-
 	// ------------------- 分类封禁 -------------------
-
+	// /**
+	//  * 封禁：指定账号
+	//  * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
+	//  *
+	//  * @param {Object} loginId  账号id指定账号id
+	//  * @param {long | String} timeOrService 封禁时间, 单位: 秒 （-1=永久封禁）|指定服务
+	//  */
+	// disable(loginId, timeOrService, time) {
+	// 	if(arguments.length === 2) {
+	// 		this.disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL, timeOrService);
+	// 	}else{
+	// 		this.disableLevel(loginId, timeOrService, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
+	// 	}
+	// 	//this.disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
+	// }
+		
 	/**
 	 * 封禁：指定账号的指定服务
 	 * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
@@ -2834,19 +2891,48 @@ class StpLogic {
 	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	 */
 	disable(loginId, service, time) {
-		disableLevel(loginId, service, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
+		if(arguments.length === 2) {
+			//第二个参数作为time传递
+			time = service;  
+			this.disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
+		} else {
+			this.disableLevel(loginId, service, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
+		}
+		
 	}
+
+	// /**
+	//  * 判断：指定账号是否已被封禁 (true=已被封禁, false=未被封禁)
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {boolean} /
+	//  */
+	// isDisable(loginId) {
+	// 	return this.isDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.MIN_DISABLE_LEVEL);
+	// }
 
 	/**
 	 * 判断：指定账号的指定服务 是否已被封禁（true=已被封禁, false=未被封禁）
 	 *
 	 * @param {Object} loginId 账号id
-	 * @param {String} service 指定服务
+	 * @param {String} service 指定服务 可不指定
 	 * @return {boolean} /
 	 */
-	isDisable(loginId, service) {
-		return isDisableLevel(loginId, service, SaTokenConsts.MIN_DISABLE_LEVEL);
+	isDisable(loginId, service = SaTokenConsts.DEFAULT_DISABLE_SERVICE) {
+		return this.isDisableLevel(loginId, service, SaTokenConsts.MIN_DISABLE_LEVEL);
 	}
+
+
+
+	// /**
+	//  * 校验：指定账号是否已被封禁，如果被封禁则抛出异常
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// checkDisable(loginId) {
+	// 	this.checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.MIN_DISABLE_LEVEL);
+	// }
+
 
 	/**
 	 * 校验：指定账号 指定服务 是否已被封禁，如果被封禁则抛出异常
@@ -2854,13 +2940,27 @@ class StpLogic {
 	 * @param {Object} loginId 账号id
 	 * @param {String...} services 指定服务，可以指定多个
 	 */
-	checkDisable(loginId, String... services) {
-		if(services != null) {
-			for (String service : services) {
-				checkDisableLevel(loginId, service, SaTokenConsts.MIN_DISABLE_LEVEL);
+	checkDisable(loginId, ...services) {
+		if(arguments.length === 1) {
+			this.checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.MIN_DISABLE_LEVEL);
+		} else {
+			if(services != null) {
+				for (const service of services) {
+					this.checkDisableLevel(loginId, service, SaTokenConsts.MIN_DISABLE_LEVEL);
+				}
 			}
 		}
 	}
+
+	// /**
+	//  * 获取：指定账号剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {long} /
+	//  */
+	// getDisableTime(loginId) {
+	// 	return this.getDisableTime(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
+	// }
 
 	/**
 	 * 获取：指定账号 指定服务 剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
@@ -2869,9 +2969,20 @@ class StpLogic {
 	 * @param {String} service 指定服务
 	 * @return {long} see note
 	 */
-	getDisableTime(loginId, service) {
-		return getSaTokenDao().getTimeout(splicingKeyDisable(loginId, service));
+	getDisableTime(loginId, service = SaTokenConsts.DEFAULT_DISABLE_SERVICE) {
+		return this.getSaTokenDao().getTimeout(this.splicingKeyDisable(loginId, service));
 	}
+
+	// /**
+	//  * 解封：指定账号
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// untieDisable(loginId) {
+	// 	this.untieDisable(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
+	// }
+
+	
 
 	/**
 	 * 解封：指定账号、指定服务
@@ -2885,14 +2996,20 @@ class StpLogic {
 		if(SaFoxUtil.isEmpty(loginId)) {
 			throw new SaTokenException("请提供要解禁的账号").setCode(SaErrorCode.CODE_11062);
 		}
+
+		// 如果没有传入 services,则解封默认服务
+		if(services.length === 0) {
+			services = [SaTokenConsts.DEFAULT_DISABLE_SERVICE];
+		}
+
 		if(services == null || services.length == 0) {
 			throw new SaTokenException("请提供要解禁的服务").setCode(SaErrorCode.CODE_11063);
 		}
 
 		// 遍历逐个解禁
-		for (String service : services) {
+		for (const service of services) {
 			// 解封
-			getSaTokenDao().delete(splicingKeyDisable(loginId, service));
+			this.getSaTokenDao().delete(this.splicingKeyDisable(loginId, service));
 
 			// $$ 发布事件
 			SaTokenEventCenter.doUntieDisable(this.loginType, loginId, service);
@@ -2902,114 +3019,238 @@ class StpLogic {
 
 	// ------------------- 阶梯封禁 -------------------
 
-	/**
-	 * 封禁：指定账号，并指定封禁等级
-	 *
-	 * @param {Object} loginId 指定账号id
-	 * @param {int} level 指定封禁等级
-	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
-	 */
-	disableLevel(loginId, level, time) {
-		disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level, time);
-	}
 
 	/**
-	 * 封禁：指定账号的指定服务，并指定封禁等级
+	 * 封禁账号并指定封禁等级 - 支持多种参数模式
 	 *
-	 * @param {Object} loginId 指定账号id
-	 * @param {String} service 指定封禁服务
-	 * @param {int} level 指定封禁等级
-	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	 * @param {Object} loginId 指定账号id  
+	 * @param {String|Number} serviceOrLevel 指定服务名称或封禁等级
+	 * @param {Number} levelOrTime 指定封禁等级或封禁时间
+	 * @param {Number} [time] 封禁时间(单位：秒,-1=永久封禁)
 	 */
-	disableLevel(loginId, service, level, time) {
-		// 先检查提供的参数是否有效
+	disableLevel(loginId, serviceOrLevel, levelOrTime, time) {
+		// 情况1: disableLevel(loginId, level, time)  
+		if(typeof serviceOrLevel === 'number') {
+			this.disableLevel(
+				loginId,
+				SaTokenConsts.DEFAULT_DISABLE_SERVICE, 
+				serviceOrLevel,
+				levelOrTime
+			);
+			return;
+		}
+
+		// 情况2: disableLevel(loginId, service, level, time)
+		// 参数检查
 		if(SaFoxUtil.isEmpty(loginId)) {
-			throw new SaTokenException("请提供要封禁的账号").setCode(SaErrorCode.CODE_11062);
+			throw new SaTokenException("请提供要封禁的账号")
+				.setCode(SaErrorCode.CODE_11062);
 		}
-		if(SaFoxUtil.isEmpty(service)) {
-			throw new SaTokenException("请提供要封禁的服务").setCode(SaErrorCode.CODE_11063);
+		if(SaFoxUtil.isEmpty(serviceOrLevel)) {
+			throw new SaTokenException("请提供要封禁的服务")
+				.setCode(SaErrorCode.CODE_11063); 
 		}
-		if(level < SaTokenConsts.MIN_DISABLE_LEVEL && level != 0) {
-			throw new SaTokenException("封禁等级不可以小于最小值：" + SaTokenConsts.MIN_DISABLE_LEVEL + " (0除外)").setCode(SaErrorCode.CODE_11064);
+		if(levelOrTime < SaTokenConsts.MIN_DISABLE_LEVEL && levelOrTime != 0) {
+			throw new SaTokenException(
+				"封禁等级不可以小于最小值：" + SaTokenConsts.MIN_DISABLE_LEVEL + " (0除外)"
+			).setCode(SaErrorCode.CODE_11064);
 		}
 
 		// 打上封禁标记
-		getSaTokenDao().set(splicingKeyDisable(loginId, service), String.valueOf(level), time);
+		this.getSaTokenDao().set(
+			this.splicingKeyDisable(loginId, serviceOrLevel),
+			String(levelOrTime),
+			time
+		);
 
-		// $$ 发布事件
-		SaTokenEventCenter.doDisable(this.loginType, loginId, service, level, time);
+		// 发布事件
+		SaTokenEventCenter.doDisable(
+			this.loginType,
+			loginId, 
+			serviceOrLevel,
+			levelOrTime,
+			time
+		);
 	}
 
-	/**
-	 * 判断：指定账号是否已被封禁到指定等级
-	 *
-	 * @param {Object} loginId 指定账号id
-	 * @param {int} level 指定封禁等级
-	 * @return {boolean} /
-	 */
-	isDisableLevel(loginId, level) {
-		return isDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
-	}
+	// /**
+	//  * 封禁：指定账号，并指定封禁等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 指定封禁等级
+	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	//  */
+	// disableLevel(loginId, level, time) {
+	// 	disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level, time);
+	// }
+
+	// /**
+	//  * 封禁：指定账号的指定服务，并指定封禁等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 指定封禁等级
+	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	//  */
+	// disableLevel(loginId, service, level, time) {
+	// 	// 先检查提供的参数是否有效
+	// 	if(SaFoxUtil.isEmpty(loginId)) {
+	// 		throw new SaTokenException("请提供要封禁的账号").setCode(SaErrorCode.CODE_11062);
+	// 	}
+	// 	if(SaFoxUtil.isEmpty(service)) {
+	// 		throw new SaTokenException("请提供要封禁的服务").setCode(SaErrorCode.CODE_11063);
+	// 	}
+	// 	if(level < SaTokenConsts.MIN_DISABLE_LEVEL && level != 0) {
+	// 		throw new SaTokenException("封禁等级不可以小于最小值：" + SaTokenConsts.MIN_DISABLE_LEVEL + " (0除外)").setCode(SaErrorCode.CODE_11064);
+	// 	}
+
+	// 	// 打上封禁标记
+	// 	getSaTokenDao().set(splicingKeyDisable(loginId, service), String.valueOf(level), time);
+
+	// 	// $$ 发布事件
+	// 	SaTokenEventCenter.doDisable(this.loginType, loginId, service, level, time);
+	// }
+
 
 	/**
-	 * 判断：指定账号的指定服务，是否已被封禁到指定等级
-	 *
+	 * 判断账号是否已被封禁到指定等级
+	 * 
 	 * @param {Object} loginId 指定账号id
-	 * @param {String} service 指定封禁服务
-	 * @param {int} level 指定封禁等级
-	 * @return {boolean} /
+	 * @param {String|Number} serviceOrLevel 指定服务或封禁等级
+	 * @param {Number} [level] 指定封禁等级(当第一个参数为服务时使用)
+	 * @return {boolean} 是否已被封禁到指定等级
 	 */
-	isDisableLevel(loginId, service, level) {
+	isDisableLevel(loginId, serviceOrLevel, level) {
+		// 情况1: isDisableLevel(loginId, level) - 使用默认服务
+		if(typeof serviceOrLevel === 'number') {
+			return this.isDisableLevel(
+				loginId, 
+				SaTokenConsts.DEFAULT_DISABLE_SERVICE, 
+				serviceOrLevel
+			);
+		}
+
+		// 情况2: isDisableLevel(loginId, service, level) - 指定服务和等级
 		// 1、先前置检查一下这个账号是否被封禁了
-		const disableLevel = getDisableLevel(loginId, service);
+		const disableLevel = this.getDisableLevel(loginId, serviceOrLevel);
 		if(disableLevel == SaTokenConsts.NOT_DISABLE_LEVEL) {
-			return false;
+			return false; 
 		}
 
 		// 2、再判断被封禁的等级是否达到了指定级别
 		return disableLevel >= level;
 	}
+	// /**
+	//  * 判断：指定账号是否已被封禁到指定等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 指定封禁等级
+	//  * @return {boolean} /
+	//  */
+	// isDisableLevel(loginId, level) {
+	// 	return isDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
+	// }
+
+	// /**
+	//  * 判断：指定账号的指定服务，是否已被封禁到指定等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 指定封禁等级
+	//  * @return {boolean} /
+	//  */
+	// isDisableLevel(loginId, service, level) {
+	// 	// 1、先前置检查一下这个账号是否被封禁了
+	// 	const disableLevel = getDisableLevel(loginId, service);
+	// 	if(disableLevel == SaTokenConsts.NOT_DISABLE_LEVEL) {
+	// 		return false;
+	// 	}
+
+	// 	// 2、再判断被封禁的等级是否达到了指定级别
+	// 	return disableLevel >= level;
+	// }
+
+
 
 	/**
-	 * 校验：指定账号是否已被封禁到指定等级（如果已经达到，则抛出异常）
-	 *
+	 * 校验账号是否已被封禁到指定等级 - 支持多种参数模式
+	 * 
 	 * @param {Object} loginId 指定账号id
-	 * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	 * @param {String|Number} serviceOrLevel 指定服务或封禁等级 
+	 * @param {Number} [level] 封禁等级(当第一个参数为服务时使用)
+	 * @throws {DisableServiceException} 如果已被封禁则抛出异常
 	 */
-	checkDisableLevel(loginId, level) {
-		checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
-	}
+	checkDisableLevel(loginId, serviceOrLevel, level) {
+		// 情况1: checkDisableLevel(loginId, level)
+		if(typeof serviceOrLevel === 'number') {
+			this.checkDisableLevel(
+				loginId,
+				SaTokenConsts.DEFAULT_DISABLE_SERVICE, 
+				serviceOrLevel
+			);
+			return;
+		}
 
-	/**
-	 * 校验：指定账号的指定服务，是否已被封禁到指定等级（如果已经达到，则抛出异常）
-	 *
-	 * @param {Object} loginId 指定账号id
-	 * @param {String} service 指定封禁服务
-	 * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
-	 */
-	checkDisableLevel(loginId, service, level) {
+		// 情况2: checkDisableLevel(loginId, service, level)
 		// 1、先前置检查一下这个账号是否被封禁了
-		const disableLevel = getDisableLevel(loginId, service);
-		if(disableLevel == SaTokenConsts.NOT_DISABLE_LEVEL) {
+		const disableLevel = this.getDisableLevel(loginId, serviceOrLevel);
+		if(disableLevel === SaTokenConsts.NOT_DISABLE_LEVEL) {
 			return;
 		}
 
 		// 2、再判断被封禁的等级是否达到了指定级别
 		if(disableLevel >= level) {
-			throw new DisableServiceException(this.loginType, loginId, service, disableLevel, level, getDisableTime(loginId, service))
-					.setCode(SaErrorCode.CODE_11061);
+			throw new DisableServiceException(
+				this.loginType,
+				loginId, 
+				serviceOrLevel,
+				disableLevel,
+				level,
+				this.getDisableTime(loginId, serviceOrLevel)
+			).setCode(SaErrorCode.CODE_11061);
 		}
 	}
 
-	/**
-	 * 获取：指定账号被封禁的等级，如果未被封禁则返回-2
-	 *
-	 * @param {Object} loginId 指定账号id
-	 * @return {int} /
-	 */
-	getDisableLevel(loginId) {
-		return getDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
-	}
+	// /**
+	//  * 校验：指定账号是否已被封禁到指定等级（如果已经达到，则抛出异常）
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	//  */
+	// checkDisableLevel(loginId, level) {
+	// 	checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
+	// }
+
+	// /**
+	//  * 校验：指定账号的指定服务，是否已被封禁到指定等级（如果已经达到，则抛出异常）
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	//  */
+	// checkDisableLevel(loginId, service, level) {
+	// 	// 1、先前置检查一下这个账号是否被封禁了
+	// 	const disableLevel = getDisableLevel(loginId, service);
+	// 	if(disableLevel == SaTokenConsts.NOT_DISABLE_LEVEL) {
+	// 		return;
+	// 	}
+
+	// 	// 2、再判断被封禁的等级是否达到了指定级别
+	// 	if(disableLevel >= level) {
+	// 		throw new DisableServiceException(this.loginType, loginId, service, disableLevel, level, getDisableTime(loginId, service))
+	// 				.setCode(SaErrorCode.CODE_11061);
+	// 	}
+	// }
+
+	// /**
+	//  * 获取：指定账号被封禁的等级，如果未被封禁则返回-2
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @return {int} /
+	//  */
+	// getDisableLevel(loginId) {
+	// 	return getDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
+	// }
 
 	/**
 	 * 获取：指定账号的 指定服务 被封禁的等级，如果未被封禁则返回-2
@@ -3018,11 +3259,11 @@ class StpLogic {
 	 * @param {String} service 指定封禁服务
 	 * @return {int} /
 	 */
-	getDisableLevel(loginId, service) {
+	getDisableLevel(loginId, service = SaTokenConsts.DEFAULT_DISABLE_SERVICE) {
 		// 1、先从缓存中查询数据，缓存中有值，以缓存值优先
-		const value = getSaTokenDao().get(splicingKeyDisable(loginId, service));
+		const value = this.getSaTokenDao().get(this.splicingKeyDisable(loginId, service));
 		if(SaFoxUtil.isNotEmpty(value)) {
-			return SaFoxUtil.getValueByType(value, int.class);
+			return SaFoxUtil.getValueByType(value, Number);
 		}
 
 		// 2、如果缓存中无数据，则从"数据加载器"中再次查询
@@ -3030,7 +3271,7 @@ class StpLogic {
 
 		// 如果返回值 disableTime 有效，则代表返回结果需要写入缓存
 		if(disableWrapperInfo.disableTime == SaTokenDao.NEVER_EXPIRE || disableWrapperInfo.disableTime > 0) {
-			disableLevel(loginId, service, disableWrapperInfo.disableLevel, disableWrapperInfo.disableTime);
+			this.disableLevel(loginId, service, disableWrapperInfo.disableLevel, disableWrapperInfo.disableTime);
 		}
 
 		// 返回查询结果
@@ -3046,14 +3287,14 @@ class StpLogic {
 	 * @param {Object} loginId 指定loginId
 	 */
 	switchTo(loginId) {
-		SaHolder.getStorage().set(splicingKeySwitch(), loginId);
+		SaHolder.getStorage().set(this.splicingKeySwitch(), loginId);
 	}
 
 	/**
 	 * 结束临时切换身份
 	 */
 	endSwitch() {
-		SaHolder.getStorage().delete(splicingKeySwitch());
+		SaHolder.getStorage().delete(this.splicingKeySwitch());
 	}
 
 	/**
@@ -3062,7 +3303,7 @@ class StpLogic {
 	 * @return {boolean} /
 	 */
 	isSwitch() {
-		return SaHolder.getStorage().get(splicingKeySwitch()) != null;
+		return SaHolder.getStorage().get(this.splicingKeySwitch()) != null;
 	}
 
 	/**
@@ -3071,7 +3312,7 @@ class StpLogic {
 	 * @return {Object} /
 	 */
 	getSwitchLoginId() {
-		return SaHolder.getStorage().get(splicingKeySwitch());
+		return SaHolder.getStorage().get(this.splicingKeySwitch());
 	}
 
 	/**
@@ -3082,119 +3323,204 @@ class StpLogic {
 	 */
 	switchTo(loginId, func) {
 		try {
-			switchTo(loginId);
-			func();
+			SaHolder.getStorage().set(this.splicingKeySwitch(), loginId);
+			if(func) {
+				func();
+			}
 		} finally {
-			endSwitch();
+			this.endSwitch();
 		}
 	}
 
 
 	// ------------------- 二级认证 -------------------
 
+
 	/**
-	 * 在当前会话 开启二级认证
-	 *
-	 * @param {long} safeTime 维持时间 (单位: 秒)
+	 * 在当前会话开启二级认证 - 支持多种参数模式
+	 * 
+	 * @param {String|Number} serviceOrSafeTime 业务标识或维持时间(单位:秒)
+	 * @param {Number} [safeTime] 维持时间(单位:秒,当第一个参数为业务标识时使用)
 	 */
-	openSafe(safeTime) {
-		openSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE, safeTime);
+	openSafe(serviceOrSafeTime, safeTime) {
+		// 1、开启二级认证前必须处于登录状态，否则抛出异常  
+		this.checkLogin();
+
+		// 2、获取 token 值，如果不存在则抛出异常
+		const tokenValue = this.getTokenValueNotNull();
+
+		// 3、判断参数模式
+		let service, timeout;
+		
+		// 情况1: openSafe(safeTime) - 使用默认业务标识
+		if(typeof serviceOrSafeTime === 'number') {
+			service = SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE;
+			timeout = serviceOrSafeTime;
+		}
+		// 情况2: openSafe(service, safeTime) - 指定业务标识
+		else {
+			service = serviceOrSafeTime; 
+			timeout = safeTime;
+		}
+
+		// 4、写入指定标记，打开二级认证
+		this.getSaTokenDao().set(
+			this.splicingKeySafe(tokenValue, service),
+			SaTokenConsts.SAFE_AUTH_SAVE_VALUE,
+			timeout
+		);
+
+		// 5、发布事件
+		SaTokenEventCenter.doOpenSafe(
+			this.loginType,
+			tokenValue,
+			service,
+			timeout
+		);
 	}
 
+	// /**
+	//  * 在当前会话 开启二级认证
+	//  *
+	//  * @param {long} safeTime 维持时间 (单位: 秒)
+	//  */
+	// openSafe(safeTime) {
+	// 	this.openSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE, safeTime);
+	// }
+
+	// /**
+	//  * 在当前会话 开启二级认证
+	//  *
+	//  * @param {String} service 业务标识
+	//  * @param {long} safeTime 维持时间 (单位: 秒)
+	//  */
+	// openSafe(service, safeTime) {
+	// 	// 1、开启二级认证前必须处于登录状态，否则抛出异常
+	// 	checkLogin();
+
+	// 	// 2、写入指定的 可以 标记，打开二级认证
+	// 	const tokenValue = getTokenValueNotNull();
+	// 	getSaTokenDao().set(splicingKeySafe(tokenValue, service), SaTokenConsts.SAFE_AUTH_SAVE_VALUE, safeTime);
+
+	// 	// 3、$$ 发布事件，某某 token 令牌开启了二级认证
+	// 	SaTokenEventCenter.doOpenSafe(this.loginType, tokenValue, service, safeTime);
+	// }
+
+
 	/**
-	 * 在当前会话 开启二级认证
-	 *
-	 * @param {String} service 业务标识
-	 * @param {long} safeTime 维持时间 (单位: 秒)
-	 */
-	openSafe(service, safeTime) {
-		// 1、开启二级认证前必须处于登录状态，否则抛出异常
-		checkLogin();
-
-		// 2、写入指定的 可以 标记，打开二级认证
-		const tokenValue = getTokenValueNotNull();
-		getSaTokenDao().set(splicingKeySafe(tokenValue, service), SaTokenConsts.SAFE_AUTH_SAVE_VALUE, safeTime);
-
-		// 3、$$ 发布事件，某某 token 令牌开启了二级认证
-		SaTokenEventCenter.doOpenSafe(this.loginType, tokenValue, service, safeTime);
-	}
-
-	/**
-	 * 判断：当前会话是否处于二级认证时间内
-	 *
+	 * 判断当前会话是否处于二级认证时间内 - 支持多种参数模式
+	 * 
+	 * @param {String} [serviceOrTokenValue] 业务标识
+	 * @param {String} [service] Token值(当传入service时可用)
 	 * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	 */
-	isSafe() {
-		return isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
-	}
+	isSafe(serviceOrTokenValue, service) {
+		// 情况1: isSafe() - 判断当前会话默认业务
+		if(arguments.length === 0) {
+			return this.isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+		}
 
-	/**
-	 * 判断：当前会话 是否处于指定业务的二级认证时间内
-	 *
-	 * @param {String} service 业务标识
-	 * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
-	 */
-	isSafe(service) {
-		return isSafe(getTokenValue(), service);
-	}
+		// 情况2: isSafe(service) - 判断当前会话指定业务
+		if(arguments.length === 1) {
+			return this.isSafe(this.getTokenValue(), serviceOrTokenValue);
+		}
 
-	/**
-	 * 判断：指定 token 是否处于二级认证时间内
-	 *
-	 * @param {String} tokenValue Token 值
-	 * @param {String} service 业务标识
-	 * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
-	 */
-	isSafe(tokenValue, service) {
+		// 情况3: isSafe(service, tokenValue) - 判断指定token的指定业务
 		// 1、如果提供的 Token 为空，则直接视为未认证
-		if(SaFoxUtil.isEmpty(tokenValue)) {
+		if(SaFoxUtil.isEmpty(serviceOrTokenValue)) {
 			return false;
 		}
 
 		// 2、如果此 token 不处于登录状态，也将其视为未认证
-		const loginId = getLoginIdNotHandle(tokenValue);
-		if( ! isValidLoginId(loginId) ) {
+		const loginId = this.getLoginIdNotHandle(serviceOrTokenValue);
+		if(!this.isValidLoginId(loginId)) {
 			return false;
 		}
 
 		// 3、如果缓存中可以查询出指定的键值，则代表已认证，否则视为未认证
-		const value = getSaTokenDao().get(splicingKeySafe(tokenValue, service));
-		return !(SaFoxUtil.isEmpty(value));
+		const value = this.getSaTokenDao().get(this.splicingKeySafe(serviceOrTokenValue, service));
+		return !SaFoxUtil.isEmpty(value);
 	}
 
-	/**
-	 * 校验：当前会话是否已通过二级认证，如未通过则抛出异常
-	 */
-	checkSafe() {
-		checkSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
-	}
+	// /**
+	//  * 判断：当前会话是否处于二级认证时间内
+	//  *
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// isSafe() {
+	// 	return isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+	// }
+
+	// /**
+	//  * 判断：当前会话 是否处于指定业务的二级认证时间内
+	//  *
+	//  * @param {String} service 业务标识
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// isSafe(service) {
+	// 	return isSafe(getTokenValue(), service);
+	// }
+
+	// /**
+	//  * 判断：指定 token 是否处于二级认证时间内
+	//  *
+	//  * @param {String} tokenValue Token 值
+	//  * @param {String} service 业务标识
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// isSafe(tokenValue, service) {
+	// 	// 1、如果提供的 Token 为空，则直接视为未认证
+	// 	if(SaFoxUtil.isEmpty(tokenValue)) {
+	// 		return false;
+	// 	}
+
+	// 	// 2、如果此 token 不处于登录状态，也将其视为未认证
+	// 	const loginId = getLoginIdNotHandle(tokenValue);
+	// 	if( ! isValidLoginId(loginId) ) {
+	// 		return false;
+	// 	}
+
+	// 	// 3、如果缓存中可以查询出指定的键值，则代表已认证，否则视为未认证
+	// 	const value = getSaTokenDao().get(splicingKeySafe(tokenValue, service));
+	// 	return !(SaFoxUtil.isEmpty(value));
+	// }
+
+
+
+	
+	// /**
+	//  * 校验：当前会话是否已通过二级认证，如未通过则抛出异常
+	//  */
+	// checkSafe() {
+	// 	checkSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+	// }
 
 	/**
 	 * 校验：检查当前会话是否已通过指定业务的二级认证，如未通过则抛出异常
 	 *
 	 * @param {String} service 业务标识
 	 */
-	checkSafe(service) {
+	checkSafe(service = SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE) {
 		// 1、必须先通过登录校验
-		checkLogin();
+		this.checkLogin();
 
 		// 2、再进行二级认证校验
 		// 		如果缓存中可以查询出指定的键值，则代表已认证，否则视为未认证
-		const tokenValue = getTokenValue();
-		const value = getSaTokenDao().get(splicingKeySafe(tokenValue, service));
+		const tokenValue = this.getTokenValue();
+		const value = this.getSaTokenDao().get(this.splicingKeySafe(tokenValue, service));
 		if(SaFoxUtil.isEmpty(value)) {
 			throw new NotSafeException(this.loginType, tokenValue, service).setCode(SaErrorCode.CODE_11071);
 		}
 	}
 
-	/**
-	 * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
-	 *
-	 * @return {long} 剩余有效时间
-	 */
-	getSafeTime() {
-		return getSafeTime(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
-	}
+	// /**
+	//  * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
+	//  *
+	//  * @return {long} 剩余有效时间
+	//  */
+	// getSafeTime() {
+	// 	return getSafeTime(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+	// }
 
 	/**
 	 * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
@@ -3202,38 +3528,38 @@ class StpLogic {
 	 * @param {String} service 业务标识
 	 * @return {long} 剩余有效时间
 	 */
-	getSafeTime(service) {
+	getSafeTime(service = SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE) {
 		// 1、如果前端没有提交 Token，则直接视为未认证
-		const tokenValue = getTokenValue();
+		const tokenValue = this.getTokenValue();
 		if(SaFoxUtil.isEmpty(tokenValue)) {
 			return SaTokenDao.NOT_VALUE_EXPIRE;
 		}
 
 		// 2、从缓存中查询这个 key 的剩余有效期
-		return getSaTokenDao().getTimeout(splicingKeySafe(tokenValue, service));
+		return this.getSaTokenDao().getTimeout(this.splicingKeySafe(tokenValue, service));
 	}
 
-	/**
-	 * 在当前会话 结束二级认证
-	 */
-	closeSafe() {
-		closeSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
-	}
+	// /**
+	//  * 在当前会话 结束二级认证
+	//  */
+	// closeSafe() {
+	// 	closeSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+	// }
 
 	/**
 	 * 在当前会话 结束指定业务标识的二级认证
 	 *
 	 * @param {String} service 业务标识
 	 */
-	closeSafe(service) {
+	closeSafe(service = SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE) {
 		// 1、如果前端没有提交 Token，则无需任何操作
-		const tokenValue = getTokenValue();
+		const tokenValue = this.getTokenValue();
 		if(SaFoxUtil.isEmpty(tokenValue)) {
 			return;
 		}
 
 		// 2、删除 key
-		getSaTokenDao().delete(splicingKeySafe(tokenValue, service));
+		this.getSaTokenDao().delete(this.splicingKeySafe(tokenValue, service));
 
 		// 3、$$ 发布事件，某某 token 令牌关闭了二级认证
 		SaTokenEventCenter.doCloseSafe(this.loginType, tokenValue, service);
@@ -3248,7 +3574,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeyTokenName() {
-		return getConfigOrGlobal().getTokenName();
+		return this.getConfigOrGlobal().getTokenName();
 	}
 
 	/**
@@ -3258,7 +3584,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeyTokenValue(tokenValue) {
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token:" + tokenValue;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token:" + tokenValue;
 	}
 
 	/**
@@ -3268,7 +3594,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeySession(loginId) {
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":session:" + loginId;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":session:" + loginId;
 	}
 
 	/**
@@ -3278,7 +3604,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeyTokenSession(tokenValue) {
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token-session:" + tokenValue;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token-session:" + tokenValue;
 	}
 
 	/**
@@ -3288,7 +3614,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeyLastActiveTime(tokenValue) {
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":last-active:" + tokenValue;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":last-active:" + tokenValue;
 	}
 
 	/**
@@ -3318,7 +3644,7 @@ class StpLogic {
 	 * @return {String} key
 	 */
 	splicingKeyDisable(loginId, service) {
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":disable:" + service + ":" + loginId;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":disable:" + service + ":" + loginId;
 	}
 
 	/**
@@ -3331,7 +3657,7 @@ class StpLogic {
 	splicingKeySafe(tokenValue, service) {
 		// 格式：<Token名称>:<账号类型>:<safe>:<业务标识>:<Token值>
 		// 形如：satoken:login:safe:important:gr_SwoIN0MC1ewxHX_vfCW3BothWDZMMtx__
-		return getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":safe:" + service + ":" + tokenValue;
+		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":safe:" + service + ":" + tokenValue;
 	}
 
 
@@ -3352,7 +3678,7 @@ class StpLogic {
 	 * @return {boolean} /
 	 */
 	isSupportShareToken() {
-		return getConfigOrGlobal().getIsShare();
+		return this.getConfigOrGlobal().getIsShare();
 	}
 
 	/**
@@ -3361,7 +3687,7 @@ class StpLogic {
 	 * @return {boolean} /
 	 */
 	isOpenCheckActiveTimeout() {
-		const cfg = getConfigOrGlobal();
+		const cfg = this.getConfigOrGlobal();
 		return cfg.getActiveTimeout() != SaTokenDao.NEVER_EXPIRE || cfg.getDynamicActiveTimeout();
 	}
 
@@ -3371,9 +3697,9 @@ class StpLogic {
 	 * @return {int} Cookie 应该保存的时长
 	 */
 	getConfigOfCookieTimeout() {
-		const timeout = getConfigOrGlobal().getTimeout();
+		const timeout = this.getConfigOrGlobal().getTimeout();
 		if(timeout == SaTokenDao.NEVER_EXPIRE) {
-			return Integer.MAX_VALUE;
+			return Number.MAX_SAFE_INTEGER;
 		}
 		return timeout;
 	}
@@ -3396,7 +3722,7 @@ class StpLogic {
 	 * @return {boolean} /
 	 */
 	hasElement(list, element) {
-		return SaStrategy.instance.hasElement.apply(list, element);
+		return SaStrategy.instance.hasElement(list, element);
 	}
 
 	/**
@@ -3414,7 +3740,7 @@ class StpLogic {
 	 * @return {SaLoginParameter} /
 	 */
 	createSaLoginParameter() {
-		return new SaLoginParameter(getConfigOrGlobal());
+		return new SaLoginParameter(this.getConfigOrGlobal());
 	}
 
 	/**
@@ -3423,7 +3749,7 @@ class StpLogic {
 	 * @return {SaLogoutParameter} /
 	 */
 	createSaLogoutParameter() {
-		return new SaLogoutParameter(getConfigOrGlobal());
+		return new SaLogoutParameter(this.getConfigOrGlobal());
 	}
 
 
@@ -3438,7 +3764,7 @@ class StpLogic {
 	 */
 	// @Deprecated
 	getLoginDevice() {
-		return getLoginDeviceType();
+		return this.getLoginDeviceType();
 	}
 
 	/**
@@ -3450,8 +3776,8 @@ class StpLogic {
 	 */
 	// @Deprecated
 	getLoginDeviceByToken(tokenValue) {
-		return getLoginDeviceTypeByToken(tokenValue);
+		return this.getLoginDeviceTypeByToken(tokenValue);
 	}
 
 }
-export default SaTokenDao;
+export default StpLogic;

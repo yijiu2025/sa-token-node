@@ -13,46 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.stp;
 
-import cn.dev33.satoken.SaManager;
-import cn.dev33.satoken.fun.SaFunction;
-import cn.dev33.satoken.fun.SaTwoParamFunction;
-import cn.dev33.satoken.listener.SaTokenEventCenter;
-import cn.dev33.satoken.session.SaSession;
-import cn.dev33.satoken.session.SaTerminalInfo;
-import cn.dev33.satoken.stp.parameter.SaLoginParameter;
-import cn.dev33.satoken.stp.parameter.SaLogoutParameter;
-
-import java.util.List;
-
+import SaManager from '../SaManager.js';
+import SaFunction from '../fun/SaFunction.js';
+import SaTwoParamFunction from '../fun/SaTwoParamFunction.js';
+import SaTokenEventCenter from '../listener/SaTokenEventCenter.js';
+import SaSession from '../session/SaSession.js';
+import SaTerminalInfo from '../session/SaTerminalInfo.js';
+import SaLoginParameter from '../stp/parameter/SaLoginParameter.js';
+import SaLogoutParameter from '../stp/parameter/SaLogoutParameter.js';
+import StpLogic from './StpLogic.js';
 /**
  * Sa-Token 权限认证工具类
  *
  * @author click33
  * @since 1.0.0
  */
-public class StpUtil {
+class StpUtil {
 	
-	private StpUtil() {}
-	
+	constructor() {
+        throw new Error("StpUtil is a static class and cannot be instantiated");
+    }
 	/**
 	 * 多账号体系下的类型标识
 	 */
-	public static final String TYPE = "login";
-	
+	static #TYPE = "login";
+
 	/**
 	 * 底层使用的 StpLogic 对象
 	 */
-	public static StpLogic stpLogic = new StpLogic(TYPE);
+	static #stpLogic = new StpLogic(this.#TYPE);
 
 	/**
 	 * 获取当前 StpLogic 的账号类型
 	 *
-	 * @return /
+	 * @return {String} /
 	 */
-	public static String getLoginType(){
-		return stpLogic.getLoginType();
+	static getLoginType(){
+		return this.#stpLogic.getLoginType();
 	}
 
 	/**
@@ -62,27 +60,27 @@ public class StpUtil {
 	 * <br> 2、put 到全局 StpLogic 集合中 
 	 * <br> 3、发送日志 
 	 * 
-	 * @param newStpLogic / 
+	 * @param {StpLogic} newStpLogic / 
 	 */
-	public static void setStpLogic(StpLogic newStpLogic) {
+	static setStpLogic(newStpLogic) {
 		// 1、重置此账户的 StpLogic 对象
-		stpLogic = newStpLogic;
-		
+		this.#stpLogic = newStpLogic;
+
 		// 2、添加到全局 StpLogic 集合中
 		//    以便可以通过 SaManager.getStpLogic(type) 的方式来全局获取到这个 StpLogic
 		SaManager.putStpLogic(newStpLogic);
 		
 		// 3、$$ 发布事件：更新了 stpLogic 对象
-		SaTokenEventCenter.doSetStpLogic(stpLogic);
+		SaTokenEventCenter.doSetStpLogic(this.#stpLogic);
 	}
 
 	/**
 	 * 获取 StpLogic 对象
 	 *
-	 * @return / 
+	 * @return {StpLogic} / 
 	 */
-	public static StpLogic getStpLogic() {
-		return stpLogic;
+	static getStpLogic() {
+		return this.#stpLogic;
 	}
 	
 	
@@ -91,75 +89,75 @@ public class StpUtil {
 	/**
 	 * 返回 token 名称，此名称在以下地方体现：Cookie 保存 token 时的名称、提交 token 时参数的名称、存储 token 时的 key 前缀
 	 *
-	 * @return /
+	 * @return {String} /
 	 */
-	public static String getTokenName() {
- 		return stpLogic.getTokenName();
+	static getTokenName() {
+ 		return this.#stpLogic.getTokenName();
  	}
 
-	/**
-	 * 在当前会话写入指定 token 值
-	 *
-	 * @param tokenValue token 值
-	 */
-	public static void setTokenValue(String tokenValue){
-		stpLogic.setTokenValue(tokenValue);
-	}
+	// /**
+	//  * 在当前会话写入指定 token 值
+	//  *
+	//  * @param {String} tokenValue token 值
+	//  */
+	// static setTokenValue(tokenValue){
+	// 	this.#stpLogic.setTokenValue(tokenValue);
+	// }
 
 	/**
 	 * 在当前会话写入指定 token 值
 	 *
-	 * @param tokenValue token 值
-	 * @param cookieTimeout Cookie存活时间(秒)
+	 * @param {String} tokenValue token 值
+	 * @param {int | SaLoginParameter} cookieTimeout | loginParameter Cookie存活时间(秒) | 登录参数
 	 */
-	public static void setTokenValue(String tokenValue, int cookieTimeout){
-		stpLogic.setTokenValue(tokenValue, cookieTimeout);
+	static setTokenValue(tokenValue, cookieTimeoutOrLoginParameter){
+		this.#stpLogic.setTokenValue(tokenValue, cookieTimeoutOrLoginParameter);
 	}
 
-	/**
-	 * 在当前会话写入指定 token 值
-	 *
-	 * @param tokenValue token 值
-	 * @param loginParameter 登录参数
-	 */
-	public static void setTokenValue(String tokenValue, SaLoginParameter loginParameter){
-		stpLogic.setTokenValue(tokenValue, loginParameter);
-	}
+	// /**
+	//  * 在当前会话写入指定 token 值
+	//  *
+	//  * @param {String} tokenValue token 值
+	//  * @param {SaLoginParameter} loginParameter 登录参数
+	//  */
+	// static setTokenValue(tokenValue, loginParameter){
+	// 	this.#stpLogic.setTokenValue(tokenValue, loginParameter);
+	// }
 
 	/**
 	 * 将 token 写入到当前请求的 Storage 存储器里
 	 *
-	 * @param tokenValue 要保存的 token 值
+	 * @param {String} tokenValue 要保存的 token 值
 	 */
-	public static void setTokenValueToStorage(String tokenValue){
-		stpLogic.setTokenValueToStorage(tokenValue);
+	static setTokenValueToStorage(tokenValue){
+		this.#stpLogic.setTokenValueToStorage(tokenValue);
 	}
 
 	/**
 	 * 获取当前请求的 token 值
 	 *
-	 * @return 当前tokenValue
+	 * @return {String} 当前tokenValue
 	 */
-	public static String getTokenValue() {
-		return stpLogic.getTokenValue();
+	static getTokenValue() {
+		return this.#stpLogic.getTokenValue();
 	}
 
 	/**
 	 * 获取当前请求的 token 值 （不裁剪前缀）
 	 *
-	 * @return / 
+	 * @return {String} / 
 	 */
-	public static String getTokenValueNotCut(){
-		return stpLogic.getTokenValueNotCut();
+	static getTokenValueNotCut(){
+		return this.#stpLogic.getTokenValueNotCut();
 	}
 
 	/**
 	 * 获取当前会话的 token 参数信息
 	 *
-	 * @return token 参数信息
+	 * @return {SaTokenInfo} token 参数信息
 	 */
-	public static SaTokenInfo getTokenInfo() {
-		return stpLogic.getTokenInfo();
+	static getTokenInfo() {
+		return this.#stpLogic.getTokenInfo();
 	}
 
 	
@@ -167,410 +165,462 @@ public class StpUtil {
 
 	// --- 登录 
 
-	/**
-	 * 会话登录
-	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 */
-	public static void login(Object id) {
-		stpLogic.login(id);
-	}
 
 	/**
-	 * 会话登录，并指定登录设备类型
-	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @param deviceType 设备类型
-	 */
-	public static void login(Object id, String deviceType) {
-		stpLogic.login(id, deviceType);
+     * 会话登录（支持多种参数模式）
+     *
+     * @param {Object} id 账号id，建议的类型：（long | int | String）
+     * @param {String|boolean|number|SaLoginParameter} [arg] 可选参数：设备类型/是否记住我/token有效期/SaLoginParameter
+     */
+	static login(id, arg) {
+		this.#stpLogic.login(id, arg);
 	}
 
-	/**
-	 * 会话登录，并指定是否 [记住我]
-	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @param isLastingCookie 是否为持久Cookie，值为 true 时记住我，值为 false 时关闭浏览器需要重新登录
-	 */
-	public static void login(Object id, boolean isLastingCookie) {
-		stpLogic.login(id, isLastingCookie);
-	}
 
-	/**
-	 * 会话登录，并指定此次登录 token 的有效期, 单位:秒
-	 *
-	 * @param id      账号id，建议的类型：（long | int | String）
-	 * @param timeout 此次登录 token 的有效期, 单位:秒
-	 */
-	public static void login(Object id, long timeout) {
-		stpLogic.login(id, timeout);
-	}
 
-	/**
-	 * 会话登录，并指定所有登录参数 Model
-	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @param loginParameter 此次登录的参数Model
-	 */
-	public static void login(Object id, SaLoginParameter loginParameter) {
-		stpLogic.login(id, loginParameter);
-	}
+	// /**
+	//  * 会话登录
+	//  *
+	//  * @param {Object} id 账号id，建议的类型：（long | int | String）
+	//  */
+	// static login(id) {
+	// 	this.#stpLogic.login(id);
+	// }
+
+	// /**
+	//  * 会话登录，并指定登录设备类型
+	//  *
+	//  * @param {Object} id 账号id，建议的类型：（long | int | String）
+	//  * @param {String} deviceType 设备类型
+	//  */
+	// static login(id, deviceType) {
+	// 	this.#stpLogic.login(id, deviceType);
+	// }
+
+	// /**
+	//  * 会话登录，并指定是否 [记住我]
+	//  *
+	//  * @param {Object} id 账号id，建议的类型：（long | int | String）
+	//  * @param {boolean} isLastingCookie 是否为持久Cookie，值为 true 时记住我，值为 false 时关闭浏览器需要重新登录
+	//  */
+	// static login(id, isLastingCookie) {
+	// 	this.#stpLogic.login(id, isLastingCookie);
+	// }
+
+	// /**
+	//  * 会话登录，并指定此次登录 token 的有效期, 单位:秒
+	//  *
+	//  * @param {Object} id      账号id，建议的类型：（long | int | String）
+	//  * @param {long} timeout 此次登录 token 的有效期, 单位:秒
+	//  */
+	// static login(id, timeout) {
+	// 	this.#stpLogic.login(id, timeout);
+	// }
+
+	// /**
+	//  * 会话登录，并指定所有登录参数 Model
+	//  *
+	//  * @param {Object} id 账号id，建议的类型：（| int | String）
+	//  * @param {SaLoginParameter} loginParameter 此次登录的参数Model
+	//  */
+	// static login(id, loginParameter) {
+	// 	this.#stpLogic.login(id, loginParameter);
+	// }
+
+	// /**
+	//  * 创建指定账号 id 的登录会话数据
+	//  *
+	//  * @param {Object} id 账号id，建议的类型：（long | int | String）
+	//  * @return {String} 返回会话令牌
+	//  */
+	// static createLoginSession(id) {
+	// 	return this.#stpLogic.createLoginSession(id);
+	// }
 
 	/**
 	 * 创建指定账号 id 的登录会话数据
 	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @return 返回会话令牌
+	 * @param {Object} id 账号id，建议的类型：（long | int | String）
+	 * @param {SaLoginParameter} loginParameter 此次登录的参数Model
+	 * @return {String} 返回会话令牌
 	 */
-	public static String createLoginSession(Object id) {
-		return stpLogic.createLoginSession(id);
-	}
-
-	/**
-	 * 创建指定账号 id 的登录会话数据
-	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @param loginParameter 此次登录的参数Model 
-	 * @return 返回会话令牌
-	 */
-	public static String createLoginSession(Object id, SaLoginParameter loginParameter) {
-		return stpLogic.createLoginSession(id, loginParameter);
+	static createLoginSession(id, loginParameter) {
+		return this.#stpLogic.createLoginSession(id, loginParameter);
 	}
 
 	/**
 	 * 获取指定账号 id 的登录会话数据，如果获取不到则创建并返回
 	 *
-	 * @param id 账号id，建议的类型：（long | int | String）
-	 * @return 返回会话令牌
+	 * @param {Object} id 账号id，建议的类型：（long | int | String）
+	 * @return {String} 返回会话令牌
 	 */
-	public static String getOrCreateLoginSession(Object id) {
-		return stpLogic.getOrCreateLoginSession(id);
+	static getOrCreateLoginSession(id) {
+		return this.#stpLogic.getOrCreateLoginSession(id);
+	}
+
+
+	/**
+	 * 会话注销方法 - 支持多种注销方式
+	 * 
+	 * @param {Object|SaLogoutParameter} arg1 账号id或注销参数对象 
+	 * @param {String|SaLogoutParameter} [arg2] 设备类型或注销参数对象
+	 */
+
+	static logout(arg1, arg2) {
+		this.#stpLogic.logout(arg1, arg2);
 	}
 
 	// --- 注销 (根据 token)
 
-	/**
-	 * 在当前客户端会话注销
-	 */
-	public static void logout() {
-		stpLogic.logout();
-	}
+	// /**
+	//  * 在当前客户端会话注销
+	//  */
+	// static logout() {
+	// 	this.#stpLogic.logout();
+	// }
 
-	/**
-	 * 在当前客户端会话注销，根据注销参数
-	 */
-	public static void logout(SaLogoutParameter logoutParameter) {
-		stpLogic.logout(logoutParameter);
-	}
+	// /**
+	//  * 在当前客户端会话注销，根据注销参数
+	//  * @param {SaLogoutParameter} logoutParameter 注销参数
+	//  */
+	// static logout(logoutParameter) {
+	// 	this.#stpLogic.logout(logoutParameter);
+	// }
 
-	/**
-	 * 注销下线，根据指定 token
-	 *
-	 * @param tokenValue 指定 token
-	 */
-	public static void logoutByTokenValue(String tokenValue) {
-		stpLogic.logoutByTokenValue(tokenValue);
-	}
+	// /**
+	//  * 注销下线，根据指定 token
+	//  *
+	//  * @param {String} tokenValue 指定 token
+	//  */
+	// static logoutByTokenValue(tokenValue) {
+	// 	this.#stpLogic.logoutByTokenValue(tokenValue);
+	// }
 
 	/**
 	 * 注销下线，根据指定 token、注销参数
 	 *
-	 * @param tokenValue 指定 token
-	 * @param logoutParameter /
+	 * @param {String} tokenValue 指定 token
+	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
-	public static void logoutByTokenValue(String tokenValue, SaLogoutParameter logoutParameter) {
-		stpLogic.logoutByTokenValue(tokenValue, logoutParameter);
+	static logoutByTokenValue(tokenValue, logoutParameter) {
+		this.#stpLogic.logoutByTokenValue(tokenValue, logoutParameter);
 	}
 
-	/**
-	 * 踢人下线，根据指定 token
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
-	 *
-	 * @param tokenValue 指定 token
-	 */
-	public static void kickoutByTokenValue(String tokenValue) {
-		stpLogic.kickoutByTokenValue(tokenValue);
-	}
+	// /**
+	//  * 踢人下线，根据指定 token
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
+	//  *
+	//  * @param {String} tokenValue 指定 token
+	//  */
+	// static kickoutByTokenValue(tokenValue) {
+	// 	this.#stpLogic.kickoutByTokenValue(tokenValue);
+	// }
 
 	/**
 	 * 踢人下线，根据指定 token、注销参数
 	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
 	 *
-	 * @param tokenValue 指定 token
-	 * @param logoutParameter 注销参数
+	 * @param {String} tokenValue 指定 token
+	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
-	public static void kickoutByTokenValue(String tokenValue, SaLogoutParameter logoutParameter) {
-		stpLogic.kickoutByTokenValue(tokenValue, logoutParameter);
+	static kickoutByTokenValue(tokenValue, logoutParameter) {
+		this.#stpLogic.kickoutByTokenValue(tokenValue, logoutParameter);
 	}
 
-	/**
-	 * 顶人下线，根据指定 token
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
-	 *
-	 * @param tokenValue 指定 token
-	 */
-	public static void replacedByTokenValue(String tokenValue) {
-		stpLogic.replacedByTokenValue(tokenValue);
-	}
+	// /**
+	//  * 顶人下线，根据指定 token
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
+	//  *
+	//  * @param {String} tokenValue 指定 token
+	//  */
+	// static replacedByTokenValue(tokenValue) {
+	// 	this.#stpLogic.replacedByTokenValue(tokenValue);
+	// }
 
 	/**
 	 * 顶人下线，根据指定 token、注销参数
 	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
 	 *
-	 * @param tokenValue 指定 token
-	 * @param logoutParameter /
+	 * @param {String} tokenValue 指定 token
+	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
-	public static void replacedByTokenValue(String tokenValue, SaLogoutParameter logoutParameter) {
-		stpLogic.replacedByTokenValue(tokenValue, logoutParameter);
+	static replacedByTokenValue(tokenValue, logoutParameter) {
+		this.#stpLogic.replacedByTokenValue(tokenValue, logoutParameter);
 	}
 
 	// --- 注销 (根据 loginId)
 
-	/**
-	 * 会话注销，根据账号id
-	 *
-	 * @param loginId 账号id
-	 */
-	public static void logout(Object loginId) {
-		stpLogic.logout(loginId);
-	}
+	// /**
+	//  * 会话注销，根据账号id
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// static logout(loginId) {
+	// 	this.#stpLogic.logout(loginId);
+	// }
+
+	// /**
+	//  * 会话注销，根据账号id 和 设备类型
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {String} deviceType 设备类型 (填 null 代表注销该账号的所有设备类型)
+	//  */
+	// static logout(loginId, deviceType) {
+	// 	this.#stpLogic.logout(loginId, deviceType);
+	// }
+
+	// /**
+	//  * 会话注销，根据账号id 和 注销参数
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {SaLogoutParameter} logoutParameter 注销参数
+	//  */
+	// static logout(loginId, logoutParameter) {
+	// 	this.#stpLogic.logout(loginId, logoutParameter);
+	// }
+
 
 	/**
-	 * 会话注销，根据账号id 和 设备类型
-	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型 (填 null 代表注销该账号的所有设备类型)
-	 */
-	public static void logout(Object loginId, String deviceType) {
-		stpLogic.logout(loginId, deviceType);
-	}
-
-	/**
-	 * 会话注销，根据账号id 和 注销参数
-	 *
-	 * @param loginId 账号id
-	 * @param logoutParameter 注销参数
-	 */
-	public static void logout(Object loginId, SaLogoutParameter logoutParameter) {
-		stpLogic.logout(loginId, logoutParameter);
-	}
-
-	/**
-	 * 踢人下线，根据账号id
+	 * 踢人下线方法 - 支持多种参数模式
 	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
 	 *
-	 * @param loginId 账号id
+	 * @param {Object} loginId 账号id
+	 * @param {String|SaLogoutParameter} [arg] 可选参数：设备类型或注销参数对象
 	 */
-	public static void kickout(Object loginId) {
-		stpLogic.kickout(loginId);
+	static kickout(loginId, arg) {
+		this.#stpLogic.kickout(loginId, arg);
 	}
 
-	/**
-	 * 踢人下线，根据账号id 和 设备类型
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
-	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型 (填 null 代表踢出该账号的所有设备类型)
-	 */
-	public static void kickout(Object loginId, String deviceType) {
-		stpLogic.kickout(loginId, deviceType);
-	}
+
+	// /**
+	//  * 踢人下线，根据账号id
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// static kickout(loginId) {
+	// 	this.#stpLogic.kickout(loginId);
+	// }
+
+	// /**
+	//  * 踢人下线，根据账号id 和 设备类型
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {String} deviceType 设备类型 (填 null 代表踢出该账号的所有设备类型)
+	//  */
+	// static kickout(loginId, deviceType) {
+	// 	this.#stpLogic.kickout(loginId, deviceType);
+	// }
+
+	// /**
+	//  * 踢人下线，根据账号id 和 注销参数
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {SaLogoutParameter} logoutParameter 注销参数
+	//  */
+	// static kickout(loginId, logoutParameter) {
+	// 	this.#stpLogic.kickout(loginId, logoutParameter);
+	// }
+
 
 	/**
-	 * 踢人下线，根据账号id 和 注销参数
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-5 </p>
-	 *
-	 * @param loginId 账号id
-	 * @param logoutParameter 注销参数
-	 */
-	public static void kickout(Object loginId, SaLogoutParameter logoutParameter) {
-		stpLogic.kickout(loginId, logoutParameter);
-	}
-
-	/**
-	 * 顶人下线，根据账号id
+	 * 顶人下线方法 - 支持多种参数模式 
 	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
 	 *
-	 * @param loginId 账号id
+	 * @param {Object} loginId 账号id
+	 * @param {String|SaLogoutParameter} [arg] 可选参数：设备类型或注销参数对象
 	 */
-	public static void replaced(Object loginId) {
-		stpLogic.replaced(loginId);
+	static replaced(loginId, arg) {
+		this.#stpLogic.replaced(loginId, arg);
 	}
 
-	/**
-	 * 顶人下线，根据账号id 和 设备类型
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
-	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型 （填 null 代表顶替该账号的所有设备类型）
-	 */
-	public static void replaced(Object loginId, String deviceType) {
-		stpLogic.replaced(loginId, deviceType);
-	}
 
-	/**
-	 * 顶人下线，根据账号id 和 注销参数
-	 * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
-	 *
-	 * @param loginId 账号id
-	 * @param logoutParameter 注销参数
-	 */
-	public static void replaced(Object loginId, SaLogoutParameter logoutParameter) {
-		stpLogic.replaced(loginId, logoutParameter);
-	}
+	// /**
+	//  * 顶人下线，根据账号id
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// static replaced(loginId) {
+	// 	this.#stpLogic.replaced(loginId);
+	// }
+
+	// /**
+	//  * 顶人下线，根据账号id 和 设备类型
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {String} deviceType 设备类型 （填 null 代表顶替该账号的所有设备类型）
+	//  */
+	// static replaced(loginId, deviceType) {
+	// 	this.#stpLogic.replaced(loginId, deviceType);
+	// }
+
+	// /**
+	//  * 顶人下线，根据账号id 和 注销参数
+	//  * <p> 当对方再次访问系统时，会抛出 NotLoginException 异常，场景值=-4 </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @param {SaLogoutParameter} logoutParameter 注销参数
+	//  */
+	// static replaced(loginId, logoutParameter) {
+	// 	this.#stpLogic.replaced(loginId, logoutParameter);
+	// }
 
 	// --- 注销 (会话管理辅助方法)
 
 	/**
 	 * 在 Account-Session 上移除 Terminal 信息 (注销下线方式)
-	 * @param session /
-	 * @param terminal /
+	 * @param {SaSession} session /
+	 * @param {SaTerminalInfo} terminal /
 	 */
-	public static void removeTerminalByLogout(SaSession session, SaTerminalInfo terminal) {
-		stpLogic.removeTerminalByLogout(session, terminal);
+	static removeTerminalByLogout(session, terminal) {
+		this.#stpLogic.removeTerminalByLogout(session, terminal);
 	}
 
 	/**
 	 * 在 Account-Session 上移除 Terminal 信息 (踢人下线方式)
-	 * @param session /
-	 * @param terminal /
+	 * @param {SaSession} session /
+	 * @param {SaTerminalInfo} terminal /
 	 */
-	public static void removeTerminalByKickout(SaSession session, SaTerminalInfo terminal) {
-		stpLogic.removeTerminalByKickout(session, terminal);
+	static removeTerminalByKickout(session, terminal) {
+		this.#stpLogic.removeTerminalByKickout(session, terminal);
 	}
 
 	/**
 	 * 在 Account-Session 上移除 Terminal 信息 (顶人下线方式)
-	 * @param session /
-	 * @param terminal /
+	 * @param {SaSession} session /
+	 * @param {SaTerminalInfo} terminal /
 	 */
-	public static void removeTerminalByReplaced(SaSession session, SaTerminalInfo terminal) {
-		stpLogic.removeTerminalByReplaced(session, terminal);
+	static removeTerminalByReplaced(session, terminal) {
+		this.#stpLogic.removeTerminalByReplaced(session, terminal);
 	}
 
 
 	// 会话查询
 
-	/**
-	 * 判断当前会话是否已经登录
-	 *
-	 * @return 已登录返回 true，未登录返回 false
-	 */
-	public static boolean isLogin() {
-		return stpLogic.isLogin();
-	}
+	// /**
+	//  * 判断当前会话是否已经登录
+	//  *
+	//  * @return {boolean} 已登录返回 true，未登录返回 false
+	//  */
+	// static isLogin() {
+	// 	return this.#stpLogic.isLogin();
+	// }
 
 	/**
 	 * 判断指定账号是否已经登录
-	 *
-	 * @return 已登录返回 true，未登录返回 false
+	 * @param {Object} loginId 账号id
+	 * @return {boolean} 已登录返回 true，未登录返回 false
 	 */
-	public static boolean isLogin(Object loginId) {
-		return stpLogic.isLogin(loginId);
+	static isLogin(loginId) {
+		return this.#stpLogic.isLogin(loginId);
 	}
 
 	/**
 	 * 检验当前会话是否已经登录，如未登录，则抛出异常
 	 */
- 	public static void checkLogin() {
- 		stpLogic.checkLogin();
+ 	static checkLogin() {
+ 		this.#stpLogic.checkLogin();
  	}
 
-	/**
-	 * 获取当前会话账号id，如果未登录，则抛出异常
-	 *
-	 * @return 账号id
-	 */
-	public static Object getLoginId() {
-		return stpLogic.getLoginId();
-	}
+	// /**
+	//  * 获取当前会话账号id，如果未登录，则抛出异常
+	//  *
+	//  * @return {Object} 账号id
+	//  */
+	// static getLoginId() {
+	// 	return this.#stpLogic.getLoginId();
+	// }
 
 	/**
 	 * 获取当前会话账号id, 如果未登录，则返回默认值
 	 *
-	 * @param <T> 返回类型 
-	 * @param defaultValue 默认值
-	 * @return 登录id
+	 * @param {<T>} <T> 返回类型
+	 * @param {T} defaultValue 默认值
+	 * @return {<T> T} 登录id
 	 */
-	public static <T> T getLoginId(T defaultValue) {
-		return stpLogic.getLoginId(defaultValue);
+	static getLoginId(defaultValue) {
+		return this.#stpLogic.getLoginId(defaultValue);
 	}
 
 	/**
 	 * 获取当前会话账号id, 如果未登录，则返回null
 	 *
-	 * @return 账号id
+	 * @return {Object} 账号id
 	 */
-	public static Object getLoginIdDefaultNull() {
-		return stpLogic.getLoginIdDefaultNull();
+	static getLoginIdDefaultNull() {
+		return this.#stpLogic.getLoginIdDefaultNull();
  	}
 
 	/**
 	 * 获取当前会话账号id, 并转换为 String 类型
 	 *
-	 * @return 账号id
+	 * @return {String} 账号id
 	 */
-	public static String getLoginIdAsString() {
-		return stpLogic.getLoginIdAsString();
+	static getLoginIdAsString() {
+		return this.#stpLogic.getLoginIdAsString();
 	}
 
 	/**
 	 * 获取当前会话账号id, 并转换为 int 类型
 	 *
-	 * @return 账号id
+	 * @return {int} 账号id
 	 */
-	public static int getLoginIdAsInt() {
-		return stpLogic.getLoginIdAsInt();
+	static getLoginIdAsInt() {
+		return this.#stpLogic.getLoginIdAsInt();
 	}
 
 	/**
 	 * 获取当前会话账号id, 并转换为 long 类型
 	 *
-	 * @return 账号id
+	 * @return {long} 账号id
 	 */
-	public static long getLoginIdAsLong() {
-		return stpLogic.getLoginIdAsLong();
+	static getLoginIdAsLong() {
+		return this.#stpLogic.getLoginIdAsLong();
 	}
 
 	/**
 	 * 获取指定 token 对应的账号id，如果 token 无效或 token 处于被踢、被顶、被冻结等状态，则返回 null
 	 *
-	 * @param tokenValue token
-	 * @return 账号id
+	 * @param {String} tokenValue token
+	 * @return {Object} 账号id
 	 */
- 	public static Object getLoginIdByToken(String tokenValue) {
- 		return stpLogic.getLoginIdByToken(tokenValue);
+ 	static getLoginIdByToken(tokenValue) {
+ 		return this.#stpLogic.getLoginIdByToken(tokenValue);
  	}
 
 	/**
 	 * 获取指定 token 对应的账号id，如果 token 无效或 token 处于被踢、被顶等状态 (不考虑被冻结)，则返回 null
 	 *
-	 * @param tokenValue token
-	 * @return 账号id
+	 * @param {String} tokenValue token
+	 * @return {Object} 账号id
 	 */
-	public Object getLoginIdByTokenNotThinkFreeze(String tokenValue) {
-		return stpLogic.getLoginIdByTokenNotThinkFreeze(tokenValue);
+	static getLoginIdByTokenNotThinkFreeze(tokenValue) {
+		return this.#stpLogic.getLoginIdByTokenNotThinkFreeze(tokenValue);
 	}
 
-	/**
-	 * 获取当前 Token 的扩展信息（此函数只在jwt模式下生效）
-	 *
-	 * @param key 键值 
-	 * @return 对应的扩展数据
-	 */
-	public static Object getExtra(String key) {
-		return stpLogic.getExtra(key);
-	}
+	// /**
+	//  * 获取当前 Token 的扩展信息（此函数只在jwt模式下生效）
+	//  *
+	//  * @param {String} key 键值
+	//  * @return {Object} 对应的扩展数据
+	//  */
+	// static getExtra(key) {
+	// 	return this.#stpLogic.getExtra(key);
+	// }
 
 	/**
 	 * 获取指定 Token 的扩展信息（此函数只在jwt模式下生效）
 	 *
-	 * @param tokenValue 指定的 Token 值
-	 * @param key 键值
-	 * @return 对应的扩展数据
+	 * @param {String} tokenValue  | key 指定的 Token 值
+	 * @param {String} key 键值
+	 * @return {Object} 对应的扩展数据
 	 */
-	public static Object getExtra(String tokenValue, String key) {
-		return stpLogic.getExtra(tokenValue, key);
+	static getExtra(tokenValueOrKey, key) {
+		return this.#stpLogic.getExtra(tokenValueOrKey, key);
 	}
  	
  	
@@ -579,52 +629,52 @@ public class StpUtil {
 	/**
 	 * 获取指定账号 id 的 Account-Session, 如果该 SaSession 尚未创建，isCreate=是否新建并返回
 	 *
-	 * @param loginId 账号id
-	 * @param isCreate 是否新建
-	 * @return SaSession 对象
+	 * @param {Object} loginId 账号id
+	 * @param {boolean} isCreate 是否新建
+	 * @return {SaSession} SaSession 对象
 	 */
-	public static SaSession getSessionByLoginId(Object loginId, boolean isCreate) {
-		return stpLogic.getSessionByLoginId(loginId, isCreate);
+	static getSessionByLoginId(loginId, isCreate) {
+		return this.#stpLogic.getSessionByLoginId(loginId, isCreate);
 	}
 
 	/**
 	 * 获取指定 key 的 SaSession, 如果该 SaSession 尚未创建，则返回 null
 	 *
-	 * @param sessionId SessionId
-	 * @return Session对象
+	 * @param {String} sessionId SessionId
+	 * @return {SaSession} Session对象
 	 */
-	public static SaSession getSessionBySessionId(String sessionId) {
-		return stpLogic.getSessionBySessionId(sessionId);
+	static getSessionBySessionId(sessionId) {
+		return this.#stpLogic.getSessionBySessionId(sessionId);
 	}
 
-	/**
-	 * 获取指定账号 id 的 Account-Session，如果该 SaSession 尚未创建，则新建并返回
-	 *
-	 * @param loginId 账号id
-	 * @return SaSession 对象
-	 */
-	public static SaSession getSessionByLoginId(Object loginId) {
-		return stpLogic.getSessionByLoginId(loginId);
-	}
+	// /**
+	//  * 获取指定账号 id 的 Account-Session，如果该 SaSession 尚未创建，则新建并返回
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {SaSession} SaSession 对象
+	//  */
+	// static getSessionByLoginId(loginId) {
+	// 	return this.#stpLogic.getSessionByLoginId(loginId);
+	// }
 
 	/**
 	 * 获取当前已登录账号的 Account-Session, 如果该 SaSession 尚未创建，isCreate=是否新建并返回
 	 *
-	 * @param isCreate 是否新建 
-	 * @return Session对象
+	 * @param {boolean} isCreate 是否新建
+	 * @return {SaSession} Session对象
 	 */
-	public static SaSession getSession(boolean isCreate) {
-		return stpLogic.getSession(isCreate);
+	static getSession(isCreate) {
+		return this.#stpLogic.getSession(isCreate);
 	}
 
-	/**
-	 * 获取当前已登录账号的 Account-Session，如果该 SaSession 尚未创建，则新建并返回
-	 *
-	 * @return Session对象
-	 */
-	public static SaSession getSession() {
-		return stpLogic.getSession();
-	}
+	// /**
+	//  * 获取当前已登录账号的 Account-Session，如果该 SaSession 尚未创建，则新建并返回
+	//  *
+	//  * @return {SaSession} Session对象
+	//  */
+	// static getSession() {
+	// 	return this.#stpLogic.getSession();
+	// }
 
 	
 	// ------------------- Token-Session 相关 -------------------  
@@ -632,29 +682,29 @@ public class StpUtil {
 	/**
 	 * 获取指定 token 的 Token-Session，如果该 SaSession 尚未创建，则新建并返回
 	 *
-	 * @param tokenValue Token值
-	 * @return Session对象
+	 * @param {String} tokenValue Token值
+	 * @return {SaSession} Session对象
 	 */
-	public static SaSession getTokenSessionByToken(String tokenValue) {
-		return stpLogic.getTokenSessionByToken(tokenValue);
+	static getTokenSessionByToken(tokenValue) {
+		return this.#stpLogic.getTokenSessionByToken(tokenValue);
 	}
 
 	/**
 	 * 获取当前 token 的 Token-Session，如果该 SaSession 尚未创建，则新建并返回
 	 *
-	 * @return Session对象
+	 * @return {SaSession} Session对象
 	 */
-	public static SaSession getTokenSession() {
-		return stpLogic.getTokenSession();
+	static getTokenSession() {
+		return this.#stpLogic.getTokenSession();
 	}
 
 	/**
 	 * 获取当前匿名 Token-Session （可在未登录情况下使用的Token-Session）
 	 *
-	 * @return Token-Session 对象
+	 * @return {SaSession} Token-Session 对象
 	 */
-	public static SaSession getAnonTokenSession() {
-		return stpLogic.getAnonTokenSession();
+	static getAnonTokenSession() {
+		return this.#stpLogic.getAnonTokenSession();
 	}
 	
 
@@ -667,290 +717,290 @@ public class StpUtil {
 	 * 		如果此场景下需要提示续签失败，可在此之前调用 checkActiveTimeout() 强制检查是否冻结即可
 	 * </h2>
 	 */
-	public static void updateLastActiveToNow() {
-		stpLogic.updateLastActiveToNow();
+	static updateLastActiveToNow() {
+		this.#stpLogic.updateLastActiveToNow();
 	}
 
 	/**
 	 * 检查当前 token 是否已被冻结，如果是则抛出异常
 	 */
- 	public static void checkActiveTimeout() {
- 		stpLogic.checkActiveTimeout();
+ 	static checkActiveTimeout() {
+ 		this.#stpLogic.checkActiveTimeout();
  	}
 
 	/**
 	 * 获取当前 token 的最后活跃时间（13位时间戳），如果不存在则返回 -2
 	 *
-	 * @return /
+	 * @return {long} /
 	 */
-	public static long getTokenLastActiveTime() {
-		return stpLogic.getTokenLastActiveTime();
+	static getTokenLastActiveTime() {
+		return this.#stpLogic.getTokenLastActiveTime();
 	}
 
 
 	// ------------------- 过期时间相关 -------------------  
 
-	/**
-	 * 获取当前会话 token 剩余有效时间（单位: 秒，返回 -1 代表永久有效，-2 代表没有这个值）
-	 *
-	 * @return token剩余有效时间
-	 */
- 	public static long getTokenTimeout() {
- 		return stpLogic.getTokenTimeout();
- 	}
+	// /**
+	//  * 获取当前会话 token 剩余有效时间（单位: 秒，返回 -1 代表永久有效，-2 代表没有这个值）
+	//  *
+	//  * @return {long} token剩余有效时间
+	//  */
+ 	// static getTokenTimeout() {
+ 	// 	return this.#stpLogic.getTokenTimeout();
+ 	// }
 
 	/**
 	 * 获取指定 token 剩余有效时间（单位: 秒，返回 -1 代表永久有效，-2 代表没有这个值）
 	 *
-	 * @param token 指定token
-	 * @return token剩余有效时间
+	 * @param {String} token 指定token
+	 * @return {long} token剩余有效时间
 	 */
-	public static long getTokenTimeout(String token) {
-		return stpLogic.getTokenTimeout(token);
+	static getTokenTimeout(token) {
+		return this.#stpLogic.getTokenTimeout(token);
 	}
 
 	/**
 	 * 获取当前登录账号的 Account-Session 剩余有效时间（单位: 秒，返回 -1 代表永久有效，-2 代表没有这个值）
 	 *
-	 * @return token剩余有效时间
+	 * @return {long} token剩余有效时间
 	 */
- 	public static long getSessionTimeout() {
- 		return stpLogic.getSessionTimeout();
+ 	static getSessionTimeout() {
+ 		return this.#stpLogic.getSessionTimeout();
  	}
 
 	/**
 	 * 获取当前 token 的 Token-Session 剩余有效时间（单位: 秒，返回 -1 代表永久有效，-2 代表没有这个值）
 	 *
-	 * @return token剩余有效时间
+	 * @return {long} token剩余有效时间
 	 */
- 	public static long getTokenSessionTimeout() {
- 		return stpLogic.getTokenSessionTimeout();
+ 	static getTokenSessionTimeout() {
+ 		return this.#stpLogic.getTokenSessionTimeout();
  	}
 
 	/**
 	 * 获取当前 token 剩余活跃有效期：当前 token 距离被冻结还剩多少时间（单位: 秒，返回 -1 代表永不冻结，-2 代表没有这个值或 token 已被冻结了）
 	 *
-	 * @return /
+	 * @return {long} /
 	 */
- 	public static long getTokenActiveTimeout() {
- 		return stpLogic.getTokenActiveTimeout();
+ 	static getTokenActiveTimeout() {
+ 		return this.#stpLogic.getTokenActiveTimeout();
  	}
 
-	/**
-	 * 对当前 token 的 timeout 值进行续期
-	 *
-	 * @param timeout 要修改成为的有效时间 (单位: 秒)
-	 */
- 	public static void renewTimeout(long timeout) {
- 		stpLogic.renewTimeout(timeout);
- 	}
+	// /**
+	//  * 对当前 token 的 timeout 值进行续期
+	//  *
+	//  * @param {long} timeout 要修改成为的有效时间 (单位: 秒)
+	//  */
+ 	// static renewTimeout(timeout) {
+ 	// 	this.#stpLogic.renewTimeout(timeout);
+ 	// }
 
 	/**
 	 * 对指定 token 的 timeout 值进行续期
 	 *
-	 * @param tokenValue 指定 token
-	 * @param timeout 要修改成为的有效时间 (单位: 秒，填 -1 代表要续为永久有效)
+	 * @param {String | long} tokenValueOrTimeout 指定 token
+	 * @param {long} timeout 要修改成为的有效时间 (单位: 秒，填 -1 代表要续为永久有效)
 	 */
- 	public static void renewTimeout(String tokenValue, long timeout) {
- 		stpLogic.renewTimeout(tokenValue, timeout);
+ 	static renewTimeout(tokenValueOrTimeout, timeout) {
+ 		this.#stpLogic.renewTimeout(tokenValueOrTimeout, timeout);
  	}
  	
  	
 	// ------------------- 角色认证操作 -------------------
 
-	/**
-	 * 获取：当前账号的角色集合
-	 *
-	 * @return /
-	 */
-	public static List<String> getRoleList() {
-		return stpLogic.getRoleList();
-	}
+	// /**
+	//  * 获取：当前账号的角色集合
+	//  *
+	//  * @return {List<String>} /
+	//  */
+	// static getRoleList() {
+	// 	return this.#stpLogic.getRoleList();
+	// }
 
 	/**
 	 * 获取：指定账号的角色集合
 	 *
-	 * @param loginId 指定账号id 
-	 * @return /
+	 * @param {Object} loginId 指定账号id
+	 * @return {List<String>} /
 	 */
-	public static List<String> getRoleList(Object loginId) {
-		return stpLogic.getRoleList(loginId);
+	static getRoleList(loginId) {
+		return this.#stpLogic.getRoleList(loginId);
 	}
 
-	/**
-	 * 判断：当前账号是否拥有指定角色, 返回 true 或 false
-	 *
-	 * @param role 角色
-	 * @return /
-	 */
- 	public static boolean hasRole(String role) {
- 		return stpLogic.hasRole(role);
- 	}
+	// /**
+	//  * 判断：当前账号是否拥有指定角色, 返回 true 或 false
+	//  *
+	//  * @param {String} role 角色
+	//  * @return {boolean} /
+	//  */
+ 	// static hasRole(role) {
+ 	// 	return this.#stpLogic.hasRole(role);
+ 	// }
 
 	/**
 	 * 判断：指定账号是否含有指定角色标识, 返回 true 或 false
 	 *
-	 * @param loginId 账号id
-	 * @param role 角色标识
-	 * @return 是否含有指定角色标识
+	 * @param {Object | String} loginIdOrRole 账号id | 角色
+	 * @param {String} role 角色标识
+	 * @return {boolean} 是否含有指定角色标识
 	 */
- 	public static boolean hasRole(Object loginId, String role) {
- 		return stpLogic.hasRole(loginId, role);
+ 	static hasRole(loginIdOrRole, role) {
+ 		return this.#stpLogic.hasRole(loginIdOrRole, role);
  	}
 
 	/**
 	 * 判断：当前账号是否含有指定角色标识 [ 指定多个，必须全部验证通过 ]
 	 *
-	 * @param roleArray 角色标识数组
-	 * @return true或false
+	 * @param {String[]} roleArray 角色标识数组
+	 * @return {boolean} true或false
 	 */
- 	public static boolean hasRoleAnd(String... roleArray){
- 		return stpLogic.hasRoleAnd(roleArray);
+ 	static hasRoleAnd(...roleArray){
+ 		return this.#stpLogic.hasRoleAnd(...roleArray);
  	}
 
 	/**
 	 * 判断：当前账号是否含有指定角色标识 [ 指定多个，只要其一验证通过即可 ]
 	 *
-	 * @param roleArray 角色标识数组
-	 * @return true或false
+	 * @param {String[]} roleArray 角色标识数组
+	 * @return {boolean} true或false
 	 */
- 	public static boolean hasRoleOr(String... roleArray){
- 		return stpLogic.hasRoleOr(roleArray);
+ 	static hasRoleOr(...roleArray){
+ 		return this.#stpLogic.hasRoleOr(...roleArray);
  	}
 
 	/**
 	 * 校验：当前账号是否含有指定角色标识, 如果验证未通过，则抛出异常: NotRoleException
 	 *
-	 * @param role 角色标识
+	 * @param {String} role 角色标识
 	 */
- 	public static void checkRole(String role) {
- 		stpLogic.checkRole(role);
+ 	static checkRole(role) {
+ 		this.#stpLogic.checkRole(role);
  	}
 
 	/**
 	 * 校验：当前账号是否含有指定角色标识 [ 指定多个，必须全部验证通过 ]
 	 *
-	 * @param roleArray 角色标识数组
+	 * @param {String...} roleArray 角色标识数组
 	 */
- 	public static void checkRoleAnd(String... roleArray){
- 		stpLogic.checkRoleAnd(roleArray);
+ 	static checkRoleAnd(...roleArray){
+ 		this.#stpLogic.checkRoleAnd(...roleArray);
  	}
 
 	/**
 	 * 校验：当前账号是否含有指定角色标识 [ 指定多个，只要其一验证通过即可 ]
 	 *
-	 * @param roleArray 角色标识数组
+	 * @param {String...} roleArray 角色标识数组
 	 */
- 	public static void checkRoleOr(String... roleArray){
- 		stpLogic.checkRoleOr(roleArray);
+ 	static checkRoleOr(...roleArray){
+ 		this.#stpLogic.checkRoleOr(...roleArray);
  	}
 
 	
 	// ------------------- 权限认证操作 -------------------
 
-	/**
-	 * 获取：当前账号的权限码集合
-	 *
-	 * @return / 
-	 */
-	public static List<String> getPermissionList() {
-		return stpLogic.getPermissionList();
-	}
+	// /**
+	//  * 获取：当前账号的权限码集合
+	//  *
+	//  * @return {List<String>} /
+	//  */
+	// static getPermissionList() {
+	// 	return this.#stpLogic.getPermissionList();
+	// }
 
 	/**
 	 * 获取：指定账号的权限码集合
 	 *
-	 * @param loginId 指定账号id
-	 * @return / 
+	 * @param {Object} loginId 指定账号id
+	 * @return {List<String>} /
 	 */
-	public static List<String> getPermissionList(Object loginId) {
-		return stpLogic.getPermissionList(loginId);
+	static getPermissionList(loginId) {
+		return this.#stpLogic.getPermissionList(loginId);
 	}
 
-	/**
-	 * 判断：当前账号是否含有指定权限, 返回 true 或 false
-	 *
-	 * @param permission 权限码
-	 * @return 是否含有指定权限
-	 */
-	public static boolean hasPermission(String permission) {
-		return stpLogic.hasPermission(permission);
-	}
+	// /**
+	//  * 判断：当前账号是否含有指定权限, 返回 true 或 false
+	//  *
+	//  * @param {String} permission 权限码
+	//  * @return {boolean} 是否含有指定权限
+	//  */
+	// static hasPermission(permission) {
+	// 	return this.#stpLogic.hasPermission(permission);
+	// }
 
 	/**
 	 * 判断：指定账号 id 是否含有指定权限, 返回 true 或 false
 	 *
-	 * @param loginId 账号 id
-	 * @param permission 权限码
-	 * @return 是否含有指定权限
+	 * @param {Object | String} loginIdOrPermission 账号 id | 权限码
+	 * @param {String} permission 权限码
+	 * @return {boolean} 是否含有指定权限
 	 */
-	public static boolean hasPermission(Object loginId, String permission) {
-		return stpLogic.hasPermission(loginId, permission);
+	static hasPermission(loginIdOrPermission, permission) {
+		return this.#stpLogic.hasPermission(loginIdOrPermission, permission);
 	}
 
 	/**
 	 * 判断：当前账号是否含有指定权限 [ 指定多个，必须全部具有 ]
 	 *
-	 * @param permissionArray 权限码数组
-	 * @return true 或 false
+	 * @param {String...} permissionArray 权限码数组
+	 * @return {boolean} true 或 false
 	 */
- 	public static boolean hasPermissionAnd(String... permissionArray){
- 		return stpLogic.hasPermissionAnd(permissionArray);
+ 	static hasPermissionAnd(...permissionArray){
+ 		return this.#stpLogic.hasPermissionAnd(...permissionArray);
  	}
 
 	/**
 	 * 判断：当前账号是否含有指定权限 [ 指定多个，只要其一验证通过即可 ]
 	 *
-	 * @param permissionArray 权限码数组
-	 * @return true 或 false
+	 * @param {String...} permissionArray 权限码数组
+	 * @return {boolean} true 或 false
 	 */
- 	public static boolean hasPermissionOr(String... permissionArray){
- 		return stpLogic.hasPermissionOr(permissionArray);
+ 	static hasPermissionOr(...permissionArray){
+ 		return this.#stpLogic.hasPermissionOr(...permissionArray);
  	}
 
 	/**
 	 * 校验：当前账号是否含有指定权限, 如果验证未通过，则抛出异常: NotPermissionException
 	 *
-	 * @param permission 权限码
+	 * @param {String} permission 权限码
 	 */
-	public static void checkPermission(String permission) {
-		stpLogic.checkPermission(permission);
+	static checkPermission(permission) {
+		this.#stpLogic.checkPermission(permission);
 	}
 
 	/**
 	 * 校验：当前账号是否含有指定权限 [ 指定多个，必须全部验证通过 ]
 	 *
-	 * @param permissionArray 权限码数组
+	 * @param {String...} permissionArray 权限码数组
 	 */
-	public static void checkPermissionAnd(String... permissionArray) {
-		stpLogic.checkPermissionAnd(permissionArray);
+	static checkPermissionAnd(...permissionArray) {
+		this.#stpLogic.checkPermissionAnd(...permissionArray);
 	}
 
 	/**
 	 * 校验：当前账号是否含有指定权限 [ 指定多个，只要其一验证通过即可 ]
 	 *
-	 * @param permissionArray 权限码数组
+	 * @param {String...} permissionArray 权限码数组
 	 */
-	public static void checkPermissionOr(String... permissionArray) {
-		stpLogic.checkPermissionOr(permissionArray);
+	static checkPermissionOr(...permissionArray) {
+		this.#stpLogic.checkPermissionOr(...permissionArray);
 	}
 
 
 	// ------------------- id 反查 token 相关操作 -------------------
 
-	/**
-	 * 获取指定账号 id 的 token
-	 * <p>
-	 * 		在配置为允许并发登录时，此方法只会返回队列的最后一个 token，
-	 * 		如果你需要返回此账号 id 的所有 token，请调用 getTokenValueListByLoginId
-	 * </p>
-	 *
-	 * @param loginId 账号id
-	 * @return token值
-	 */
-	public static String getTokenValueByLoginId(Object loginId) {
-		return stpLogic.getTokenValueByLoginId(loginId);
-	}
+	// /**
+	//  * 获取指定账号 id 的 token
+	//  * <p>
+	//  * 		在配置为允许并发登录时，此方法只会返回队列的最后一个 token，
+	//  * 		如果你需要返回此账号 id 的所有 token，请调用 getTokenValueListByLoginId
+	//  * </p>
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {String} token值
+	//  */
+	// static getTokenValueByLoginId(loginId) {
+	// 	return this.#stpLogic.getTokenValueByLoginId(loginId);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的 token
@@ -959,130 +1009,131 @@ public class StpUtil {
 	 * 		如果你需要返回此账号 id 的所有 token，请调用 getTokenValueListByLoginId
 	 * </p>
 	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型，填 null 代表不限设备类型
-	 * @return token值
+	 * @param {Object} loginId 账号id
+	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
+	 * @return {String} token值
 	 */
-	public static String getTokenValueByLoginId(Object loginId, String deviceType) {
-		return stpLogic.getTokenValueByLoginId(loginId, deviceType);
+	static getTokenValueByLoginId(loginId, deviceType) {
+		return this.#stpLogic.getTokenValueByLoginId(loginId, deviceType);
 	}
 
-	/**
-	 * 获取指定账号 id 的 token 集合
-	 *
-	 * @param loginId 账号id
-	 * @return 此 loginId 的所有相关 token
-	 */
-	public static List<String> getTokenValueListByLoginId(Object loginId) {
-		return stpLogic.getTokenValueListByLoginId(loginId);
-	}
+	// /**
+	//  * 获取指定账号 id 的 token 集合
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {List<String>} 此 loginId 的所有相关 token
+	//  */
+	// static getTokenValueListByLoginId(loginId) {
+	// 	return this.#stpLogic.getTokenValueListByLoginId(loginId);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的 token 集合
 	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型，填 null 代表不限设备类型
-	 * @return 此 loginId 的所有登录 token
+	 * @param {Object} loginId 账号id
+	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
+	 * @return {List<String>} 此 loginId 的所有登录 token
 	 */
-	public static List<String> getTokenValueListByLoginId(Object loginId, String deviceType) {
-		return stpLogic.getTokenValueListByLoginId(loginId, deviceType);
+	static getTokenValueListByLoginId(loginId, deviceType) {
+		return this.#stpLogic.getTokenValueListByLoginId(loginId, deviceType);
 	}
 
-	/**
-	 * 获取指定账号 id 已登录设备信息集合
-	 *
-	 * @param loginId 账号id
-	 * @return 此 loginId 的所有登录 token
-	 */
-	public static List<SaTerminalInfo> getTerminalListByLoginId(Object loginId) {
-		return stpLogic.getTerminalListByLoginId(loginId);
-	}
+	// /**
+	//  * 获取指定账号 id 已登录设备信息集合
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {List<SaTerminalInfo>} 此 loginId 的所有登录 token
+	//  */
+	// static getTerminalListByLoginId(loginId) {
+	// 	return this.#stpLogic.getTerminalListByLoginId(loginId);
+	// }
 
 	/**
 	 * 获取指定账号 id 指定设备类型端的已登录设备信息集合
 	 *
-	 * @param loginId 账号id
-	 * @param deviceType 设备类型，填 null 代表不限设备类型
-	 * @return /
+	 * @param {Object} loginId 账号id
+	 * @param {String} deviceType 设备类型，填 null 代表不限设备类型
+	 * @return {List<SaTerminalInfo>} 此 loginId 的所有登录设备信息
 	 */
-	public static List<SaTerminalInfo> getTerminalListByLoginId(Object loginId, String deviceType) {
-		return stpLogic.getTerminalListByLoginId(loginId, deviceType);
+	static getTerminalListByLoginId(loginId, deviceType) {
+		return this.#stpLogic.getTerminalListByLoginId(loginId, deviceType);
 	}
 
 	/**
 	 * 获取指定账号 id 已登录设备信息集合，执行特定函数
 	 *
-	 * @param loginId 账号id
-	 * @param function 需要执行的函数
+	 * @param {Object} loginId 账号id
+	 * @param {SaTwoParamFunction<SaSession, SaTerminalInfo>} function 需要执行的函数
 	 */
-	public static void forEachTerminalList(Object loginId, SaTwoParamFunction<SaSession, SaTerminalInfo> function) {
-		stpLogic.forEachTerminalList(loginId, function);
+	static forEachTerminalList(loginId, func) {
+		this.#stpLogic.forEachTerminalList(loginId, func);
 	}
 
 	/**
 	 * 返回当前 token 指向的 SaTerminalInfo 设备信息，如果 token 无效则返回 null
 	 *
-	 * @return /
+	 * @return {SaTerminalInfo} /
 	 */
-	public static SaTerminalInfo getTerminalInfo() {
-		return stpLogic.getTerminalInfo();
+	static getTerminalInfo() {
+		return this.#stpLogic.getTerminalInfo();
 	}
 
 	/**
 	 * 返回指定 token 指向的 SaTerminalInfo 设备信息，如果 Token 无效则返回 null
 	 *
-	 * @param tokenValue 指定 token
-	 * @return /
+	 * @param {String} tokenValue 指定 token
+	 * @return {SaTerminalInfo} /
 	 */
-	public static SaTerminalInfo getTerminalInfoByToken(String tokenValue) {
-		return stpLogic.getTerminalInfoByToken(tokenValue);
+	static getTerminalInfoByToken(tokenValue) {
+		return this.#stpLogic.getTerminalInfoByToken(tokenValue);
 	}
 
 	/**
 	 * 返回当前会话的登录设备类型
 	 *
-	 * @return 当前令牌的登录设备类型
+	 * @return {String} 当前令牌的登录设备类型
 	 */
-	public static String getLoginDeviceType() {
-		return stpLogic.getLoginDeviceType();
+	static getLoginDeviceType() {
+		return this.#stpLogic.getLoginDeviceType();
 	}
 
 	/**
 	 * 返回指定 token 会话的登录设备类型
 	 *
-	 * @param tokenValue 指定token
-	 * @return 当前令牌的登录设备类型
+	 * @param {String} tokenValue 指定token
+	 * @return {String} 当前令牌的登录设备类型
 	 */
-	public static String getLoginDeviceTypeByToken(String tokenValue) {
-		return stpLogic.getLoginDeviceTypeByToken(tokenValue);
+	static getLoginDeviceTypeByToken(tokenValue) {
+		return this.#stpLogic.getLoginDeviceTypeByToken(tokenValue);
 	}
 
 	/**
 	 * 返回当前会话的登录设备 ID
 	 *
-	 * @return /
+	 * @return {String} /
 	 */
-	public static String getLoginDeviceId() {
-		return stpLogic.getLoginDeviceId();
+	static getLoginDeviceId() {
+		return this.#stpLogic.getLoginDeviceId();
 	}
 
 	/**
 	 * 返回指定 token 会话的登录设备 ID
 	 *
-	 * @param tokenValue 指定token
-	 * @return /
+	 * @param {String} tokenValue 指定token
+	 * @return {String} /
 	 */
-	public static String getLoginDeviceIdByToken(String tokenValue) {
-		return stpLogic.getLoginDeviceIdByToken(tokenValue);
+	static getLoginDeviceIdByToken(tokenValue) {
+		return this.#stpLogic.getLoginDeviceIdByToken(tokenValue);
 	}
 
 	/**
 	 * 判断对于指定 loginId 来讲，指定设备 id 是否为可信任设备
-	 * @param deviceId /
-	 * @return /
+	 * @param {Object} userId 账号id
+	 * @param {String} deviceId /
+	 * @return {boolean} /
 	 */
-	public static boolean isTrustDeviceId(Object userId, String deviceId) {
-		return stpLogic.isTrustDeviceId(userId, deviceId);
+	static isTrustDeviceId(userId, deviceId) {
+		return this.#stpLogic.isTrustDeviceId(userId, deviceId);
 	}
 
 
@@ -1092,96 +1143,96 @@ public class StpUtil {
 	/**
 	 * 根据条件查询缓存中所有的 token
 	 *
-	 * @param keyword 关键字
-	 * @param start 开始处索引
-	 * @param size 获取数量 (-1代表一直获取到末尾)
-	 * @param sortType 排序类型（true=正序，false=反序）
+	 * @param {String} keyword 关键字
+	 * @param {int} start 开始处索引
+	 * @param {int} size 获取数量 (-1代表一直获取到末尾)
+	 * @param {boolean} sortType 排序类型（true=正序，false=反序）
 	 *
-	 * @return token集合
+	 * @return {List<String>} token集合
 	 */
-	public static List<String> searchTokenValue(String keyword, int start, int size, boolean sortType) {
-		return stpLogic.searchTokenValue(keyword, start, size, sortType);
+	static searchTokenValue(keyword, start, size, sortType) {
+		return this.#stpLogic.searchTokenValue(keyword, start, size, sortType);
 	}
 
 	/**
 	 * 根据条件查询缓存中所有的 SessionId
 	 *
-	 * @param keyword 关键字
-	 * @param start 开始处索引
-	 * @param size 获取数量  (-1代表一直获取到末尾)
-	 * @param sortType 排序类型（true=正序，false=反序）
+	 * @param {String} keyword 关键字
+	 * @param {int} start 开始处索引
+	 * @param {int} size 获取数量  (-1代表一直获取到末尾)
+	 * @param {boolean} sortType 排序类型（true=正序，false=反序）
 	 *
-	 * @return sessionId集合
+	 * @return {List<String>} sessionId集合
 	 */
-	public static List<String> searchSessionId(String keyword, int start, int size, boolean sortType) {
-		return stpLogic.searchSessionId(keyword, start, size, sortType);
+	static searchSessionId(keyword, start, size, sortType) {
+		return this.#stpLogic.searchSessionId(keyword, start, size, sortType);
 	}
 
 	/**
 	 * 根据条件查询缓存中所有的 Token-Session-Id
 	 *
-	 * @param keyword 关键字
-	 * @param start 开始处索引
-	 * @param size 获取数量 (-1代表一直获取到末尾)
-	 * @param sortType 排序类型（true=正序，false=反序）
+	 * @param {String} keyword 关键字
+	 * @param {int} start 开始处索引
+	 * @param {int} size 获取数量 (-1代表一直获取到末尾)
+	 * @param {boolean} sortType 排序类型（true=正序，false=反序）
 	 *
-	 * @return sessionId集合
+	 * @return {List<String>} sessionId集合
 	 */
-	public static List<String> searchTokenSessionId(String keyword, int start, int size, boolean sortType) {
-		return stpLogic.searchTokenSessionId(keyword, start, size, sortType);
+	static searchTokenSessionId(keyword, start, size, sortType) {
+		return this.#stpLogic.searchTokenSessionId(keyword, start, size, sortType);
 	}
 
 	
 	// ------------------- 账号封禁 -------------------  
 
-	/**
-	 * 封禁：指定账号
-	 * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
-	 *
-	 * @param loginId 指定账号id 
-	 * @param time 封禁时间, 单位: 秒 （-1=永久封禁）
-	 */
-	public static void disable(Object loginId, long time) {
-		stpLogic.disable(loginId, time);
-	}
+	// /**
+	//  * 封禁：指定账号
+	//  * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	//  */
+	// static disable(loginId, time) {
+	// 	this.#stpLogic.disable(loginId, time);
+	// }
 
-	/**
-	 * 判断：指定账号是否已被封禁 (true=已被封禁, false=未被封禁) 
-	 *
-	 * @param loginId 账号id
-	 * @return / 
-	 */
-	public static boolean isDisable(Object loginId) {
-		return stpLogic.isDisable(loginId);
-	}
+	// /**
+	//  * 判断：指定账号是否已被封禁 (true=已被封禁, false=未被封禁) 
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {boolean} /
+	//  */
+	// static isDisable(loginId) {
+	// 	return this.#stpLogic.isDisable(loginId);
+	// }
 
-	/**
-	 * 校验：指定账号是否已被封禁，如果被封禁则抛出异常
-	 *
-	 * @param loginId 账号id
-	 */
-	public static void checkDisable(Object loginId) {
-		stpLogic.checkDisable(loginId);
-	}
+	// /**
+	//  * 校验：指定账号是否已被封禁，如果被封禁则抛出异常
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// static checkDisable(loginId) {
+	// 	this.#stpLogic.checkDisable(loginId);
+	// }
 
-	/**
-	 * 获取：指定账号剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
-	 *
-	 * @param loginId 账号id
-	 * @return / 
-	 */
-	public static long getDisableTime(Object loginId) {
-		return stpLogic.getDisableTime(loginId);
-	}
+	// /**
+	//  * 获取：指定账号剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  * @return {long} /
+	//  */
+	// static getDisableTime(loginId) {
+	// 	return this.#stpLogic.getDisableTime(loginId);
+	// }
 
-	/**
-	 * 解封：指定账号
-	 *
-	 * @param loginId 账号id
-	 */
-	public static void untieDisable(Object loginId) {
-		stpLogic.untieDisable(loginId);
-	}
+	// /**
+	//  * 解封：指定账号
+	//  *
+	//  * @param {Object} loginId 账号id
+	//  */
+	// static untieDisable(loginId) {
+	// 	this.#stpLogic.untieDisable(loginId);
+	// }
 
 	
 	// ------------------- 分类封禁 -------------------  
@@ -1190,286 +1241,352 @@ public class StpUtil {
 	 * 封禁：指定账号的指定服务 
 	 * <p> 此方法不会直接将此账号id踢下线，如需封禁后立即掉线，请追加调用 StpUtil.logout(id)
 	 *
-	 * @param loginId 指定账号id
-	 * @param service 指定服务 
-	 * @param time 封禁时间, 单位: 秒 （-1=永久封禁）
+	 * @param {Object} loginId  指定账号id
+	 * @param {String | long} serviceOrTime  指定服务 | 封禁时间, 单位: 秒 （-1=永久封禁）
+	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	 */
-	public static void disable(Object loginId, String service, long time) {
-		stpLogic.disable(loginId, service, time);
+	static disable(loginId, serviceOrTime, time) {
+		this.#stpLogic.disable(loginId, serviceOrTime, time);
 	}
 
 	/**
 	 * 判断：指定账号的指定服务 是否已被封禁（true=已被封禁, false=未被封禁）
 	 *
-	 * @param loginId 账号id
-	 * @param service 指定服务 
-	 * @return / 
+	 * @param {Object} loginId 账号id
+	 * @param {String} service 指定服务
+	 * @return {boolean} /
 	 */
-	public static boolean isDisable(Object loginId, String service) {
-		return stpLogic.isDisable(loginId, service);
+	static isDisable(loginId, service) {
+		return this.#stpLogic.isDisable(loginId, service);
 	}
 
 	/**
 	 * 校验：指定账号 指定服务 是否已被封禁，如果被封禁则抛出异常
 	 *
-	 * @param loginId 账号id
-	 * @param services 指定服务，可以指定多个 
+	 * @param {Object} loginId 账号id
+	 * @param {String...} services 指定服务，可以指定多个
 	 */
-	public static void checkDisable(Object loginId, String... services) {
-		stpLogic.checkDisable(loginId, services);
+	static checkDisable(loginId, ...services) {
+		this.#stpLogic.checkDisable(loginId, ...services);
 	}
 
 	/**
 	 * 获取：指定账号 指定服务 剩余封禁时间，单位：秒（-1=永久封禁，-2=未被封禁）
 	 *
-	 * @param loginId 账号id
-	 * @param service 指定服务 
-	 * @return see note 
+	 * @param {Object} loginId 账号id
+	 * @param {String} service 指定服务
+	 * @return {long} /
 	 */
-	public static long getDisableTime(Object loginId, String service) {
-		return stpLogic.getDisableTime(loginId, service);
+	static getDisableTime(loginId, service) {
+		return this.#stpLogic.getDisableTime(loginId, service);
 	}
 
 	/**
 	 * 解封：指定账号、指定服务
 	 *
-	 * @param loginId 账号id
-	 * @param services 指定服务，可以指定多个 
+	 * @param {Object} loginId 账号id
+	 * @param {String...} services 指定服务，可以指定多个
 	 */
-	public static void untieDisable(Object loginId, String... services) {
-		stpLogic.untieDisable(loginId, services);
+	static untieDisable(loginId, ...services) {
+		this.#stpLogic.untieDisable(loginId, ...services);
 	}
 
 
 	// ------------------- 阶梯封禁 -------------------  
 
-	/**
-	 * 封禁：指定账号，并指定封禁等级
-	 *
-	 * @param loginId 指定账号id 
-	 * @param level 指定封禁等级 
-	 * @param time 封禁时间, 单位: 秒 （-1=永久封禁）
-	 */
-	public static void disableLevel(Object loginId, int level, long time) {
-		stpLogic.disableLevel(loginId, level, time);
-	}
 
 	/**
-	 * 封禁：指定账号的指定服务，并指定封禁等级
+	 * 封禁账号并指定封禁等级 - 支持多种参数模式
 	 *
-	 * @param loginId 指定账号id 
-	 * @param service 指定封禁服务 
-	 * @param level 指定封禁等级 
-	 * @param time 封禁时间, 单位: 秒 （-1=永久封禁）
+	 * @param {Object} loginId 指定账号id  
+	 * @param {String|Number} serviceOrLevel 指定服务名称或封禁等级
+	 * @param {Number} levelOrTime 指定封禁等级或封禁时间
+	 * @param {Number} [time] 封禁时间(单位：秒,-1=永久封禁)
 	 */
-	public static void disableLevel(Object loginId, String service, int level, long time) {
-		stpLogic.disableLevel(loginId, service, level, time);
+	static disableLevel(loginId, serviceOrLevel, levelOrTime, time) {
+		this.#stpLogic.disableLevel(loginId, serviceOrLevel, levelOrTime, time);
 	}
+ 
+
+	// /**
+	//  * 封禁：指定账号，并指定封禁等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 指定封禁等级
+	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	//  */
+	// static disableLevel(loginId, level, time) {
+	// 	this.#stpLogic.disableLevel(loginId, level, time);
+	// }
+
+	// /**
+	//  * 封禁：指定账号的指定服务，并指定封禁等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 指定封禁等级
+	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
+	//  */
+	// static disableLevel(loginId, service, level, time) {
+	// 	this.#stpLogic.disableLevel(loginId, service, level, time);
+	// }
+
+
 
 	/**
-	 * 判断：指定账号是否已被封禁到指定等级
-	 *
-	 * @param loginId 指定账号id 
-	 * @param level 指定封禁等级 
-	 * @return / 
+	 * 判断账号是否已被封禁到指定等级
+	 * 
+	 * @param {Object} loginId 指定账号id
+	 * @param {String|Number} serviceOrLevel 指定服务或封禁等级
+	 * @param {Number} [level] 指定封禁等级(当第一个参数为服务时使用)
+	 * @return {boolean} 是否已被封禁到指定等级
 	 */
-	public static boolean isDisableLevel(Object loginId, int level) {
-		return stpLogic.isDisableLevel(loginId, level);
+	static isDisableLevel(loginId, serviceOrLevel, level) {
+		return this.#stpLogic.isDisableLevel(loginId, serviceOrLevel, level);
 	}
 
-	/**
-	 * 判断：指定账号的指定服务，是否已被封禁到指定等级 
-	 *
-	 * @param loginId 指定账号id 
-	 * @param service 指定封禁服务 
-	 * @param level 指定封禁等级 
-	 * @return / 
-	 */
-	public static boolean isDisableLevel(Object loginId, String service, int level) {
-		return stpLogic.isDisableLevel(loginId, service, level);
-	}
+	// /**
+	//  * 判断：指定账号是否已被封禁到指定等级
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 指定封禁等级
+	//  * @return {boolean} /
+	//  */
+	// static isDisableLevel(loginId, level) {
+	// 	return this.#stpLogic.isDisableLevel(loginId, level);
+	// }
+
+	// /**
+	//  * 判断：指定账号的指定服务，是否已被封禁到指定等级 
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 指定封禁等级
+	//  * @return {boolean} /
+	//  */
+	// static isDisableLevel(loginId, service, level) {
+	// 	return this.#stpLogic.isDisableLevel(loginId, service, level);
+	// }
+
 
 	/**
-	 * 校验：指定账号是否已被封禁到指定等级（如果已经达到，则抛出异常）
-	 *
-	 * @param loginId 指定账号id 
-	 * @param level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	 * 校验账号是否已被封禁到指定等级 - 支持多种参数模式
+	 * 
+	 * @param {Object} loginId 指定账号id
+	 * @param {String|Number} serviceOrLevel 指定服务或封禁等级 
+	 * @param {Number} [level] 封禁等级(当第一个参数为服务时使用)
+	 * @throws {DisableServiceException} 如果已被封禁则抛出异常
 	 */
-	public static void checkDisableLevel(Object loginId, int level) {
-		stpLogic.checkDisableLevel(loginId, level);
+	static checkDisableLevel(loginId, serviceOrLevel, level) {
+		this.#stpLogic.checkDisableLevel(loginId, serviceOrLevel, level);
 	}
 
-	/**
-	 * 校验：指定账号的指定服务，是否已被封禁到指定等级（如果已经达到，则抛出异常）
-	 *
-	 * @param loginId 指定账号id 
-	 * @param service 指定封禁服务 
-	 * @param level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
-	 */
-	public static void checkDisableLevel(Object loginId, String service, int level) {
-		stpLogic.checkDisableLevel(loginId, service, level);
-	}
+	// /**
+	//  * 校验：指定账号是否已被封禁到指定等级（如果已经达到，则抛出异常）
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	//  */
+	// static checkDisableLevel(loginId, level) {
+	// 	this.#stpLogic.checkDisableLevel(loginId, level);
+	// }
 
-	/**
-	 * 获取：指定账号被封禁的等级，如果未被封禁则返回-2 
-	 *
-	 * @param loginId 指定账号id 
-	 * @return / 
-	 */
-	public static int getDisableLevel(Object loginId) {
-		return stpLogic.getDisableLevel(loginId);
-	}
+	// /**
+	//  * 校验：指定账号的指定服务，是否已被封禁到指定等级（如果已经达到，则抛出异常）
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @param {String} service 指定封禁服务
+	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
+	//  */
+	// static checkDisableLevel(loginId, service, level) {
+	// 	this.#stpLogic.checkDisableLevel(loginId, service, level);
+	// }
+
+	// /**
+	//  * 获取：指定账号被封禁的等级，如果未被封禁则返回-2 
+	//  *
+	//  * @param {Object} loginId 指定账号id
+	//  * @return {int} /
+	//  */
+	// static getDisableLevel(loginId) {
+	// 	return this.#stpLogic.getDisableLevel(loginId);
+	// }
 
 	/**
 	 * 获取：指定账号的 指定服务 被封禁的等级，如果未被封禁则返回-2 
 	 *
-	 * @param loginId 指定账号id 
-	 * @param service 指定封禁服务 
-	 * @return / 
+	 * @param {Object} loginId 指定账号id 
+	 * @param {String} service 指定封禁服务 
+	 * @return {int} /
 	 */
-	public static int getDisableLevel(Object loginId, String service) {
-		return stpLogic.getDisableLevel(loginId, service);
+	static getDisableLevel(loginId, service) {
+		return this.#stpLogic.getDisableLevel(loginId, service);
 	}
 	
 	
 	// ------------------- 临时身份切换 -------------------
 
-	/**
-	 * 临时切换身份为指定账号id
-	 *
-	 * @param loginId 指定loginId 
-	 */
-	public static void switchTo(Object loginId) {
-		stpLogic.switchTo(loginId);
-	}
+	// /**
+	//  * 临时切换身份为指定账号id
+	//  *
+	//  * @param {Object} loginId 指定loginId
+	//  */
+	// static switchTo(loginId) {
+	// 	this.#stpLogic.switchTo(loginId);
+	// }
 
 	/**
 	 * 结束临时切换身份
 	 */
-	public static void endSwitch() {
-		stpLogic.endSwitch();
+	static endSwitch() {
+		this.#stpLogic.endSwitch();
 	}
 
 	/**
 	 * 判断当前请求是否正处于 [ 身份临时切换 ] 中
 	 *
-	 * @return /
+	 * @return {boolean} /
 	 */
-	public static boolean isSwitch() {
-		return stpLogic.isSwitch();
+	static isSwitch() {
+		return this.#stpLogic.isSwitch();
 	}
 
 	/**
 	 * 在一个 lambda 代码段里，临时切换身份为指定账号id，lambda 结束后自动恢复
 	 *
-	 * @param loginId 指定账号id 
-	 * @param function 要执行的方法 
+	 * @param {Object} loginId 指定账号id
+	 * @param {SaFunction} function 要执行的方法
 	 */
-	public static void switchTo(Object loginId, SaFunction function) {
-		stpLogic.switchTo(loginId, function);
+	static switchTo(loginId, func) {
+		this.#stpLogic.switchTo(loginId, func);
 	}
 	
 
 	// ------------------- 二级认证 -------------------  
 
-	/**
-	 * 在当前会话 开启二级认证
-	 *
-	 * @param safeTime 维持时间 (单位: 秒) 
-	 */
-	public static void openSafe(long safeTime) {
-		stpLogic.openSafe(safeTime);
-	}
 
 	/**
-	 * 在当前会话 开启二级认证
-	 *
-	 * @param service 业务标识  
-	 * @param safeTime 维持时间 (单位: 秒) 
+	 * 在当前会话开启二级认证 - 支持多种参数模式
+	 * 
+	 * @param {String|Number} serviceOrSafeTime 业务标识或维持时间(单位:秒)
+	 * @param {Number} [safeTime] 维持时间(单位:秒,当第一个参数为业务标识时使用)
 	 */
-	public static void openSafe(String service, long safeTime) {
-		stpLogic.openSafe(service, safeTime);
+	static openSafe(serviceOrSafeTime, safeTime) {
+		this.#stpLogic.openSafe(serviceOrSafeTime, safeTime);
 	}
 
-	/**
-	 * 判断：当前会话是否处于二级认证时间内
-	 *
-	 * @return true=二级认证已通过, false=尚未进行二级认证或认证已超时 
-	 */
-	public static boolean isSafe() {
-		return stpLogic.isSafe();
-	}
+
+	// /**
+	//  * 在当前会话 开启二级认证
+	//  *
+	//  * @param {long} safeTime 维持时间 (单位: 秒) 
+	//  */
+	// static openSafe(safeTime) {
+	// 	this.#stpLogic.openSafe(safeTime);
+	// }
+
+	// /**
+	//  * 在当前会话 开启二级认证
+	//  *
+	//  * @param {String} service 业务标识
+	//  * @param {long} safeTime 维持时间 (单位: 秒)
+	//  */
+	// static openSafe(service, safeTime) {
+	// 	this.#stpLogic.openSafe(service, safeTime);
+	// }
+
 
 	/**
-	 * 判断：当前会话 是否处于指定业务的二级认证时间内
-	 *
-	 * @param service 业务标识  
-	 * @return true=二级认证已通过, false=尚未进行二级认证或认证已超时 
+	 * 判断当前会话是否处于二级认证时间内 - 支持多种参数模式
+	 * 
+	 * @param {String} [serviceOrTokenValue] 业务标识
+	 * @param {String} [service] Token值(当传入service时可用)
+	 * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	 */
-	public static boolean isSafe(String service) {
-		return stpLogic.isSafe(service);
+	static isSafe(serviceOrTokenValue, service) {
+		return this.#stpLogic.isSafe(serviceOrTokenValue, service);
 	}
 
-	/**
-	 * 判断：指定 token 是否处于二级认证时间内
-	 *
-	 * @param tokenValue Token 值  
-	 * @param service 业务标识  
-	 * @return true=二级认证已通过, false=尚未进行二级认证或认证已超时 
-	 */
-	public static boolean isSafe(String tokenValue, String service) {
-		return stpLogic.isSafe(tokenValue, service);
-	}
 
-	/**
-	 * 校验：当前会话是否已通过二级认证，如未通过则抛出异常
-	 */
-	public static void checkSafe() {
-		stpLogic.checkSafe();
-	}
+	// /**
+	//  * 判断：当前会话是否处于二级认证时间内
+	//  *
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// static isSafe() {
+	// 	return this.#stpLogic.isSafe();
+	// }
+
+	// /**
+	//  * 判断：当前会话 是否处于指定业务的二级认证时间内
+	//  *
+	//  * @param {String} service 业务标识
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// static isSafe(service) {
+	// 	return this.#stpLogic.isSafe(service);
+	// }
+
+	// /**
+	//  * 判断：指定 token 是否处于二级认证时间内
+	//  *
+	//  * @param {String} tokenValue Token 值
+	//  * @param {String} service 业务标识
+	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
+	//  */
+	// static isSafe(tokenValue, service) {
+	// 	return this.#stpLogic.isSafe(tokenValue, service);
+	// }
+
+	// /**
+	//  * 校验：当前会话是否已通过二级认证，如未通过则抛出异常
+	//  */
+	// static checkSafe() {
+	// 	this.#stpLogic.checkSafe();
+	// }
 
 	/**
 	 * 校验：检查当前会话是否已通过指定业务的二级认证，如未通过则抛出异常
 	 *
-	 * @param service 业务标识  
+	 * @param {String} service 业务标识
 	 */
-	public static void checkSafe(String service) {
-		stpLogic.checkSafe(service);
+	static checkSafe(service) {
+		this.#stpLogic.checkSafe(service);
 	}
+
+	// /**
+	//  * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
+	//  *
+	//  * @return {long} 剩余有效时间
+	//  */
+	// static getSafeTime() {
+	// 	return this.#stpLogic.getSafeTime();
+	// }
 
 	/**
 	 * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
 	 *
-	 * @return 剩余有效时间
+	 * @param {String} service 业务标识
+	 * @return {long} 剩余有效时间
 	 */
-	public static long getSafeTime() {
-		return stpLogic.getSafeTime();
+	static getSafeTime(service) {
+		return this.#stpLogic.getSafeTime(service);
 	}
 
-	/**
-	 * 获取：当前会话的二级认证剩余有效时间（单位: 秒, 返回-2代表尚未通过二级认证）
-	 *
-	 * @param service 业务标识  
-	 * @return 剩余有效时间
-	 */
-	public static long getSafeTime(String service) {
-		return stpLogic.getSafeTime(service);
-	}
-
-	/**
-	 * 在当前会话 结束二级认证 
-	 */
-	public static void closeSafe() {
-		stpLogic.closeSafe();
-	}
+	// /**
+	//  * 在当前会话 结束二级认证 
+	//  */
+	// static closeSafe() {
+	// 	this.#stpLogic.closeSafe();
+	// }
 
 	/**
 	 * 在当前会话 结束指定业务标识的二级认证
 	 *
-	 * @param service 业务标识  
+	 * @param {String} service 业务标识
 	 */
-	public static void closeSafe(String service) {
-		stpLogic.closeSafe(service);
+	static closeSafe(service) {
+		this.#stpLogic.closeSafe(service);
 	}
 
 
@@ -1478,10 +1595,10 @@ public class StpUtil {
 	/**
 	 * 根据当前配置对象创建一个 SaLoginParameter 对象
 	 *
-	 * @return /
+	 * @return {SaLoginParameter} /
 	 */
-	public static SaLoginParameter createSaLoginParameter() {
-		return stpLogic.createSaLoginParameter();
+	static createSaLoginParameter() {
+		return this.#stpLogic.createSaLoginParameter();
 	}
 
 
@@ -1491,23 +1608,25 @@ public class StpUtil {
 	 * <h2>请更换为 getLoginDeviceType </h2>
 	 * 返回当前会话的登录设备类型
 	 *
-	 * @return 当前令牌的登录设备类型
+	 * @return {String} 当前令牌的登录设备类型
 	 */
-	@Deprecated
-	public static String getLoginDevice() {
-		return stpLogic.getLoginDevice();
+	// @Deprecated
+	static getLoginDevice() {
+		return this.#stpLogic.getLoginDevice();
 	}
 
 	/**
 	 * <h2>请更换为 getLoginDeviceTypeByToken </h2>
 	 * 返回指定 token 会话的登录设备类型
 	 *
-	 * @param tokenValue 指定token
-	 * @return 当前令牌的登录设备类型
+	 * @param {String} tokenValue 指定token
+	 * @return {String} 当前令牌的登录设备类型
 	 */
-	@Deprecated
-	public static String getLoginDeviceByToken(String tokenValue) {
-		return stpLogic.getLoginDeviceByToken(tokenValue);
+	// @Deprecated
+	static getLoginDeviceByToken(tokenValue) {
+		return this.#stpLogic.getLoginDeviceByToken(tokenValue);
 	}
 
 }
+
+export default StpUtil;
