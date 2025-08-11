@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import SaTokenException from "./SaTokenException";
-import StpUtil from "../stp/StpUtil";
+import SaTokenException from "./SaTokenException.js";
+import StpUtil from "../stp/StpUtil.js";
 
 /**
  * 一个异常：代表会话未能通过权限认证校验

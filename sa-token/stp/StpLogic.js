@@ -618,7 +618,7 @@ class StpLogic {
 		}
 
 		// 4、如果代码走到此处，说明未能成功复用旧 token，需要根据算法新建 token
-		return SaStrategy.instance.generateUniqueToken.execute(
+		return SaStrategy.instance.generateUniqueToken(
 				"token",
 				this.getConfigOfMaxTryTimes(loginParameter),
 				() => {
@@ -1809,7 +1809,7 @@ class StpLogic {
 		 */
 		if(isCreate) {
 			// 随机创建一个 Token
-			tokenValue = SaStrategy.instance.generateUniqueToken.execute(
+			tokenValue = SaStrategy.instance.generateUniqueToken(
 					"token",
 					this.getConfigOfMaxTryTimes(this.createSaLoginParameter()),
 					() => {
