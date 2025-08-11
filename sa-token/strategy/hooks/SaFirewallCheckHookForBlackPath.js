@@ -13,59 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
-import cn.dev33.satoken.exception.RequestPathInvalidException;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import RequestPathInvalidException from "../../exception/RequestPathInvalidException.js";
+import SaFirewallCheckHook from "./SaFirewallCheckHook.js";
+
 
 /**
  * 防火墙策略校验钩子函数：请求 path 黑名单校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
-public class SaFirewallCheckHookForBlackPath implements SaFirewallCheckHook {
+class SaFirewallCheckHookForBlackPath extends SaFirewallCheckHook {
 
     /**
      * 默认实例
      */
-    public static SaFirewallCheckHookForBlackPath instance = new SaFirewallCheckHookForBlackPath();
+    static instance = new SaFirewallCheckHookForBlackPath();
 
     /**
      * 请求 path 黑名单
      */
-    public List<String> blackPaths = new ArrayList<>();
+    blackPaths = [];
 
     /**
      * 重载配置
-     * @param paths 黑名单 path 列表
+     * @param {...String} paths 黑名单 path 列表
      */
-    public void resetConfig(String... paths) {
-        this.blackPaths.clear();
-        this.blackPaths.addAll(Arrays.asList(paths));
+    resetConfig(...paths) {
+        this.blackPaths = [];
+        this.blackPaths.push(...paths);
     }
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 扩展预留参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 扩展预留参数
      */
-    @Override
-    public void execute(SaRequest req, SaResponse res, Object extArg) {
-        String requestPath = req.getRequestPath();
-        for (String item : blackPaths) {
-            if (requestPath.equals(item)) {
+    // @Override
+    execute(req, res, extArg) {
+        const requestPath = req.getRequestPath();
+        for (const item of this.blackPaths) {
+            if (requestPath === item) {
                 throw new RequestPathInvalidException("非法请求：" + requestPath, requestPath);
             }
         }
-
     }
 
 }
+export default SaFirewallCheckHookForBlackPath;

@@ -14,50 +14,48 @@
  * limitations under the License.
  */
 
-// import cn.dev33.satoken.annotation.*;
-// import cn.dev33.satoken.annotation.handler.*;
-// import cn.dev33.satoken.fun.strategy.*;
 import SaTokenEventCenter from "../listener/SaTokenEventCenter.js";
 import SaRouter from "../router/SaRouter.js";
 
-// 注解类导入（暂时留空，因为这些文件是空的）
-// import SaCheckLogin from "../annotation/SaCheckLogin.js";
-// import SaCheckRole from "../annotation/SaCheckRole.js";
-// import SaCheckPermission from "../annotation/SaCheckPermission.js";
-// import SaCheckSafe from "../annotation/SaCheckSafe.js";
-// import SaCheckDisable from "../annotation/SaCheckDisable.js";
-// import SaCheckHttpBasic from "../annotation/SaCheckHttpBasic.js";
-// import SaCheckHttpDigest from "../annotation/SaCheckHttpDigest.js";
-// import SaCheckOr from "../annotation/SaCheckOr.js";
-// import SaIgnore from "../annotation/SaIgnore.js";
+// 注解类导入
+import SaCheckLogin from "../annotation/SaCheckLogin.js";
+import SaCheckRole from "../annotation/SaCheckRole.js";
+import SaCheckPermission from "../annotation/SaCheckPermission.js";
+import SaCheckSafe from "../annotation/SaCheckSafe.js";
+import SaCheckDisable from "../annotation/SaCheckDisable.js";
+import SaCheckHttpBasic from "../annotation/SaCheckHttpBasic.js";
+import SaCheckHttpDigest from "../annotation/SaCheckHttpDigest.js";
+import SaCheckOr from "../annotation/SaCheckOr.js";
+import SaIgnore from "../annotation/SaIgnore.js";
 
-// 注解处理器导入（暂时留空，因为这些文件是空的）
-// import SaCheckLoginHandler from "../annotation/handler/SaCheckLoginHandler.js";
-// import SaCheckRoleHandler from "../annotation/handler/SaCheckRoleHandler.js";
-// import SaCheckPermissionHandler from "../annotation/handler/SaCheckPermissionHandler.js";
-// import SaCheckSafeHandler from "../annotation/handler/SaCheckSafeHandler.js";
-// import SaCheckDisableHandler from "../annotation/handler/SaCheckDisableHandler.js";
-// import SaCheckHttpBasicHandler from "../annotation/handler/SaCheckHttpBasicHandler.js";
-// import SaCheckHttpDigestHandler from "../annotation/handler/SaCheckHttpDigestHandler.js";
-// import SaCheckOrHandler from "../annotation/handler/SaCheckOrHandler.js";
+// 注解处理器导入
+import SaCheckLoginHandler from "../annotation/handler/SaCheckLoginHandler.js";
+import SaCheckRoleHandler from "../annotation/handler/SaCheckRoleHandler.js";
+import SaCheckPermissionHandler from "../annotation/handler/SaCheckPermissionHandler.js";
+import SaCheckSafeHandler from "../annotation/handler/SaCheckSafeHandler.js";
+import SaCheckDisableHandler from "../annotation/handler/SaCheckDisableHandler.js";
+import SaCheckHttpBasicHandler from "../annotation/handler/SaCheckHttpBasicHandler.js";
+import SaCheckHttpDigestHandler from "../annotation/handler/SaCheckHttpDigestHandler.js";
+import SaCheckOrHandler from "../annotation/handler/SaCheckOrHandler.js";
+import SaIgnoreHandler from "../annotation/handler/SaIgnoreHandler.js";
+
+import SaCheckMethodAnnotationFunction from "../fun/strategy/SaCheckMethodAnnotationFunction.js";
 
 
+// import cn.dev33.satoken.fun.strategy.*;
 
 
 /**
  * Sa-Token 注解鉴权相关策略
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.39.0
  */
 class SaAnnotationStrategy {
 
 	constructor() {
-        // 初始化注解处理器集合
-        this.annotationHandlerMap = new Map();
-        this.registerDefaultAnnotationHandler();
-    }
-
+		this.registerDefaultAnnotationHandler();
+	}
 
 	/**
 	 * 全局单例引用
@@ -81,31 +79,33 @@ class SaAnnotationStrategy {
 	 * 注册所有默认的注解处理器
 	 */
 	registerDefaultAnnotationHandler() {
-		this.annotationHandlerMap.set(SaCheckLogin.class, new SaCheckLoginHandler());
-		this.annotationHandlerMap.set(SaCheckRole.class, new SaCheckRoleHandler());
-		this.annotationHandlerMap.set(SaCheckPermission.class, new SaCheckPermissionHandler());
-		this.annotationHandlerMap.set(SaCheckSafe.class, new SaCheckSafeHandler());
-		this.annotationHandlerMap.set(SaCheckDisable.class, new SaCheckDisableHandler());
-		this.annotationHandlerMap.set(SaCheckHttpBasic.class, new SaCheckHttpBasicHandler());
-		this.annotationHandlerMap.set(SaCheckHttpDigest.class, new SaCheckHttpDigestHandler());
-		this.annotationHandlerMap.set(SaCheckOr.class, new SaCheckOrHandler());
+		this.annotationHandlerMap.set(SaCheckLogin, new SaCheckLoginHandler());
+		this.annotationHandlerMap.set(SaCheckRole, new SaCheckRoleHandler());
+		this.annotationHandlerMap.set(SaCheckPermission, new SaCheckPermissionHandler());
+		this.annotationHandlerMap.set(SaCheckSafe, new SaCheckSafeHandler());
+		this.annotationHandlerMap.set(SaCheckDisable, new SaCheckDisableHandler());
+		this.annotationHandlerMap.set(SaCheckHttpBasic, new SaCheckHttpBasicHandler());
+		this.annotationHandlerMap.set(SaCheckHttpDigest, new SaCheckHttpDigestHandler());
+		this.annotationHandlerMap.set(SaCheckOr, new SaCheckOrHandler());
 	}
 
 	/**
 	 * 注册一个注解处理器
 	 */
-	public void registerAnnotationHandler(SaAnnotationHandlerInterface<?> handler) {
-		annotationHandlerMap.put(handler.getHandlerAnnotationClass(), handler);
+	registerAnnotationHandler(handler) {
+		this.annotationHandlerMap.set(handler.getHandlerAnnotationClass(), handler);
 		SaTokenEventCenter.doRegisterAnnotationHandler(handler);
 	}
 
 	/**
 	 * 注册一个注解处理器，到首位
 	 */
-	public void registerAnnotationHandlerToFirst(SaAnnotationHandlerInterface<?> handler) {
-		Map<Class<?>, SaAnnotationHandlerInterface<?>> newMap = new LinkedHashMap<>();
-		newMap.put(handler.getHandlerAnnotationClass(), handler);
-		newMap.putAll(annotationHandlerMap);
+	registerAnnotationHandlerToFirst(handler) {
+		const newMap = new Map();
+		newMap.set(handler.getHandlerAnnotationClass(), handler);
+		for (const [key, value] of this.annotationHandlerMap) {
+			newMap.set(key, value);
+		}
 		this.annotationHandlerMap = newMap;
 		SaTokenEventCenter.doRegisterAnnotationHandler(handler);
 	}
@@ -113,49 +113,47 @@ class SaAnnotationStrategy {
 	/**
 	 * 移除一个注解处理器
 	 */
-	public void removeAnnotationHandler(Class<?> cls) {
-		annotationHandlerMap.remove(cls);
+	removeAnnotationHandler(cls) {
+		this.annotationHandlerMap.delete(cls);
 	}
 
 	/**
 	 * 对一个 [Method] 对象进行注解校验 （注解鉴权内部实现）
 	 */
-	public SaCheckMethodAnnotationFunction checkMethodAnnotation = (method) -> {
+	checkMethodAnnotation = (method) => {
 
 		// 如果 Method 或其所属 Class 上有 @SaIgnore 注解，则直接跳过整个校验过程
-		if(instance.isAnnotationPresent.apply(method, SaIgnore.class)) {
+		if(SaAnnotationStrategy.instance.isAnnotationPresent.apply(method, SaIgnore)) {
 			SaRouter.stop();
 		}
 
 		// 先校验 Method 所属 Class 上的注解
-		instance.checkElementAnnotation.accept(method.getDeclaringClass());
+		SaAnnotationStrategy.instance.checkElementAnnotation(method.getDeclaringClass());
 
 		// 再校验 Method 上的注解
-		instance.checkElementAnnotation.accept(method);
+		SaAnnotationStrategy.instance.checkElementAnnotation(method);
 	};
 
 	/**
 	 * 对一个 [Element] 对象进行注解校验 （注解鉴权内部实现）
 	 */
-	@SuppressWarnings("unchecked")
-	public SaCheckElementAnnotationFunction checkElementAnnotation = (element) -> {
+	checkElementAnnotation = (element) => {
 		// 如果此元素上标注了 @SaCheckOr，则必须在后续判断中忽略掉其指定的 append() 类型注解判断
-		List<Class<? extends Annotation>> ignoreClassList = new ArrayList<>();
-		SaCheckOr checkOr = (SaCheckOr)instance.getAnnotation.apply(element, SaCheckOr.class);
+		let ignoreClassList = [];
+		const checkOr = SaAnnotationStrategy.instance.getAnnotation.apply(element, SaCheckOr);
 		if(checkOr != null) {
-			ignoreClassList = Arrays.asList(checkOr.append());
+			ignoreClassList = Array.from(checkOr.append());
 		}
 
 		// 遍历所有的注解处理器，检查此 element 是否具有这些指定的注解
-		for (Map.Entry<Class<?>, SaAnnotationHandlerInterface<?>> entry: annotationHandlerMap.entrySet()) {
+		for (const [atClass, value] of this.annotationHandlerMap) {
 			// 忽略掉在 @SaCheckOr 中 append 字段指定的注解
-			Class<Annotation> atClass = (Class<Annotation>)entry.getKey();
-			if(ignoreClassList.contains(atClass)) {
+			if(ignoreClassList.includes(atClass)) {
 				continue;
 			}
-			Annotation annotation = instance.getAnnotation.apply(element, atClass);
+			const annotation = SaAnnotationStrategy.instance.getAnnotation.apply(element, atClass);
 			if(annotation != null) {
-				entry.getValue().check(annotation, element);
+				value.check(annotation, element);
 			}
 		}
 	};
@@ -163,25 +161,32 @@ class SaAnnotationStrategy {
 	/**
 	 * 从元素上获取注解
 	 */
-	public SaGetAnnotationFunction getAnnotation = (element, annotationClass)->{
-		return element.getAnnotation(annotationClass);
+	getAnnotation = (element, annotationClass) => {
+		// 在 Node.js 中，我们需要一种方式来模拟注解
+		// 这里假设 element 有一个 annotations 属性来存储注解
+		if (element.annotations && element.annotations[annotationClass.name]) {
+			return element.annotations[annotationClass.name];
+		}
+		return null;
 	};
 
 	/**
 	 * 判断一个 Method 或其所属 Class 是否包含指定注解
 	 */
-	public SaIsAnnotationPresentFunction isAnnotationPresent = (method, annotationClass) -> {
-		return instance.getAnnotation.apply(method, annotationClass) != null ||
-				instance.getAnnotation.apply(method.getDeclaringClass(), annotationClass) != null;
+	isAnnotationPresent = (method, annotationClass) => {
+		return SaAnnotationStrategy.instance.getAnnotation.apply(method, annotationClass) != null ||
+				SaAnnotationStrategy.instance.getAnnotation.apply(method.getDeclaringClass(), annotationClass) != null;
 	};
 
 	/**
 	 * SaCheckELRootMap 扩展函数
 	 */
-	public SaCheckELRootMapExtendFunction checkELRootMapExtendFunction = rootMap -> {
+	checkELRootMapExtendFunction = (rootMap) => {
 		// 默认不做任何处理
 	};
 
 
 
 }
+
+export default SaAnnotationStrategy;

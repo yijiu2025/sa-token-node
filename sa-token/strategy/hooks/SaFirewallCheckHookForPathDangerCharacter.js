@@ -13,33 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
-import cn.dev33.satoken.exception.RequestPathInvalidException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
+import RequestPathInvalidException from "../../exception/RequestPathInvalidException.js";
+import SaFirewallCheckHook from "./SaFirewallCheckHook.js";
 
 /**
  * 防火墙策略校验钩子函数：请求 path 危险字符校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
-public class SaFirewallCheckHookForPathDangerCharacter implements SaFirewallCheckHook {
+class SaFirewallCheckHookForPathDangerCharacter extends SaFirewallCheckHook {
 
     /**
      * 默认实例
      */
-    public static SaFirewallCheckHookForPathDangerCharacter instance = new SaFirewallCheckHookForPathDangerCharacter();
+    static instance = new SaFirewallCheckHookForPathDangerCharacter();
 
     /**
      * 请求 path 不允许出现的危险字符
      */
-    public List<String> dangerCharacter = new ArrayList<>(Arrays.asList(
+    dangerCharacter = [
             "//",           // //
             "\\",			// \
             "%2e", "%2E",	// .
@@ -52,31 +48,32 @@ public class SaFirewallCheckHookForPathDangerCharacter implements SaFirewallChec
             "\r", "%0d", "%0D",	// 回车符
             "\u2028",     // 行分隔符
             "\u2029"    // 段分隔符
-    ));
+    ];
 
     /**
      * 重载配置
-     * @param character 危险字符列表
+     * @param {String...} character 危险字符列表
      */
-    public void resetConfig(String... character) {
-        this.dangerCharacter = Arrays.asList(character);
+    resetConfig(...character) {
+        this.dangerCharacter = [...character];
     }
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 预留扩展参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 预留扩展参数
      */
-    @Override
-    public void execute(SaRequest req, SaResponse res, Object extArg) {
-        String requestPath = req.getRequestPath();
-        for (String item : dangerCharacter) {
-            if (requestPath.contains(item)) {
+    execute(req, res, extArg) {
+        const requestPath = req.getRequestPath();
+        for (const item of this.dangerCharacter) {
+            if (requestPath.includes(item)) {
                 throw new RequestPathInvalidException("非法请求：" + requestPath, requestPath);
             }
         }
     }
 
 }
+
+export default SaFirewallCheckHookForPathDangerCharacter;

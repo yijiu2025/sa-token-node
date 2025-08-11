@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import FirewallCheckException from "./FirewallCheckException";
+import FirewallCheckException from "./FirewallCheckException.js";
 
 /**
  * 一个异常：代表请求 path 无效或非法

@@ -13,56 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
-import cn.dev33.satoken.exception.FirewallCheckException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
+import FirewallCheckException from "../../exception/FirewallCheckException.js";
+import SaFirewallCheckHook from "./SaFirewallCheckHook.js";
 
 /**
  * 防火墙策略校验钩子函数：请求头检测
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
-public class SaFirewallCheckHookForHeader implements SaFirewallCheckHook {
+class SaFirewallCheckHookForHeader extends SaFirewallCheckHook {
 
     /**
      * 默认实例
      */
-    public static SaFirewallCheckHookForHeader instance = new SaFirewallCheckHookForHeader();
+    static instance = new SaFirewallCheckHookForHeader();
 
     /**
      * 不允许的请求头列表
      */
-    public List<String> notAllowHeaderNames = new ArrayList<>();
+    notAllowHeaderNames = [];
 
-    public SaFirewallCheckHookForHeader() {
+    constructor() {
+        super();
     }
 
     /**
      * 配置
-     * @param notAllowHeaderNames 不允许的请求头列表 (先清空原来的，再添加上新的)
+     * @param {String...} notAllowHeaderNames 不允许的请求头列表 (先清空原来的，再添加上新的)
      */
-    public void resetConfig(String... notAllowHeaderNames) {
-        this.notAllowHeaderNames.clear();
-        this.notAllowHeaderNames.addAll(Arrays.asList(notAllowHeaderNames));
+    resetConfig(...notAllowHeaderNames) {
+        this.notAllowHeaderNames = [];
+        this.notAllowHeaderNames.push(...notAllowHeaderNames);
     }
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 预留扩展参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 预留扩展参数
      */
-    @Override
-    public void execute(SaRequest req, SaResponse res, Object extArg) {
-        for (String headerName : notAllowHeaderNames) {
+    //@Override
+    execute(req, res, extArg) {
+        for (const headerName of this.notAllowHeaderNames) {
             if(req.getHeader(headerName) != null) {
                 throw new FirewallCheckException("非法请求头：" + headerName);
             }
@@ -70,3 +67,4 @@ public class SaFirewallCheckHookForHeader implements SaFirewallCheckHook {
     }
 
 }
+export default SaFirewallCheckHookForHeader;

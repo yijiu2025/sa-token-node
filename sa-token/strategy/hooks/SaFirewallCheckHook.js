@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
 
 /**
  * 防火墙策略校验钩子函数 - 接口
  *
- * @author click33
- * @since 1.41.0
+ * @author click33 qirly
+ * @since 1.41.0 
  */
-@FunctionalInterface
-public interface SaFirewallCheckHook {
+// @FunctionalInterface
+class SaFirewallCheckHook {
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 预留扩展参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 预留扩展参数
      */
-    void execute(SaRequest req, SaResponse res, Object extArg);
+    execute(req, res, extArg) {
+        // 执行逻辑
+    };
 
 }
+export default SaFirewallCheckHook;

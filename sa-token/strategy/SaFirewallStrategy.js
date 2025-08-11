@@ -13,94 +13,106 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy;
 
-import cn.dev33.satoken.SaManager;
-import cn.dev33.satoken.fun.strategy.SaFirewallCheckFailHandleFunction;
-import cn.dev33.satoken.fun.strategy.SaFirewallCheckFunction;
-import cn.dev33.satoken.strategy.hooks.*;
+import SaManager from "../SaManager.js";
+import SaFirewallCheckFailHandleFunction from "../fun/strategy/SaFirewallCheckFailHandleFunction.js";
+import SaFirewallCheckFunction from "../fun/strategy/SaFirewallCheckFunction.js";
 
-import java.util.ArrayList;
-import java.util.List;
+import SaFirewallCheckHook from "./hooks/SaFirewallCheckHook.js";
+import SaFirewallCheckHookForWhitePath from "./hooks/SaFirewallCheckHookForWhitePath.js";
+import SaFirewallCheckHookForBlackPath from "./hooks/SaFirewallCheckHookForBlackPath.js";
+import SaFirewallCheckHookForPathDangerCharacter from "./hooks/SaFirewallCheckHookForPathDangerCharacter.js";
+import SaFirewallCheckHookForPathBannedCharacter from "./hooks/SaFirewallCheckHookForPathBannedCharacter.js";
+import SaFirewallCheckHookForDirectoryTraversal from "./hooks/SaFirewallCheckHookForDirectoryTraversal.js";
+import SaFirewallCheckHookForHost from "./hooks/SaFirewallCheckHookForHost.js";
+import SaFirewallCheckHookForHttpMethod from "./hooks/SaFirewallCheckHookForHttpMethod.js";
+import SaFirewallCheckHookForHeader from "./hooks/SaFirewallCheckHookForHeader.js";
+import SaFirewallCheckHookForParameter from "./hooks/SaFirewallCheckHookForParameter.js";
 
 /**
  * Sa-Token 防火墙策略
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.40.0
  */
-public final class SaFirewallStrategy {
+class SaFirewallStrategy {
 
 	/**
 	 * 全局单例引用
 	 */
-	public static final SaFirewallStrategy instance = new SaFirewallStrategy();
+	static get instance() {
+		if (!this._instance) {
+			this._instance = new SaFirewallStrategy();
+		}
+		return this._instance;
+	}
 
 	/**
 	 * 防火墙校验钩子函数集合
 	 */
-	public List<SaFirewallCheckHook> checkHooks = new ArrayList<>();
+	checkHooks = [];
 
-	private SaFirewallStrategy() {
+	constructor() {
 		// 初始化默认的防火墙校验钩子函数集合
-		checkHooks.add(SaFirewallCheckHookForWhitePath.instance);
-		checkHooks.add(SaFirewallCheckHookForBlackPath.instance);
-		checkHooks.add(SaFirewallCheckHookForPathDangerCharacter.instance);
-		checkHooks.add(SaFirewallCheckHookForPathBannedCharacter.instance);
-		checkHooks.add(SaFirewallCheckHookForDirectoryTraversal.instance);
-		checkHooks.add(SaFirewallCheckHookForHost.instance);
-		checkHooks.add(SaFirewallCheckHookForHttpMethod.instance);
-		checkHooks.add(SaFirewallCheckHookForHeader.instance);
-		checkHooks.add(SaFirewallCheckHookForParameter.instance);
+		checkHooks.push(SaFirewallCheckHookForWhitePath.instance);
+		checkHooks.push(SaFirewallCheckHookForBlackPath.instance);
+		checkHooks.push(SaFirewallCheckHookForPathDangerCharacter.instance);
+		checkHooks.push(SaFirewallCheckHookForPathBannedCharacter.instance);
+		checkHooks.push(SaFirewallCheckHookForDirectoryTraversal.instance);
+		checkHooks.push(SaFirewallCheckHookForHost.instance);
+		checkHooks.push(SaFirewallCheckHookForHttpMethod.instance);
+		checkHooks.push(SaFirewallCheckHookForHeader.instance);
+		checkHooks.push(SaFirewallCheckHookForParameter.instance);
 	}
 
 	/**
 	 * 注册一个防火墙校验 hook
-	 * @param checkHook /
+	 * @param {SaFirewallCheckHook} checkHook /
 	 */
-	public void registerHook(SaFirewallCheckHook checkHook) {
-		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.getClass());
-		checkHooks.add(checkHook);
+	registerHook(checkHook) {
+		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.name);
+		this.checkHooks.push(checkHook);
 	}
 
 	/**
 	 * 注册一个防火墙校验 hook 到第一位，
 	 * <b>请注意将 hook 注册到第一位将会优先于白名单的判断，如果您依然希望白名单 hook 保持最高优先级，请调用 registerHookToSecond </b>
-	 * @param checkHook /
+	 * @param {SaFirewallCheckHook} checkHook /
 	 */
-	public void registerHookToFirst(SaFirewallCheckHook checkHook) {
-		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.getClass());
-		checkHooks.add(0, checkHook);
+	registerHookToFirst(checkHook) {
+		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.name);
+		this.checkHooks.unshift(checkHook);
 	}
 
 	/**
 	 * 注册一个防火墙校验 hook 到第二位
-	 * @param checkHook /
+	 * @param {SaFirewallCheckHook} checkHook /
 	 */
-	public void registerHookToSecond(SaFirewallCheckHook checkHook) {
-		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.getClass());
-		checkHooks.add(1, checkHook);
+	registerHookToSecond(checkHook) {
+		SaManager.getLog().info("防火墙校验 hook 注册成功: " + checkHook.name);
+		this.checkHooks.splice(1, 0, checkHook);
 	}
 
 	/**
 	 * 移除指定类型的防火墙校验 hook
-	 * @param hookClass /
+	 * @param {Class<? extends SaFirewallCheckHook>} hookClass /
 	 */
-	public void removeHook(Class<? extends SaFirewallCheckHook> hookClass) {
-		for (SaFirewallCheckHook hook : checkHooks) {
-			if (hook.getClass().equals(hookClass)) {
-				checkHooks.remove(hook);
-				SaManager.getLog().info("防火墙校验 hook 移除成功: " + hookClass);
+	removeHook(hookClass) {
+		for (let i = 0; i < this.checkHooks.length; i++) {
+			const hook = this.checkHooks[i];
+			if (hook.name === hookClass.name) {
+				this.checkHooks.splice(i, 1);
+				SaManager.getLog().info("防火墙校验 hook 移除成功: " + hookClass.name);
 				return;
 			}
 		}
 	}
 
 	/**
-	 * 防火墙校验函数
+	 * 防火墙校验函数 {@link SaFirewallCheckFunction}
 	 */
-	public SaFirewallCheckFunction check = (req, res, extArg) -> {
-		for (SaFirewallCheckHook checkHook : checkHooks) {
+	check = (req, res, extArg) => {
+		for (const checkHook of this.checkHooks) {
 			checkHook.execute(req, res, extArg);
 		}
 	};
@@ -112,8 +124,11 @@ public final class SaFirewallStrategy {
 	 * 			// 自定义处理逻辑 ...
 	 *      };
 	 * </pre>
+	 * {@link SaFirewallCheckFailHandleFunction}
 	 */
-	public SaFirewallCheckFailHandleFunction checkFailHandle = null;
+	checkFailHandle = null;
 
 
 }
+
+export default SaFirewallStrategy;

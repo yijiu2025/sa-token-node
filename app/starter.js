@@ -9,8 +9,11 @@ import SaTotpTemplate from '../sa-token/secure/totp/SaTotpTemplate.js';
 
 import SaHexUtil from '../sa-token/util/SaHexUtil.js';
 // import SaSession from '../sa-token/session/SaSession.js';
-import SaTokenConsts from '../sa-token/util/SaTokenConsts.js';
+// import SaTokenConsts from '../sa-token/util/SaTokenConsts.js';
 
+// console.log(SaTokenConsts.name);
+// import SaFirewallCheckHookForDirectoryTraversal from '../sa-token/strategy/hooks/SaFirewallCheckHookForDirectoryTraversal.js';
+// new SaFirewallCheckHookForDirectoryTraversal().main();
 // const aaa = new SaTokenConsts("aaa","bbbb");
 // console.log(typeof aaa);
 

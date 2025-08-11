@@ -13,56 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
-import cn.dev33.satoken.exception.RequestPathInvalidException;
-import cn.dev33.satoken.util.SaFoxUtil;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
+import RequestPathInvalidException from "../../exception/RequestPathInvalidException.js";
+import SaFoxUtil from "../../util/SaFoxUtil.js";
+import SaFirewallCheckHook from "./SaFirewallCheckHook.js";
 
 /**
  * 防火墙策略校验钩子函数：请求 path 禁止字符校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
-public class SaFirewallCheckHookForPathBannedCharacter implements SaFirewallCheckHook {
+class SaFirewallCheckHookForPathBannedCharacter extends SaFirewallCheckHook {
 
     /**
      * 默认实例
      */
-    public static SaFirewallCheckHookForPathBannedCharacter instance = new SaFirewallCheckHookForPathBannedCharacter();
+    static instance = new SaFirewallCheckHookForPathBannedCharacter();
 
     /**
      * 是否严格禁止出现百分号字符 % （默认：否）
      */
-    public boolean bannedPercentage = false;
+    bannedPercentage = false;
 
     /**
      * 重载配置
-     * @param bannedPercentage 是否严格禁止出现百分号字符 % （默认：否）
+     * @param {boolean} bannedPercentage 是否严格禁止出现百分号字符 % （默认：否）
      */
-    public void resetConfig(boolean bannedPercentage) {
+    resetConfig(bannedPercentage) {
         this.bannedPercentage = bannedPercentage;
     }
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 预留扩展参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 预留扩展参数
      */
-    @Override
-    public void execute(SaRequest req, SaResponse res, Object extArg) {
+    execute(req, res, extArg) {
         // 非可打印 ASCII 字符检查
-        String requestPath = req.getRequestPath();
+        const requestPath = req.getRequestPath();
         if(SaFoxUtil.hasNonPrintableASCII(requestPath)) {
             throw new RequestPathInvalidException("请求 path 包含禁止字符：" + requestPath, requestPath);
         }
-        if(bannedPercentage && requestPath.contains("%")) {
+        if(this.bannedPercentage && requestPath.contains("%")) {
             throw new RequestPathInvalidException("请求 path 包含禁止字符 %：" + requestPath, requestPath);
         }
     }
 
 }
+export default SaFirewallCheckHookForPathBannedCharacter;

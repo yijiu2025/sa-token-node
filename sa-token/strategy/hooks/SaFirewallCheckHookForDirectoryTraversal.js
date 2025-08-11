@@ -13,67 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dev33.satoken.strategy.hooks;
 
-import cn.dev33.satoken.context.model.SaRequest;
-import cn.dev33.satoken.context.model.SaResponse;
-import cn.dev33.satoken.exception.RequestPathInvalidException;
+import SaRequest from "../../context/model/SaRequest.js";
+import SaResponse from "../../context/model/SaResponse.js";
+import RequestPathInvalidException from "../../exception/RequestPathInvalidException.js";
+import SaFirewallCheckHook from "./SaFirewallCheckHook.js";
 
 /**
  * 防火墙策略校验钩子函数：请求 path 目录遍历符检测
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
-public class SaFirewallCheckHookForDirectoryTraversal implements SaFirewallCheckHook {
+class SaFirewallCheckHookForDirectoryTraversal extends SaFirewallCheckHook {
 
     /**
      * 默认实例
      */
-    public static SaFirewallCheckHookForDirectoryTraversal instance = new SaFirewallCheckHookForDirectoryTraversal();
+    static instance = new SaFirewallCheckHookForDirectoryTraversal();
 
     /**
      * 执行的方法
      *
-     * @param req 请求对象
-     * @param res 响应对象
-     * @param extArg 预留扩展参数
+     * @param {SaRequest} req 请求对象
+     * @param {SaResponse} res 响应对象
+     * @param {Object} extArg 预留扩展参数
      */
-    @Override
-    public void execute(SaRequest req, SaResponse res, Object extArg) {
-        String requestPath = req.getRequestPath();
-        if(!isPathValid(requestPath)) {
+    // @Override
+    execute(req, res, extArg) {
+        const requestPath = req.getRequestPath();
+        if(!SaFirewallCheckHookForDirectoryTraversal.isPathValid(requestPath)) {
             throw new RequestPathInvalidException("非法请求：" + requestPath, requestPath);
         }
     }
 
     /**
      * 检查路径是否有效
-     * @param path /
-     * @return /
+     * @param {String} path /
+     * @return {boolean} /
      */
-    public static boolean isPathValid(String path) {
-        if (path == null || path.isEmpty()) {
+    static isPathValid(path) {
+        if (path == null || path.length === 0) {
             return false;
         }
 
         // 必须以 '/' 开头
-        if (path.charAt(0) != '/') {
+        if (path.charAt(0) !== '/') {
             return false;
         }
 
         // 特殊处理根路径 "/"
-        if (path.equals("/")) {
+        if (path === "/") {
             return true;
         }
 
-        String[] components = path.split("/");
-        for (int i = 0; i < components.length; i++) {
-            String component = components[i];
+        const components = path.split("/");
+        for (let i = 0; i < components.length; i++) {
+            const component = components[i];
 
             // 处理空组件
-            if (component.isEmpty()) {
-                if (i == 0) {
+            if (component.length === 0) {
+                if (i === 0) {
                     // 允许路径以 "/" 开头（第一个组件为空）
                     continue;
                 } else {
@@ -83,35 +83,36 @@ public class SaFirewallCheckHookForDirectoryTraversal implements SaFirewallCheck
             }
 
             // 检查是否包含 "." 或 ".." 组件
-            if (component.equals(".") || component.equals("..")) {
+            if (component === "." || component === "..") {
                 return false;
             }
         }
         return true;
     }
 
-    // 测试
-//    public static void main(String[] args) {
-//        test("/user/info", true);      // 合法
-//        test("/user/info/.", false);   // 末尾包含 /.
-//        test("/user/info/..", false);  // 末尾包含 /..
-//        test("/user/info/./get", false); // 中间包含 /./
-//        test("/user/info/../get", false); // 中间包含 /../
-//        test("/user/info/.js", true);  // 合法后缀
-//        test("/.abcdef", true);         // 合法隐藏文件
-//        test("//user", false);          // 多余斜杠
-//        test("/user//info", false);     // 中间多余斜杠
-//        test("/", true);               // 根目录合法
-//        test("user/../info", false);    // 不以 / 开头
-//        test("a/b/c/..", false);       // 不以 / 开头
-//        test("test/.", false);          // 不以 / 开头
-//        test("", true);                // 空路径非法
+//     // 测试
+//    main(args) {
+//        this.test("/user/info", true);      // 合法
+//        this.test("/user/info/.", false);   // 末尾包含 /.
+//        this.test("/user/info/..", false);  // 末尾包含 /..
+//        this.test("/user/info/./get", false); // 中间包含 /./
+//        this.test("/user/info/../get", false); // 中间包含 /../
+//        this.test("/user/info/.js", true);  // 合法后缀
+//        this.test("/.abcdef", true);         // 合法隐藏文件
+//        this.test("//user", false);          // 多余斜杠
+//        this.test("/user//info", false);     // 中间多余斜杠
+//        this.test("/", true);               // 根目录合法
+//        this.test("user/../info", false);    // 不以 / 开头
+//        this.test("a/b/c/..", false);       // 不以 / 开头
+//        this.test("test/.", false);          // 不以 / 开头
+//        this.test("", true);                // 空路径非法
 //    }
-//
-//    private static void test(String path, boolean expected) {
-//        boolean result = isPathValid(path);
-//        System.out.printf("Path: %-20s Expected: %-5s Actual: %-5s %s%n",
-//                path, expected, result, (result == expected) ? "✓" : "✗");
+
+//    test(path, expected) {
+//        const result = SaFirewallCheckHookForDirectoryTraversal.isPathValid(path);
+//        console.log(`Path: ${path} Expected: ${expected} Actual: ${result} ${result === expected ? "✓" : "✗"}`);
 //    }
 
 }
+
+export default SaFirewallCheckHookForDirectoryTraversal;

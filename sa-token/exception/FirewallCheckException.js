@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import SaTokenException from "./SaTokenException";
+import SaTokenException from "./SaTokenException.js";
 
 /**
  * 一个异常：代表防火墙检验未通过
