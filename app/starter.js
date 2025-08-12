@@ -33,7 +33,10 @@ import SaHexUtil from '../sa-token/util/SaHexUtil.js';
 import { randomUUID } from 'crypto';
 
 const uniqueId = randomUUID();
-console.log('Generated UUID:', uniqueId);
+	// randomTempToken(value) {
+	// 	return randomUUID().replace(/-/g, "");
+	// }
+console.log('Generated UUID:', uniqueId.replace(/-/g, ""));
 
 // const aaa = new SaSession("111");
 // const bytes = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);

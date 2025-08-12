@@ -50,6 +50,12 @@ class SaTokenConsts {
 	static GITHUB_URL = "https://github.com/dromara/sa-token";
 
 	/**
+	 * Sa-Token-node 开源地址 GitHub  
+	 */
+	static GITHUB_URL = "https://github.com/yijiu2025/sa-token-node";
+
+
+	/**
 	 * Sa-Token 开发文档地址 
 	 */
 	static DEV_DOC_URL = "https://sa-token.cc";
