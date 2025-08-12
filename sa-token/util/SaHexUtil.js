@@ -17,8 +17,8 @@
 /**
  * 十六进制工具类
  *
- * @author deepseek
- * @since 2025/2/24
+ * @author deepseek qirly
+ * @since 2025/8/12
  */
 class SaHexUtil {
 

@@ -30,13 +30,14 @@ import SaHexUtil from '../sa-token/util/SaHexUtil.js';
 // }
 
 // abc("aa");
-import { randomUUID } from 'crypto';
-
-const uniqueId = randomUUID();
+//import { randomUUID } from 'crypto';
+import SaFoxUtil from '../sa-token/util/SaFoxUtil.js';
+console.log(SaFoxUtil.valueToString("{true: 3, aa: 1}"));
+//const uniqueId = randomUUID();
 	// randomTempToken(value) {
 	// 	return randomUUID().replace(/-/g, "");
 	// }
-console.log('Generated UUID:', uniqueId.replace(/-/g, ""));
+//console.log('Generated UUID:', uniqueId.replace(/-/g, ""));
 
 // const aaa = new SaSession("111");
 // const bytes = new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]);

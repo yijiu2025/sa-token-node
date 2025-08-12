@@ -23,7 +23,7 @@
  *     但有一些常量没有明确的归属模块，会在很多模块中使用到，比如版本号、开源地址等，属于全局性的础性常量，这些常量统一定义在此类中。
  * </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.8.0
  */
 class SaTokenConsts {
