@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import SaManager from "../../SaManager";
-import SaTokenConfig from "../../config/SaTokenConfig";
-import SaLogoutMode from "./enums/SaLogoutMode";
-import SaLogoutRange from "./enums/SaLogoutRange";
-import SaLoginParameter from "./SaLoginParameter";
+import SaManager from "../../SaManager.js";
+import SaTokenConfig from "../../config/SaTokenConfig.js";
+import SaLogoutMode from "./enums/SaLogoutMode.js";
+import SaLogoutRange from "./enums/SaLogoutRange.js";
+import SaLoginParameter from "./SaLoginParameter.js";
 
 /**
  * 在会话注销时的 配置参数对象，决定注销时的一些细节行为 <br>

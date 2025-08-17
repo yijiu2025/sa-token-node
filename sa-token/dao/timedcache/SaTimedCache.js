@@ -21,7 +21,7 @@ import SaTokenDao from "../SaTokenDao.js";
 /**
  * 一个定时缓存的简单实现，采用：惰性检查 + 异步循环扫描
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 
@@ -172,9 +172,10 @@ class SaTimedCache {
     /**
      * 初始化定时任务，定时清理过期数据
      */
-    initRefreshThread() {
+    async initRefreshThread() {
         // 如果开发者配置了 <=0 的值，则不启动定时清理 // 休眠N秒 
-        const refreshPeriod = SaManager.getConfig().getDataRefreshPeriod();
+        const config = await SaManager.getConfig();
+        const refreshPeriod = config.getDataRefreshPeriod();
         if (refreshPeriod <= 0) {
             return;
         }

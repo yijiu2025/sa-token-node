@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import StpUtil from '../sa-token/stp/StpUtil.js';
+//import StpUtil from "./stp/StpUtil.js";
+import StpLogic from "./stp/StpLogic.js";
 import SaTokenConfig from "./config/SaTokenConfig.js";
 import SaTokenConfigFactory from "./config/SaTokenConfigFactory.js";
 import SaTokenContext from "./context/SaTokenContext.js";
@@ -26,7 +28,7 @@ import SaHttpTemplate from "./http/SaHttpTemplate.js";
 import SaHttpTemplateDefaultImpl from "./http/SaHttpTemplateDefaultImpl.js";
 import SaJsonTemplate from "./json/SaJsonTemplate.js";
 import SaJsonTemplateDefaultImpl from "./json/SaJsonTemplateDefaultImpl.js";
-import SaTokenEventCenter from "./listener/SaTokenEventCenter.js";
+import { SaTokenEventCenter } from "./listener/SaTokenEventCenter.js";
 import SaLog from "./log/SaLog.js";
 import SaLogForConsole from "./log/SaLogForConsole.js";
 import SaSameTemplate from "./same/SaSameTemplate.js";
@@ -35,8 +37,8 @@ import SaSerializerTemplate from "./serializer/SaSerializerTemplate.js";
 import SaSerializerTemplateForJson from "./serializer/impl/SaSerializerTemplateForJson.js";
 import StpInterface from "./stp/StpInterface.js";
 import StpInterfaceDefaultImpl from "./stp/StpInterfaceDefaultImpl.js";
-import StpLogic from "./stp/StpLogic.js";
-import StpUtil from "./stp/StpUtil.js";
+
+
 import SaStrategy from "./strategy/SaStrategy.js";
 import SaTempTemplate from "./temp/SaTempTemplate.js";
 import SaFoxUtil from "./util/SaFoxUtil.js";
@@ -94,11 +96,11 @@ class SaManager {
      * 获取 Sa-Token 的全局配置信息 (双检锁单例模式)
      * @return {SaTokenConfig} 全局配置信息
      */
-    static getConfig() {
+    static async getConfig() {
         if (this.config === null) {
-            
-            this.setConfigMethod(SaTokenConfigFactory.createConfig());
+            this.setConfigMethod(await SaTokenConfigFactory.createConfig());
         }
+        // console.log(this.config.getDynamicActiveTimeout());
         return this.config;
     }
 
@@ -138,10 +140,11 @@ class SaManager {
      * 获取持久化组件 (双检锁单例模式)
      * @return {SaTokenDao} 持久化组件实例
      */
-    static getSaTokenDao() {
+    static async getSaTokenDao() {
         if (this.saTokenDao == null) {
-            this.setSaTokenDaoMethod(new SaTokenDaoDefaultImpl());
+            this.setSaTokenDaoMethod(await new SaTokenDaoDefaultImpl());
         }
+        // console.log("aaa",this.saTokenDao);
         return this.saTokenDao;
     }
 
@@ -167,9 +170,9 @@ class SaManager {
      * 获取权限数据源组件 (双检锁单例模式)
      * @return {StpInterface} 权限数据源实例
      */
-    static getStpInterface() {
+    static async getStpInterface() {
         if (this.stpInterface == null) {
-            this.stpInterface = new StpInterfaceDefaultImpl(); 
+            this.stpInterface = await new StpInterfaceDefaultImpl(); 
         }
         return this.stpInterface;
     }
@@ -194,9 +197,9 @@ class SaManager {
      * 获取上下文对象 (双检锁单例模式)
      * @return {SaTokenContext} 上下文实例
      */
-    static getSaTokenContext() {
+    static async getSaTokenContext() {
         if (this.saTokenContext == null) {
-            this.saTokenContext = new SaTokenContextForThreadLocal(); 
+            this.saTokenContext = await new SaTokenContextForThreadLocal(); 
         }
         return this.saTokenContext;
     }
@@ -221,9 +224,9 @@ class SaManager {
      * 获取临时 token 认证模块 (双检锁单例模式)
      * @return {SaTempTemplate} 临时 token 认证实例
      */
-    static getSaTempTemplate() {
+    static async getSaTempTemplate() {
         if (!this.saTempTemplate) {
-            this.saTempTemplate = new SaTempTemplate(); 
+            this.saTempTemplate = await new SaTempTemplate(); 
         }
         return this.saTempTemplate;
     }
@@ -249,9 +252,9 @@ class SaManager {
      * 获取 JSON 转换器 (双检锁单例模式)
      * @return {SaJsonTemplate} JSON 转换器实例
      */
-    static getSaJsonTemplate() {
+    static async getSaJsonTemplate() {
         if (this.saJsonTemplate == null) {
-            this.saJsonTemplate = new SaJsonTemplateDefaultImpl(); 
+            this.saJsonTemplate = await new SaJsonTemplateDefaultImpl(); 
         }
         return this.saJsonTemplate;
     }
@@ -277,9 +280,9 @@ class SaManager {
      * 获取 HTTP 转换器 (双检锁单例模式)
      * @return {SaHttpTemplate} HTTP 转换器实例
      */
-    static getSaHttpTemplate() {
+    static async getSaHttpTemplate() {
         if (this.saHttpTemplate == null) {
-            this.saHttpTemplate = new SaHttpTemplateDefaultImpl(); 
+            this.saHttpTemplate = await new SaHttpTemplateDefaultImpl(); 
         }
         return this.saHttpTemplate;
     }
@@ -305,9 +308,9 @@ class SaManager {
      * 获取序列化器 (双检锁单例模式)
      * @return {SaSerializerTemplate} 序列化器实例
      */
-    static getSaSerializerTemplate() {
+    static async getSaSerializerTemplate() {
         if (this.saSerializerTemplate == null) {
-            this.saSerializerTemplate = new SaSerializerTemplateForJson(); // 假设 SaSerializerTemplateForJson 已定义
+            this.saSerializerTemplate = await new SaSerializerTemplateForJson(); // 假设 SaSerializerTemplateForJson 已定义
         }
         return this.saSerializerTemplate;
     }
@@ -333,9 +336,9 @@ class SaManager {
      * 获取 Same-Token 认证模块 (双检锁单例模式)
      * @return {SaSameTemplate} Same-Token 实例
      */
-    static getSaSameTemplate() {
+    static async getSaSameTemplate() {
         if (this.saSameTemplate == null) {
-            this.saSameTemplate = new SaSameTemplate(); // 假设 SaSameTemplate 已定义
+            this.saSameTemplate = await new SaSameTemplate(); // 假设 SaSameTemplate 已定义
         }
         return this.saSameTemplate;
     }
@@ -387,9 +390,9 @@ class SaManager {
      * 获取 TOTP 算法类 (双检锁单例模式)
      * @return {SaTotpTemplate} TOTP 实例
      */
-    static getSaTotpTemplate() {
+    static async getSaTotpTemplate() {
         if (this.totpTemplate == null) {
-            this.totpTemplate = new SaTotpTemplate(); 
+            this.totpTemplate = await new SaTotpTemplate(); 
         }
         return this.totpTemplate;
     }
@@ -464,3 +467,4 @@ class SaManager {
 }
 
 export default SaManager;
+export const log = SaManager.log;

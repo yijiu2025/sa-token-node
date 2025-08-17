@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException";
 /**
  * 一个异常：代表会话未能通过 Http Basic 认证校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.26.0
  */
 

@@ -17,7 +17,7 @@
 /**
  * lambda 表达式辅助封装：根据 Boolean 变量，决定是否执行一个函数
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.13.0
  */
 

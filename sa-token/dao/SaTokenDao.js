@@ -25,7 +25,7 @@ import SaSession from "../session/SaSession.js";
  *     如果你要自定义数据存储策略，也需通过实现此接口来完成。
  * </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 

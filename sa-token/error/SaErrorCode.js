@@ -18,7 +18,7 @@
 /**
  * 定义所有异常细分状态码 
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 

@@ -20,7 +20,7 @@ import SaTokenConfig from '../config/SaTokenConfig.js'
 import SaErrorCode from '../error/SaErrorCode.js'
 import SaTokenException from '../exception/SaTokenException.js'
 import SaLoginParameter from '../stp/parameter/SaLoginParameter.js'
-import StpLogic from '../stp/StpLogic.js'
+//import StpLogic from '../stp/StpLogic.js'
 import SaTokenListenerForLog from './SaTokenListenerForLog.js'
 
 /**
@@ -39,7 +39,6 @@ class SaTokenEventCenter {
 	
 
     static listenerList = [new SaTokenListenerForLog()];
-
 	// private static List<SaTokenListener> listenerList = new ArrayList<>();
 	
 	// static {
@@ -358,4 +357,4 @@ class SaTokenEventCenter {
 }
 
 export default SaTokenEventCenter;
-
+export { SaTokenEventCenter };

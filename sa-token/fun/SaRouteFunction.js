@@ -20,7 +20,7 @@ import SaResponse from "../../context/model/SaResponse.js"
 /**
  * 路由拦截器验证方法的函数式接口，方便开发者进行 lambda 表达式风格调用
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.34.0
  */
 // @FunctionalInterface

@@ -20,7 +20,7 @@ import SaTokenException from "./SaTokenException.js";
  * 一个异常：代表框架未能获取有效的上下文
  * <h1>已过期：请更名为 SaTokenContextException 用法不变，未来版本将彻底删除此类</h1>
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 

@@ -1,14 +1,18 @@
 {
   "name": "sa-token-node",
   "version": "1.0.0",
-  "type": "module",
   "description": "sa-token to json",
+  "type": "module",
   "main": "app/starter.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest test",
     "start:dev": "cross-env NODE_ENV=development nodemon",
-    "start:prod": "cross-env NODE_ENV=production node index",
-    "prettier": "prettier --write app/**/*.js app/*.js app/**/**/*.js app/**/**/**/*.js test/**/*.js && eslint app test --fix"
+    "start:prod": "cross-env NODE_ENV=production node app/starter.js",
+    "prettier": "prettier --write app/**/*.js app/*.js app/**/**/*.js app/**/**/**/*.js test/**/*.js && eslint app test --fix",
+    "build": "rollup -c",
+    "build:esm": "rollup -c --environment FORMAT:esm",
+    "build:cjs": "rollup -c --environment FORMAT:cjs",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "koa",
@@ -19,20 +23,34 @@
     "type": "git",
     "url": "git+https://github.com/yijiu2025/sa-token-node.git"
   },
-  "author": "Chen",
+  "author": "qirly",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.28.0",
+    "@koa/cors": "^5.0.0",
+    "@rollup/plugin-babel": "^6.0.4",
     "bcrypt": "^6.0.0",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
     "hi-base32": "^0.5.1",
     "jssha": "^3.3.1",
-    "koa": "^3.0.0",
+    "koa": "^3.0.1",
+    "koa-bodyparser": "^4.4.1",
+    "koa-mount": "^4.2.0",
+    "koa-static": "^5.0.0",
     "lodash": "^4.17.21",
     "properties-reader": "^2.3.0",
+    "rollup": "^4.46.2",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "cross-env": "^10.0.0"
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "cross-env": "^10.0.0",
+    "rollup-plugin-polyfill-node": "^0.13.0"
   }
 }

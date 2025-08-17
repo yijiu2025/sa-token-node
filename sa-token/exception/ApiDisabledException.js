@@ -21,7 +21,7 @@ import SaTokenException from "./SaTokenException.js";
  *
  * <p> 一般在 API 不合适调用的时候抛出，例如在集成 jwt 模块后调用数据持久化相关方法 </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.28.0
  */
 

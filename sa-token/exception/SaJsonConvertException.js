@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException";
 /**
  * 一个异常：代表 JSON 转换失败 
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.30.0
  */
 

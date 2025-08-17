@@ -20,7 +20,7 @@ import StpUtil from "../stp/StpUtil.js";
 /**
  * 一个异常：代表会话未能通过权限认证校验
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 
@@ -35,20 +35,20 @@ class NotPermissionException extends SaTokenException {
      */
     loginType;
 
-    /**
-     * 构造函数
-     * @param {string} permission 缺少的权限码
-     */
-    constructor(permission) {
-        this(permission, StpUtil.stpLogic.loginType);
-    }
+    // /**
+    //  * 构造函数
+    //  * @param {string} permission 缺少的权限码
+    //  */
+    // constructor(permission) {
+    //     this(permission, StpUtil.stpLogic.loginType);
+    // }
 
     /**
      * 构造函数
      * @param {string} permission 缺少的权限码
      * @param {string} loginType 账号类型
      */
-    constructor(permission, loginType) {
+    constructor(permission, loginType = StpUtil.stpLogic.loginType) {
         super(`无此权限：${permission}`);
         this.permission = permission;
         this.loginType = loginType;

@@ -25,7 +25,7 @@ import SaHttpBasicAccount from './SaHttpBasicAccount.js';
 /**
  * Sa-Token Http Basic 认证模块
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.26.0
  */
 

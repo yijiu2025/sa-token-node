@@ -820,33 +820,43 @@ class SaFoxUtil {
     static isCanColorLog() {
         // 获取当前环境相关信息
         // Node.js 中使用 isTTY 替代 Java 的 System.console() 检查
-        const isTTY = process.stdout.isTTY;
-        // 获取 TERM 环境变量
-        const term = process.env.TERM;
-
-        // 两者均为假值（undefined/null），通常是在 IDE 中运行，此时可以打印彩色日志
-        if(!isTTY && !term) {
-            return true;
-        }
-
-        // 两者均有值，通常是在 Linux 终端运行，此时可以打印彩色日志
-        if(isTTY && term) {
-            return true;
-        }
-
-        // isTTY 为真但 term 为假，通常是在 Windows cmd 中运行，此时不支持彩色日志
-        if(isTTY && !term) {
-            return false;
-        }
-
-        // isTTY 为假但 term 存在，通常是通过 nohup 命令运行，此时不支持彩色日志
-        // 也可能是 Windows 的 git bash 环境（支持彩色但难以区分，所以统一返回 false）
-        if(!isTTY && term) {
-            return false;
-        }
-
-        // 默认情况
+        // 检查是否明确禁用了颜色（常见于 CI 环境）
+    if (process.env.NO_COLOR || process.env.CI || process.env.TERM === 'dumb') {
         return false;
+    }
+
+    // 检查是否强制启用了颜色
+    if (process.env.FORCE_COLOR || process.env.COLORTERM) {
+        return true;
+    }
+
+    // 检查是否在支持颜色的终端中运行
+    const isTTY = process.stdout.isTTY;
+    const term = process.env.TERM;
+
+    // 在 VSCode 终端中，isTTY 为 true 但 TERM 可能为 undefined
+    // VSCode 终端支持颜色，所以这种情况下应该返回 true
+    if (isTTY && (term === undefined || term === 'xterm-256color' || term === 'xterm-color')) {
+        return true;
+    }
+
+    // 检查常见的支持颜色的 TERM 值
+    const colorTerms = [
+        'xterm', 'xterm-256color', 'xterm-color',
+        'screen', 'screen-256color', 'vt100',
+        'color', 'ansi', 'cygwin', 'linux'
+    ];
+    if (term && colorTerms.some(t => term.includes(t))) {
+        return true;
+    }
+
+    // Windows 10+ 的终端支持颜色
+    if (process.platform === 'win32' && parseInt(process.env.WT_SESSION) >= 0) {
+        return true;
+    }
+
+    // 默认情况
+    return false;
     }
 	// public static boolean isCanColorLog() {
 

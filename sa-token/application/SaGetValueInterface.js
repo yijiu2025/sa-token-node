@@ -20,7 +20,7 @@ import SaFoxUtil from '../util/SaFoxUtil.js';
  * 对取值的一组方法封装
  * <p> 封装 SaStorage、SaSession、SaApplication 等存取值的一些固定方法，减少重复编码 </p>
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.31.0
  */
 

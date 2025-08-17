@@ -17,7 +17,7 @@
 /**
  * 无形参、有返回值的函数式接口，方便开发者进行 lambda 表达式风格调用
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.20.0
  */
 // @FunctionalInterface

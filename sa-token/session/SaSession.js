@@ -20,7 +20,7 @@ import SaTokenDao from "../dao/SaTokenDao.js";
 import SaTwoParamFunction from "../fun/SaTwoParamFunction.js";
 import SaTokenEventCenter from "../listener/SaTokenEventCenter.js";
 import SaFoxUtil from "../util/SaFoxUtil.js";
-import SaTerminalInfo from "./SaTerminalInfo.js"
+import SaTerminalInfo from "./SaTerminalInfo.js" 
 
 /**
  * Session Model，会话作用域的读取值对象
@@ -117,7 +117,8 @@ class SaSession extends SaSetValueInterface {
 	 * 构建一个 Session 对象
 	 * @param id Session的id
 	 */
-	constructor() {
+	constructor(id) {
+		super();  // 必须先调用父类的构造函数
 		this.id = id;
 		this.createTime = Date.now();
  		// $$ 发布事件
@@ -385,8 +386,9 @@ class SaSession extends SaSetValueInterface {
 	/**
 	 * 更新Session（从持久库更新刷新一下）
 	 */
-	update() {
-		SaManager.getSaTokenDao().updateSession(this);
+	async update() {
+		const SaTokenDao = await SaManager.getSaTokenDao();
+		SaTokenDao.updateSession(this);
 	}
 
 	/** 注销Session (从持久库删除) */
@@ -407,8 +409,9 @@ class SaSession extends SaSetValueInterface {
 	 * 获取此Session的剩余存活时间 (单位: 秒) 
 	 * @return 此Session的剩余存活时间 (单位: 秒)
 	 */
-	timeout() {
-        return SaManager.getSaTokenDao().getSessionTimeout(this.id);
+	async timeout() {
+		const SaTokenDao = await SaManager.getSaTokenDao();
+        return SaTokenDao.getSessionTimeout(this.id);
     }
 	
 	/**

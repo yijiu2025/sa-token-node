@@ -23,7 +23,7 @@ import SaJsonTemplate from './SaJsonTemplate.js';
  *
  * <p> 如果代码断点走到了此默认实现类，说明框架没有注入有效的 JSON 转换器，需要开发者自行实现并注入 </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.30.0
  */
 

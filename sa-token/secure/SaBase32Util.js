@@ -19,7 +19,7 @@
 /**
  * Sa-Token Base32 工具类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.42.0
  */
 class SaBase32Util {

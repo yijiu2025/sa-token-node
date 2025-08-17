@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import SaTokenException from "./SaTokenException";
+import SaTokenException from "./SaTokenException.js";
 
 /**
  * 一个异常：代表会话未能通过二级认证校验 
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.21.0
  */
 

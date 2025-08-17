@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import SaTokenException from "./SaTokenException";
-import StpUtil from "../stp/StpUtil";
+import SaTokenException from "./SaTokenException.js";
+import StpUtil from "../stp/StpUtil.js";
 
 /**
  * 一个异常：代表会话未能通过角色认证校验
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 
@@ -35,20 +35,20 @@ class NotRoleException extends SaTokenException {
      */
     #loginType;
 
-    /**
-     * 构造函数 - 使用默认登录类型
-     * @param {string} role 缺失的角色标识
-     */
-    constructor(role) {
-        this(role, StpUtil.stpLogic.loginType);
-    }
+    // /**
+    //  * 构造函数 - 使用默认登录类型
+    //  * @param {string} role 缺失的角色标识
+    //  */
+    // constructor(role) {
+    //     this(role, StpUtil.stpLogic.loginType);
+    // }
 
     /**
      * 构造函数 - 指定登录类型
      * @param {string} role 缺失的角色标识
      * @param {string} loginType 账号类型
      */
-    constructor(role, loginType) {
+    constructor(role, loginType = StpUtil.stpLogic.loginType) {
         super(`无此角色：${role}`);
         this.#role = role;
         this.#loginType = loginType;

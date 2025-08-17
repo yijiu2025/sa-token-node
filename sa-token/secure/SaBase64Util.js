@@ -18,7 +18,7 @@
 /**
  * Sa-Token Base64 工具类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.14.0
  */
 class SaBase64Util {

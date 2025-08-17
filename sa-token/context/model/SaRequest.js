@@ -24,7 +24,7 @@ import SaFoxUtil from "../../util/SaFoxUtil.js";
 /**
  * Request 请求对象 包装类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

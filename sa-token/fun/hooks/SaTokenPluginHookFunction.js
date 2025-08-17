@@ -19,7 +19,7 @@ import SaTokenPlugin from '../plugin/SaTokenPlugin.js';
 /**
  * SaTokenPlugin 钩子函数
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 

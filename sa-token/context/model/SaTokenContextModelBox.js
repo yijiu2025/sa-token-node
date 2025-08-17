@@ -1,7 +1,7 @@
 /**
  * Box 盒子类，用于存储 [ SaRequest、SaResponse、SaStorage ] 三个包装对象
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

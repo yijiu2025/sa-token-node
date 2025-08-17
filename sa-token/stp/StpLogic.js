@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import SaManager from "../SaManager.js"; 
+
 import SaCookieConfig from "../config/SaCookieConfig.js";
 import SaTokenConfig from "../config/SaTokenConfig.js";
 import SaHolder from "../context/SaHolder.js";
@@ -49,6 +49,7 @@ import SaTokenException from "../exception/SaTokenException.js";
 import NotPermissionException from "../exception/NotPermissionException.js";
 import DisableServiceException from "../exception/DisableServiceException.js";
 import NotSafeException from "../exception/NotSafeException.js";
+import SaManager from "../SaManager.js"; 
 //import static cn.dev33.satoken.exception.NotLoginException.*;
 
 
@@ -59,7 +60,7 @@ import NotSafeException from "../exception/NotSafeException.js";
  *     Sa-Token 的核心，框架大多数功能均由此类提供具体逻辑实现。
  * </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 class StpLogic {
@@ -146,12 +147,13 @@ class StpLogic {
 	 *
 	 * @return {SaTokenConfig} /
 	 */
-	getConfigOrGlobal() {
-		const cfg = this.getConfig();
+	async getConfigOrGlobal() {
+		const cfg = await this.getConfig();
 		if(cfg != null) {
 			return cfg;
 		}
-		return SaManager.getConfig();
+		const globalCfg = await SaManager.getConfig();
+		return globalCfg;
 	}
 
 
@@ -186,7 +188,7 @@ class StpLogic {
 	 * @param {String} tokenValue token 值 
 	 * @param {Number|SaLoginParameter} [param] Cookie超时时间(秒)或登录参数对象
 	 */
-	setTokenValue(tokenValue, param) {
+	async setTokenValue(tokenValue, param) {
 		// 根据param类型确定登录参数
 		let loginParameter;
 		
@@ -210,7 +212,8 @@ class StpLogic {
 		this.setTokenValueToStorage(tokenValue);
 
 		// 2. 将 token 写入到当前会话的 Cookie 里
-		if (this.getConfigOrGlobal().getIsReadCookie()) {
+		const cfg = await this.getConfigOrGlobal();
+		if (cfg.getIsReadCookie()) {
 			this.setTokenValueToCookie(tokenValue, loginParameter.getCookie(), loginParameter.getCookieTimeout());
 		}
 
@@ -225,14 +228,15 @@ class StpLogic {
 	 *
 	 * @param {String} tokenValue 要保存的 token 值
 	 */
-	setTokenValueToStorage(tokenValue){
+	async setTokenValueToStorage(tokenValue){
 		// 1、获取当前请求的 Storage 存储器
-		const storage = SaHolder.getStorage();
+		const storage = await SaHolder.getStorage();
 
 		// 2、保存 token
 		//	- 如果没有配置前缀模式，直接保存
 		// 	- 如果配置了前缀模式，则拼接上前缀保存
-		const tokenPrefix = this.getConfigOrGlobal().getTokenPrefix();
+		const cfg = await this.getConfigOrGlobal();
+		const tokenPrefix = cfg.getTokenPrefix();
 		if( SaFoxUtil.isEmpty(tokenPrefix) ) {
 			storage.set(this.splicingKeyJustCreatedSave(), tokenValue);
 		} else {
@@ -487,8 +491,8 @@ class StpLogic {
      * @param {Object} id 账号id，建议的类型：（long | int | String）
      * @param {String|boolean|number|SaLoginParameter} [arg] 可选参数：设备类型/是否记住我/token有效期/SaLoginParameter
      */
-	login(id, arg) {
-        let loginParameter = this.createSaLoginParameter();
+	async login(id, arg) {
+        let loginParameter = await this.createSaLoginParameter();
 
         if (typeof arg === 'string') {
             // 设备类型
@@ -504,9 +508,9 @@ class StpLogic {
             loginParameter = arg;
         }
         // 创建会话
-        const token = this.createLoginSession(id, loginParameter);
+        const token = await this.createLoginSession(id, loginParameter);
         // 注入token
-        this.setTokenValue(token, loginParameter);
+        await this.setTokenValue(token, loginParameter);
     }
 
 	// /**
@@ -526,16 +530,16 @@ class StpLogic {
 	 * @param {SaLoginParameter} loginParameter 此次登录的参数Model
 	 * @return {String} 返回会话令牌
 	 */
-	createLoginSession(id, loginParameter = this.createSaLoginParameter()) {
+	async createLoginSession(id, loginParameter = this.createSaLoginParameter()) {
 
 		// 1、先检查一下，传入的参数是否有效
 		this.checkLoginArgs(id, loginParameter);
 
 		// 2、给这个账号分配一个可用的 token
-		const tokenValue = this.distUsableToken(id, loginParameter);
+		const tokenValue = await this.distUsableToken(id, loginParameter);
 
 		// 3、获取此账号的 Account-Session , 续期
-		const session = this.getSessionByLoginId(id, true, loginParameter.getTimeout());
+		const session = await this.getSessionByLoginId(id, true, await loginParameter.getTimeout());
 		session.updateMinTimeout(loginParameter.getTimeout());
 
 		// 4、在 Account-Session 上记录本次登录的终端信息
@@ -556,7 +560,7 @@ class StpLogic {
 		}
 
 		// 7、如果该 token 对应的 Token-Session 已经存在，则需要给其续期
-		const tokenSession = this.getTokenSessionByToken(tokenValue, loginParameter.getRightNowCreateTokenSession());
+		const tokenSession = await this.getTokenSessionByToken(tokenValue, loginParameter.getRightNowCreateTokenSession());
 		if(tokenSession != null) {
 			tokenSession.updateMinTimeout(loginParameter.getTimeout());
 		}
@@ -580,7 +584,7 @@ class StpLogic {
 	 * @param {SaLoginParameter} loginParameter 此次登录的参数Model
 	 * @return {String} 返回 token
 	 */
-	distUsableToken(id, loginParameter) {
+	async distUsableToken(id, loginParameter) {
 
 		// 1、获取全局配置的 isConcurrent 参数
 		//    如果配置为：不允许一个账号多地同时登录，则需要先将这个账号的历史登录会话标记为：被顶下线
@@ -592,9 +596,9 @@ class StpLogic {
 				this.replaced(id, this.createSaLogoutParameter());
 			}
 		}
-
+		// console.log(`分配 token 前，检查账号 ${id} 的登录参数:`, loginParameter);
 		// 2、如果调用者预定了要生成的 token，则直接返回这个预定的值，框架无需再操心了
-		if(SaFoxUtil.isNotEmpty(loginParameter.getToken())) {
+		if(SaFoxUtil.isNotEmpty(await loginParameter.getToken())) {
 			return loginParameter.getToken();
 		}
 
@@ -616,16 +620,15 @@ class StpLogic {
 				// ↓↓↓
 			}
 		}
-
 		// 4、如果代码走到此处，说明未能成功复用旧 token，需要根据算法新建 token
 		return SaStrategy.instance.generateUniqueToken(
 				"token",
 				this.getConfigOfMaxTryTimes(loginParameter),
-				() => {
-					return this.createTokenValue(id, loginParameter.getDeviceType(), loginParameter.getTimeout(), loginParameter.getExtraData());
+				async () => {
+					return await this.createTokenValue(id, loginParameter.getDeviceType(), loginParameter.getTimeout(), loginParameter.getExtraData());
 				},
-				tokenValue => {
-					return this.getLoginIdNotHandle(tokenValue) == null;
+				async (tokenValue) => {
+					return await this.getLoginIdNotHandle(tokenValue) == null;
 				}
 		);
 	}
@@ -636,7 +639,7 @@ class StpLogic {
 	 * @param {Object} id 账号id
 	 * @param {SaLoginParameter} loginParameter 此次登录的参数Model
 	 */
-	checkLoginArgs(id, loginParameter) {
+	async checkLoginArgs(id, loginParameter) {
 
 		// 1、账号 id 不能为空
 		if(SaFoxUtil.isEmpty(id)) {
@@ -662,7 +665,8 @@ class StpLogic {
 		}
 
 		// 5、如果全局配置未启动动态 activeTimeout 功能，但是此次登录却传入了 activeTimeout 参数，那么就打印警告信息
-		if( ! this.getConfigOrGlobal().getDynamicActiveTimeout() && loginParameter.getActiveTimeout() != null) {
+		const cfg = await this.getConfigOrGlobal();
+		if( ! cfg.getDynamicActiveTimeout() && loginParameter.getActiveTimeout() != null) {
 			SaManager.log.warn("当前全局配置未开启动态 activeTimeout 功能，传入的 activeTimeout 参数将被忽略");
 		}
 
@@ -1475,8 +1479,9 @@ class StpLogic {
 	 * @param {String} tokenValue token 值
 	 * @return {String} 账号id
 	 */
-	getLoginIdNotHandle(tokenValue) {
-		return this.getSaTokenDao().get(this.splicingKeyTokenValue(tokenValue));
+	async getLoginIdNotHandle(tokenValue) {
+		const SaTokenDao = await this.getSaTokenDao();
+		return SaTokenDao.get(this.splicingKeyTokenValue(tokenValue));
 	}
 
 
@@ -1544,8 +1549,9 @@ class StpLogic {
 	 * @param {String} loginId 账号id
 	 * @param {long} timeout 会话有效期 (单位: 秒)
 	 */
-	saveTokenToIdMapping(tokenValue, loginId, timeout) {
-		this.getSaTokenDao().set(this.splicingKeyTokenValue(tokenValue), String(loginId), timeout);
+	async saveTokenToIdMapping(tokenValue, loginId, timeout) {
+		const SaTokenDao = await this.getSaTokenDao();
+		SaTokenDao.set( await this.splicingKeyTokenValue(tokenValue), String(loginId), timeout);
 	}
 
 	/**
@@ -1583,20 +1589,18 @@ class StpLogic {
 	 * @param {Consumer<SaSession>} appendOperation 如果这个 SaSession 是新建的，则要追加执行的动作，可填 null，代表无追加动作
 	 * @return {SaSession} Session对象
 	 */
-	getSessionBySessionId(sessionId, isCreate = false, timeout = null, appendOperation = null) {
-
+	async getSessionBySessionId(sessionId, isCreate = false, timeout = null, appendOperation = null) {
 		// 如果提供的 sessionId 为 null，则直接返回 null
 		if(SaFoxUtil.isEmpty(sessionId)) {
 			throw new SaTokenException("SessionId 不能为空").setCode(SaErrorCode.CODE_11072);
 		}
 
 		// 先检查这个 SaSession 是否已经存在，如果不存在且 isCreate=true，则新建并返回
-		const session = this.getSaTokenDao().getSession(sessionId);
-
+		const SaTokenDao = await this.getSaTokenDao();
+		let session = SaTokenDao.getSession(sessionId);
 		if(session == null && isCreate) {
 			// 创建这个 SaSession
-			session = SaStrategy.instance.createSession(sessionId);
-
+			session = await SaStrategy.instance.createSession(sessionId);	
 			// 追加操作
 			if(appendOperation != null) {
 				appendOperation(session);
@@ -1617,7 +1621,8 @@ class StpLogic {
 			}
 
 			// 将这个 SaSession 入库
-			this.getSaTokenDao().setSession(session, timeout);
+			const SaTokenDao = await this.getSaTokenDao();
+			SaTokenDao.setSession(session, timeout);
 		}
 		return session;
 	}
@@ -1640,11 +1645,11 @@ class StpLogic {
 	 * @param {Long} timeout 如果这个 SaSession 是新建的，则使用此值作为过期值（单位：秒），可填 null，代表使用全局 timeout 值
 	 * @return {SaSession} SaSession 对象
 	 */
-	getSessionByLoginId(loginId, isCreate = true, timeout = null) {
+	async getSessionByLoginId(loginId, isCreate = true, timeout = null) {
 		if(SaFoxUtil.isEmpty(loginId)) {
 			throw new SaTokenException("Account-Session 获取失败：loginId 不能为空");
 		}
-		return this.getSessionBySessionId(this.splicingKeySession(loginId), isCreate, timeout, session => {
+		return this.getSessionBySessionId(await this.splicingKeySession(loginId), isCreate, timeout, session => {
 			// 这里是该 Account-Session 首次创建时才会被执行的方法：
 			// 		设定这个 SaSession 的各种基础信息：类型、账号体系、账号id
 			session.setType(SaTokenConsts.SESSION_TYPE__ACCOUNT);
@@ -1703,7 +1708,7 @@ class StpLogic {
 	 * @param {boolean} isCreate 是否新建
 	 * @return {SaSession} session对象
 	 */
-	getTokenSessionByToken(tokenValue, isCreate = true) {
+	async getTokenSessionByToken(tokenValue, isCreate = true) {
 		// 1、token 为空，不允许创建
 		if(SaFoxUtil.isEmpty(tokenValue)) {
 			throw new SaTokenException("Token-Session 获取失败：token 为空").setCode(SaErrorCode.CODE_11073);
@@ -1711,7 +1716,8 @@ class StpLogic {
 
 		// 2、如果能查询到旧记录，则直接返回
 		const sessionId = this.splicingKeyTokenSession(tokenValue);
-		const tokenSession = this.getSaTokenDao().getSession(sessionId);
+		const SaTokenDao = await this.getSaTokenDao();
+		const tokenSession = SaTokenDao.getSession(sessionId);
 		if(tokenSession != null) {
 			return tokenSession;
 		}
@@ -1871,19 +1877,19 @@ class StpLogic {
 	 * @param {Long} activeTimeout 这个 token 的最低活跃频率，单位：秒，填 null 代表使用全局配置的 activeTimeout 值
 	 * @param {Long} timeout 保存数据时使用的 ttl 值，单位：秒，填 null 代表使用全局配置的 timeout 值
 	 */
-	setLastActiveToNow(tokenValue, activeTimeout, timeout) {
+	async setLastActiveToNow(tokenValue, activeTimeout, timeout) {
 
 		// 如果提供的 timeout 为null，则使用全局配置的 timeout 值
-		const config = this.getConfigOrGlobal();
+		const config = await this.getConfigOrGlobal();
 		if(timeout == null) {
-			timeout = config.getTimeout();
+			timeout = await config.getTimeout();
 		}
 		// activeTimeout 变量无需赋值默认值，因为当缓存中没有这个值时，会自动使用全局配置的值
 
 		// 将此 token 的 [ 最后活跃时间 ] 标记为当前时间戳
-		const key = this.splicingKeyLastActiveTime(tokenValue);
+		const key = await this.splicingKeyLastActiveTime(tokenValue);
 		const value = String(Date.now());
-		if(config.getDynamicActiveTimeout() && activeTimeout != null) {
+		if( await config.getDynamicActiveTimeout() && activeTimeout != null) {
 			value += "," + activeTimeout;
 		}
 		this.getSaTokenDao().set(key, value, timeout);
@@ -3583,8 +3589,9 @@ class StpLogic {
 	 * @param {String} tokenValue token值
 	 * @return {String} key
 	 */
-	splicingKeyTokenValue(tokenValue) {
-		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token:" + tokenValue;
+	async splicingKeyTokenValue(tokenValue) {
+		const config = await this.getConfigOrGlobal();
+		return config.getTokenName() + ":" + this.loginType + ":token:" + tokenValue;
 	}
 
 	/**
@@ -3593,8 +3600,9 @@ class StpLogic {
 	 * @param {Object} loginId 账号id
 	 * @return {String} key
 	 */
-	splicingKeySession(loginId) {
-		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":session:" + loginId;
+	async splicingKeySession(loginId) {
+		const config = await this.getConfigOrGlobal();
+		return config.getTokenName() + ":" + this.loginType + ":session:" + loginId;
 	}
 
 	/**
@@ -3603,8 +3611,9 @@ class StpLogic {
 	 * @param {String} tokenValue token值
 	 * @return {String} key
 	 */
-	splicingKeyTokenSession(tokenValue) {
-		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":token-session:" + tokenValue;
+	async splicingKeyTokenSession(tokenValue) {
+		const cfg = await this.getConfigOrGlobal();
+		return cfg.getTokenName() + ":" + this.loginType + ":token-session:" + tokenValue;
 	}
 
 	/**
@@ -3613,8 +3622,9 @@ class StpLogic {
 	 * @param {String} tokenValue token值
 	 * @return {String} key
 	 */
-	splicingKeyLastActiveTime(tokenValue) {
-		return this.getConfigOrGlobal().getTokenName() + ":" + this.loginType + ":last-active:" + tokenValue;
+	async splicingKeyLastActiveTime(tokenValue) {
+		const cfg = await this.getConfigOrGlobal();
+		return cfg.getTokenName() + ":" + this.loginType + ":last-active:" + tokenValue;
 	}
 
 	/**
@@ -3677,8 +3687,9 @@ class StpLogic {
 	 *
 	 * @return {boolean} /
 	 */
-	isSupportShareToken() {
-		return this.getConfigOrGlobal().getIsShare();
+	async isSupportShareToken() {
+		const globalCfg = await this.getConfigOrGlobal();
+		return globalCfg.getIsShare();
 	}
 
 	/**
@@ -3686,8 +3697,8 @@ class StpLogic {
 	 *
 	 * @return {boolean} /
 	 */
-	isOpenCheckActiveTimeout() {
-		const cfg = this.getConfigOrGlobal();
+	async isOpenCheckActiveTimeout() {
+		const cfg = await this.getConfigOrGlobal();
 		return cfg.getActiveTimeout() != SaTokenDao.NEVER_EXPIRE || cfg.getDynamicActiveTimeout();
 	}
 
@@ -3739,8 +3750,8 @@ class StpLogic {
 	 *
 	 * @return {SaLoginParameter} /
 	 */
-	createSaLoginParameter() {
-		return new SaLoginParameter(this.getConfigOrGlobal());
+	async createSaLoginParameter() {
+		return await new SaLoginParameter(await this.getConfigOrGlobal());
 	}
 
 	/**
@@ -3748,8 +3759,8 @@ class StpLogic {
 	 *
 	 * @return {SaLogoutParameter} /
 	 */
-	createSaLogoutParameter() {
-		return new SaLogoutParameter(this.getConfigOrGlobal());
+	async createSaLogoutParameter() {
+		return await new SaLogoutParameter(await this.getConfigOrGlobal());
 	}
 
 

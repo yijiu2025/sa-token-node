@@ -22,7 +22,7 @@ import SaFoxUtil from "../util/SaFoxUtil.js";
 /**
  * Sa-Token 持久层接口，默认实现类，基于 SaTimedCache - ConcurrentHashMap （内存缓存，系统重启后数据丢失）
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 
@@ -42,20 +42,20 @@ class SaTokenDaoDefaultImpl extends SaTokenDaoByStringFollowObject {
      * @param {string} key 键名称
      * @returns {object|null}
      */
-    getObject(key) {
+    getObject(key, classType) {
         return this.timedCache.getObject(key);
     }
 
-    /**
-     * 获取对象值(指定类型)
-     * @template T
-     * @param {string} key 键名称
-     * @param {function} classType 类构造函数
-     * @returns {T|null}
-     */
-    getObject(key, classType) {
-        return this.getObject(key); // JavaScript 不进行运行时类型检查
-    }
+    // /**
+    //  * 获取对象值(指定类型)
+    //  * @template T
+    //  * @param {string} key 键名称
+    //  * @param {function} classType 类构造函数
+    //  * @returns {T|null}
+    //  */
+    // getObject(key, classType) {
+    //     return this.getObject(key); // JavaScript 不进行运行时类型检查
+    // }
 
     /**
      * 写入对象值

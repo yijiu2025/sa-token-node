@@ -22,7 +22,7 @@ import SaSetValueInterface from "../../application/SaSetValueInterface.js";
  *
  * <p> 在一次请求范围内: 存值、取值。数据在请求结束后失效。
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException";
 /**
  * 一个异常：代表当前不是 Web 上下文，无法调用某个 API
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 

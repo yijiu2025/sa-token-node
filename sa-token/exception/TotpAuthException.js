@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException.js";
 /**
  * 一个异常：代表 TOTP 校验未通过
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 

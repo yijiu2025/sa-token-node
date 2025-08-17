@@ -22,7 +22,7 @@ import SaLog from './SaLog.js';
 /**
  * Sa-Token 日志实现类 [ 控制台打印 ]
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 class SaLogForConsole extends SaLog {
@@ -84,7 +84,7 @@ class SaLogForConsole extends SaLog {
      */
 	// @Override
 	debug(str, ...args) {
-		println(SaLogForConsole.DEBUG, SaLogForConsole.DEBUG_COLOR, SaLogForConsole.DEBUG_PREFIX, str, args);
+		this.println(SaLogForConsole.DEBUG, SaLogForConsole.DEBUG_COLOR, SaLogForConsole.DEBUG_PREFIX, str, args);
 	}
 
     /**
@@ -94,7 +94,7 @@ class SaLogForConsole extends SaLog {
      */
 	// @Override
 	info(str, ...args) {
-		println(SaLogForConsole.INFO, SaLogForConsole.INFO_COLOR, SaLogForConsole.INFO_PREFIX, str, args);
+		this.println(SaLogForConsole.INFO, SaLogForConsole.INFO_COLOR, SaLogForConsole.INFO_PREFIX, str, args);
 	}
 
     /**
@@ -104,7 +104,7 @@ class SaLogForConsole extends SaLog {
      */
 	// @Override
 	warn(str, ...args) {
-		println(SaLogForConsole.WARN, SaLogForConsole.WARN_COLOR, SaLogForConsole.WARN_PREFIX, str, args);
+		this.println(SaLogForConsole.WARN, SaLogForConsole.WARN_COLOR, SaLogForConsole.WARN_PREFIX, str, args);
 	}
 
     /**
@@ -114,7 +114,7 @@ class SaLogForConsole extends SaLog {
      */
 	// @Override
 	error(str, ...args) {
-		println(SaLogForConsole.ERROR, SaLogForConsole.ERROR_COLOR, SaLogForConsole.ERROR_PREFIX, str, args);
+		this.println(SaLogForConsole.ERROR, SaLogForConsole.ERROR_COLOR, SaLogForConsole.ERROR_PREFIX, str, args);
 	}
 
     /**
@@ -124,7 +124,7 @@ class SaLogForConsole extends SaLog {
      */
 	// @Override
 	fatal(str, ...args) {
-		println(SaLogForConsole.FATAL, SaLogForConsole.FATAL_COLOR, SaLogForConsole.FATAL_PREFIX, str, args);
+		this.println(SaLogForConsole.FATAL, SaLogForConsole.FATAL_COLOR, SaLogForConsole.FATAL_PREFIX, str, args);
 	}
 
 	/**
@@ -135,11 +135,11 @@ class SaLogForConsole extends SaLog {
      * @param {string} str 字符串
      * @param {Array} args 参数列表
      */
-	println(level, color, prefix, str, args) {
-		const config = SaManager.getConfig();
+	async println(level, color, prefix, str, args) {
+		const config = await SaManager.getConfig();
 		if(config.getIsLog() && level >= config.getLogLevelInt()) {
             const formattedMessage = this.formatMessage(str, args);
-			if(config.getIsColorLog() == Boolean.TRUE) {
+			if(config.getIsColorLog() == true) {
                 // 彩色日志
                 console.log(color + prefix + formattedMessage + SaLogForConsole.DEFAULT_COLOR);
 				//System.out.println(color + prefix + StrFormatter.format(str, args) + DEFAULT_COLOR);

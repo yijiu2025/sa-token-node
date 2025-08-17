@@ -17,7 +17,7 @@
 /**
  * Http 请求处理器
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.43.0
  */
 class SaHttpTemplate {

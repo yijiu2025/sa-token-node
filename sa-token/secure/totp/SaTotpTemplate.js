@@ -16,7 +16,7 @@
 
 import TotpAuthException from '../../exception/TotpAuthException.js';
 
-import SaBase32Util from '../../secure/SaBase32Util.js';
+import SaBase32Util from '../SaBase32Util.js'
 import StrFormatter from '../../util/StrFormatter.js';
 import crypto from 'crypto';
 import pkg from 'hi-base32';

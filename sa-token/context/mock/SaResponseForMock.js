@@ -20,7 +20,7 @@ import SaResponse from '../model/SaResponse';
 /**
  * 对 SaResponse 包装类的实现（Mock 版）
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.42.0
  */
 

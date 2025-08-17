@@ -32,7 +32,7 @@ import SaCookieConfig from "./SaCookieConfig.js";
  *     <a href="https://sa-token.cc">https://sa-token.cc</a>
  * </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 

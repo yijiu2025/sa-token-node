@@ -21,7 +21,7 @@ import SaFoxUtil from "../../util/SaFoxUtil.js";
 /**
  * Cookie Model，代表一个 Cookie 应该具有的所有参数
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

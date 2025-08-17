@@ -19,7 +19,7 @@ import InvalidContextException from "./InvalidContextException.js";
 /**
  * 一个异常：代表框架未能获取有效的上下文
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 

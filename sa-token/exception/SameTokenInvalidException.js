@@ -18,7 +18,7 @@ import SaTokenException from "./SaTokenException.js";
 /**
  * 一个异常：代表 Same-Token 校验未通过
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.32.0
  */
 class SameTokenInvalidException extends SaTokenException {

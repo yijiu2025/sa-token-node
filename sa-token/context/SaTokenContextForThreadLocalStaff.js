@@ -28,7 +28,7 @@ import { AsyncLocalStorage } from 'async_hooks';
  *
  * <p> 一般情况下你不需要直接操作此类，因为框架的 starter 集成包里已经封装了完整的上下文操作 </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 
@@ -73,8 +73,8 @@ class SaTokenContextForThreadLocalStaff {
      * @returns {SaTokenContextModelBox}
      * @throws {SaTokenContextException}
      */
-    static getModelBox() {
-        const box = this.getModelBoxOrNull();
+    static async getModelBox() {
+        const box = await this.getModelBoxOrNull();
         if (!box) {
             throw new SaTokenContextException("SaTokenContext 上下文尚未初始化")
                 .setCode(SaErrorCode.CODE_10002);

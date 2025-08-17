@@ -18,23 +18,23 @@
 /**
  * 双形参、无返回值的函数式接口，方便开发者进行 lambda 表达式风格调用
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 // @FunctionalInterface
-// public interface SaTwoParamFunction<T, T2> {
+class SaTwoParamFunction {
 	
-// 	/**
-// 	 * 执行的方法 
-// 	 * @param r 传入的参数
-// 	 * @param r2 传入的参数 2
-// 	 */
-// 	void run(T r, T2 r2);
-	
-// }
+	/**
+	 * 执行的方法 
+	 * @param r 传入的参数
+	 * @param r2 传入的参数 2
+	 */
+	run(r, r2) {
+		// 实现逻辑
+	}
+}
 
-
-
+export default SaTwoParamFunction;
 
 
 

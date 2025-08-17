@@ -19,7 +19,7 @@ import SaHttpBasicTemplate from './SaHttpBasicTemplate.js';
 /**
  * Sa-Token Http Basic 认证模块，Util 工具类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.26.0
  */
 

@@ -17,13 +17,14 @@
 
 import SaManager from '../SaManager.js';
 import SaTokenDao from '../dao/SaTokenDao.js';
+import SaSetValueInterface from './SaSetValueInterface.js';
 
 /**
  * Application Model，全局作用域的读取值对象。
  *
  * <p> 在应用全局范围内: 存值、取值。数据在应用重启后失效，如果集成了 Redis，则在 Redis 重启后失效。
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.31.0
  */
 

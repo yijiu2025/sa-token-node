@@ -24,7 +24,7 @@ import SaStorage from './model/SaStorage.js';
 /**
  * Sa-Token 上下文持有类，你可以通过此类快速获取当前环境下的 SaRequest、SaResponse、SaStorage、SaApplication 对象。
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.18.0
  */
 
@@ -69,10 +69,10 @@ class SaHolder {
      * 获取当前请求的 Storage 包装对象
      * @returns {SaStorage}
      */
-    static getStorage() {
-      const ctx = SaManager.getSaTokenContext()
+    static async getStorage() {
+      const ctx = await SaManager.getSaTokenContext()
       if (!ctx) throw new Error('SaTokenContext 未初始化')
-      return ctx.getStorage()
+      return await ctx.getStorage()
     }
   
     /**

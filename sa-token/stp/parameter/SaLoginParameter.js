@@ -224,7 +224,7 @@ class SaLoginParameter {
 	 * @return {boolean} /
 	 */
 	haveExtraData() {
-		return extraData != null && !extraData.isEmpty();
+		return this.extraData != null && this.extraData.size > 0;
 	}
 
 	/**

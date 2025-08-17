@@ -81,7 +81,7 @@ class SaDisableWrapperInfo {
      * 转换为字符串表示
      * @return {string}
      */
-    @Override
+    // @Override
     toString() {
         return `SaDisableWrapperInfo{isDisable=${this.isDisable}, disableTime=${this.disableTime}, disableLevel=${this.disableLevel}}`;
     }

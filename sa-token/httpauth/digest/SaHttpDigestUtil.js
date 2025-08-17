@@ -22,7 +22,7 @@ import SaHttpDigestModel from './SaHttpDigestModel.js';
 /**
  * Sa-Token Http Digest 认证模块，Util 工具类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.38.0
  */
 

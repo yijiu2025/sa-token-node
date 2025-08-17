@@ -16,13 +16,12 @@
 
 import SaAnnotationHandlerInterface from '../annotation/handler/SaAnnotationHandlerInterface.js'
 import SaTokenConfig from '../config/SaTokenConfig.js'
-import StpLogic from '../stp/StpLogic.js'
+//import StpLogic from '../stp/StpLogic.js'
 import SaLoginParameter from '../stp/parameter/SaLoginParameter.js'
 import SaFoxUtil from '../util/SaFoxUtil.js'
 import SaTokenListener from './SaTokenListener.js'
 
-import {log} from '../SaManager.js'
-
+import { log } from '../SaManager.js'
 /**
  * Sa-Token 侦听器的一个实现：Log 打印
  * 

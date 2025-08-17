@@ -21,7 +21,7 @@ import SaStorage from '../model/SaStorage';
 /**
  * 对 SaStorage 包装类的实现（Mock 版）
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.42.0
  */
 

@@ -18,7 +18,7 @@ import SaFoxUtil from '../util/SaFoxUtil.js';
 /**
  * 应用全局信息
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.31.0
  */
 

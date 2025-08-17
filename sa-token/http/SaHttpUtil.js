@@ -19,7 +19,7 @@ import SaManager from '../SaManager.js';
 /**
  * Http 请求处理器 工具类
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.43.0
  */
 

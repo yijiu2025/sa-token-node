@@ -20,8 +20,8 @@ import SaTwoParamFunction from '../fun/SaTwoParamFunction.js';
 import SaTokenEventCenter from '../listener/SaTokenEventCenter.js';
 import SaSession from '../session/SaSession.js';
 import SaTerminalInfo from '../session/SaTerminalInfo.js';
-import SaLoginParameter from '../stp/parameter/SaLoginParameter.js';
-import SaLogoutParameter from '../stp/parameter/SaLogoutParameter.js';
+import SaLoginParameter from './parameter/SaLoginParameter.js';
+import SaLogoutParameter from './parameter/SaLogoutParameter.js';
 import StpLogic from './StpLogic.js';
 /**
  * Sa-Token 权限认证工具类
@@ -31,18 +31,18 @@ import StpLogic from './StpLogic.js';
  */
 class StpUtil {
 	
-	constructor() {
-        throw new Error("StpUtil is a static class and cannot be instantiated");
-    }
+	// constructor() {
+    //     throw new Error("StpUtil is a static class and cannot be instantiated");
+    // }
 	/**
 	 * 多账号体系下的类型标识
 	 */
-	static #TYPE = "login";
+	static TYPE = "login";
 
 	/**
 	 * 底层使用的 StpLogic 对象
 	 */
-	static #stpLogic = new StpLogic(this.#TYPE);
+	static stpLogic = new StpLogic(this.TYPE);
 
 	/**
 	 * 获取当前 StpLogic 的账号类型
@@ -50,7 +50,7 @@ class StpUtil {
 	 * @return {String} /
 	 */
 	static getLoginType(){
-		return this.#stpLogic.getLoginType();
+		return this.stpLogic.getLoginType();
 	}
 
 	/**
@@ -64,14 +64,14 @@ class StpUtil {
 	 */
 	static setStpLogic(newStpLogic) {
 		// 1、重置此账户的 StpLogic 对象
-		this.#stpLogic = newStpLogic;
+		this.stpLogic = newStpLogic;
 
 		// 2、添加到全局 StpLogic 集合中
 		//    以便可以通过 SaManager.getStpLogic(type) 的方式来全局获取到这个 StpLogic
 		SaManager.putStpLogic(newStpLogic);
 		
 		// 3、$$ 发布事件：更新了 stpLogic 对象
-		SaTokenEventCenter.doSetStpLogic(this.#stpLogic);
+		SaTokenEventCenter.doSetStpLogic(this.stpLogic);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class StpUtil {
 	 * @return {StpLogic} / 
 	 */
 	static getStpLogic() {
-		return this.#stpLogic;
+		return this.stpLogic;
 	}
 	
 	
@@ -92,7 +92,7 @@ class StpUtil {
 	 * @return {String} /
 	 */
 	static getTokenName() {
- 		return this.#stpLogic.getTokenName();
+ 		return this.stpLogic.getTokenName();
  	}
 
 	// /**
@@ -101,7 +101,7 @@ class StpUtil {
 	//  * @param {String} tokenValue token 值
 	//  */
 	// static setTokenValue(tokenValue){
-	// 	this.#stpLogic.setTokenValue(tokenValue);
+	// 	this.stpLogic.setTokenValue(tokenValue);
 	// }
 
 	/**
@@ -111,7 +111,7 @@ class StpUtil {
 	 * @param {int | SaLoginParameter} cookieTimeout | loginParameter Cookie存活时间(秒) | 登录参数
 	 */
 	static setTokenValue(tokenValue, cookieTimeoutOrLoginParameter){
-		this.#stpLogic.setTokenValue(tokenValue, cookieTimeoutOrLoginParameter);
+		this.stpLogic.setTokenValue(tokenValue, cookieTimeoutOrLoginParameter);
 	}
 
 	// /**
@@ -121,7 +121,7 @@ class StpUtil {
 	//  * @param {SaLoginParameter} loginParameter 登录参数
 	//  */
 	// static setTokenValue(tokenValue, loginParameter){
-	// 	this.#stpLogic.setTokenValue(tokenValue, loginParameter);
+	// 	this.stpLogic.setTokenValue(tokenValue, loginParameter);
 	// }
 
 	/**
@@ -130,7 +130,7 @@ class StpUtil {
 	 * @param {String} tokenValue 要保存的 token 值
 	 */
 	static setTokenValueToStorage(tokenValue){
-		this.#stpLogic.setTokenValueToStorage(tokenValue);
+		this.stpLogic.setTokenValueToStorage(tokenValue);
 	}
 
 	/**
@@ -139,7 +139,7 @@ class StpUtil {
 	 * @return {String} 当前tokenValue
 	 */
 	static getTokenValue() {
-		return this.#stpLogic.getTokenValue();
+		return this.stpLogic.getTokenValue();
 	}
 
 	/**
@@ -148,7 +148,7 @@ class StpUtil {
 	 * @return {String} / 
 	 */
 	static getTokenValueNotCut(){
-		return this.#stpLogic.getTokenValueNotCut();
+		return this.stpLogic.getTokenValueNotCut();
 	}
 
 	/**
@@ -157,7 +157,7 @@ class StpUtil {
 	 * @return {SaTokenInfo} token 参数信息
 	 */
 	static getTokenInfo() {
-		return this.#stpLogic.getTokenInfo();
+		return this.stpLogic.getTokenInfo();
 	}
 
 	
@@ -173,7 +173,7 @@ class StpUtil {
      * @param {String|boolean|number|SaLoginParameter} [arg] 可选参数：设备类型/是否记住我/token有效期/SaLoginParameter
      */
 	static login(id, arg) {
-		this.#stpLogic.login(id, arg);
+		this.stpLogic.login(id, arg);
 	}
 
 
@@ -184,7 +184,7 @@ class StpUtil {
 	//  * @param {Object} id 账号id，建议的类型：（long | int | String）
 	//  */
 	// static login(id) {
-	// 	this.#stpLogic.login(id);
+	// 	this.stpLogic.login(id);
 	// }
 
 	// /**
@@ -194,7 +194,7 @@ class StpUtil {
 	//  * @param {String} deviceType 设备类型
 	//  */
 	// static login(id, deviceType) {
-	// 	this.#stpLogic.login(id, deviceType);
+	// 	this.stpLogic.login(id, deviceType);
 	// }
 
 	// /**
@@ -204,7 +204,7 @@ class StpUtil {
 	//  * @param {boolean} isLastingCookie 是否为持久Cookie，值为 true 时记住我，值为 false 时关闭浏览器需要重新登录
 	//  */
 	// static login(id, isLastingCookie) {
-	// 	this.#stpLogic.login(id, isLastingCookie);
+	// 	this.stpLogic.login(id, isLastingCookie);
 	// }
 
 	// /**
@@ -214,7 +214,7 @@ class StpUtil {
 	//  * @param {long} timeout 此次登录 token 的有效期, 单位:秒
 	//  */
 	// static login(id, timeout) {
-	// 	this.#stpLogic.login(id, timeout);
+	// 	this.stpLogic.login(id, timeout);
 	// }
 
 	// /**
@@ -224,7 +224,7 @@ class StpUtil {
 	//  * @param {SaLoginParameter} loginParameter 此次登录的参数Model
 	//  */
 	// static login(id, loginParameter) {
-	// 	this.#stpLogic.login(id, loginParameter);
+	// 	this.stpLogic.login(id, loginParameter);
 	// }
 
 	// /**
@@ -234,7 +234,7 @@ class StpUtil {
 	//  * @return {String} 返回会话令牌
 	//  */
 	// static createLoginSession(id) {
-	// 	return this.#stpLogic.createLoginSession(id);
+	// 	return this.stpLogic.createLoginSession(id);
 	// }
 
 	/**
@@ -245,7 +245,7 @@ class StpUtil {
 	 * @return {String} 返回会话令牌
 	 */
 	static createLoginSession(id, loginParameter) {
-		return this.#stpLogic.createLoginSession(id, loginParameter);
+		return this.stpLogic.createLoginSession(id, loginParameter);
 	}
 
 	/**
@@ -255,7 +255,7 @@ class StpUtil {
 	 * @return {String} 返回会话令牌
 	 */
 	static getOrCreateLoginSession(id) {
-		return this.#stpLogic.getOrCreateLoginSession(id);
+		return this.stpLogic.getOrCreateLoginSession(id);
 	}
 
 
@@ -267,7 +267,7 @@ class StpUtil {
 	 */
 
 	static logout(arg1, arg2) {
-		this.#stpLogic.logout(arg1, arg2);
+		this.stpLogic.logout(arg1, arg2);
 	}
 
 	// --- 注销 (根据 token)
@@ -276,7 +276,7 @@ class StpUtil {
 	//  * 在当前客户端会话注销
 	//  */
 	// static logout() {
-	// 	this.#stpLogic.logout();
+	// 	this.stpLogic.logout();
 	// }
 
 	// /**
@@ -284,7 +284,7 @@ class StpUtil {
 	//  * @param {SaLogoutParameter} logoutParameter 注销参数
 	//  */
 	// static logout(logoutParameter) {
-	// 	this.#stpLogic.logout(logoutParameter);
+	// 	this.stpLogic.logout(logoutParameter);
 	// }
 
 	// /**
@@ -293,7 +293,7 @@ class StpUtil {
 	//  * @param {String} tokenValue 指定 token
 	//  */
 	// static logoutByTokenValue(tokenValue) {
-	// 	this.#stpLogic.logoutByTokenValue(tokenValue);
+	// 	this.stpLogic.logoutByTokenValue(tokenValue);
 	// }
 
 	/**
@@ -303,7 +303,7 @@ class StpUtil {
 	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
 	static logoutByTokenValue(tokenValue, logoutParameter) {
-		this.#stpLogic.logoutByTokenValue(tokenValue, logoutParameter);
+		this.stpLogic.logoutByTokenValue(tokenValue, logoutParameter);
 	}
 
 	// /**
@@ -313,7 +313,7 @@ class StpUtil {
 	//  * @param {String} tokenValue 指定 token
 	//  */
 	// static kickoutByTokenValue(tokenValue) {
-	// 	this.#stpLogic.kickoutByTokenValue(tokenValue);
+	// 	this.stpLogic.kickoutByTokenValue(tokenValue);
 	// }
 
 	/**
@@ -324,7 +324,7 @@ class StpUtil {
 	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
 	static kickoutByTokenValue(tokenValue, logoutParameter) {
-		this.#stpLogic.kickoutByTokenValue(tokenValue, logoutParameter);
+		this.stpLogic.kickoutByTokenValue(tokenValue, logoutParameter);
 	}
 
 	// /**
@@ -334,7 +334,7 @@ class StpUtil {
 	//  * @param {String} tokenValue 指定 token
 	//  */
 	// static replacedByTokenValue(tokenValue) {
-	// 	this.#stpLogic.replacedByTokenValue(tokenValue);
+	// 	this.stpLogic.replacedByTokenValue(tokenValue);
 	// }
 
 	/**
@@ -345,7 +345,7 @@ class StpUtil {
 	 * @param {SaLogoutParameter} logoutParameter 注销参数
 	 */
 	static replacedByTokenValue(tokenValue, logoutParameter) {
-		this.#stpLogic.replacedByTokenValue(tokenValue, logoutParameter);
+		this.stpLogic.replacedByTokenValue(tokenValue, logoutParameter);
 	}
 
 	// --- 注销 (根据 loginId)
@@ -356,7 +356,7 @@ class StpUtil {
 	//  * @param {Object} loginId 账号id
 	//  */
 	// static logout(loginId) {
-	// 	this.#stpLogic.logout(loginId);
+	// 	this.stpLogic.logout(loginId);
 	// }
 
 	// /**
@@ -366,7 +366,7 @@ class StpUtil {
 	//  * @param {String} deviceType 设备类型 (填 null 代表注销该账号的所有设备类型)
 	//  */
 	// static logout(loginId, deviceType) {
-	// 	this.#stpLogic.logout(loginId, deviceType);
+	// 	this.stpLogic.logout(loginId, deviceType);
 	// }
 
 	// /**
@@ -376,7 +376,7 @@ class StpUtil {
 	//  * @param {SaLogoutParameter} logoutParameter 注销参数
 	//  */
 	// static logout(loginId, logoutParameter) {
-	// 	this.#stpLogic.logout(loginId, logoutParameter);
+	// 	this.stpLogic.logout(loginId, logoutParameter);
 	// }
 
 
@@ -388,7 +388,7 @@ class StpUtil {
 	 * @param {String|SaLogoutParameter} [arg] 可选参数：设备类型或注销参数对象
 	 */
 	static kickout(loginId, arg) {
-		this.#stpLogic.kickout(loginId, arg);
+		this.stpLogic.kickout(loginId, arg);
 	}
 
 
@@ -399,7 +399,7 @@ class StpUtil {
 	//  * @param {Object} loginId 账号id
 	//  */
 	// static kickout(loginId) {
-	// 	this.#stpLogic.kickout(loginId);
+	// 	this.stpLogic.kickout(loginId);
 	// }
 
 	// /**
@@ -410,7 +410,7 @@ class StpUtil {
 	//  * @param {String} deviceType 设备类型 (填 null 代表踢出该账号的所有设备类型)
 	//  */
 	// static kickout(loginId, deviceType) {
-	// 	this.#stpLogic.kickout(loginId, deviceType);
+	// 	this.stpLogic.kickout(loginId, deviceType);
 	// }
 
 	// /**
@@ -421,7 +421,7 @@ class StpUtil {
 	//  * @param {SaLogoutParameter} logoutParameter 注销参数
 	//  */
 	// static kickout(loginId, logoutParameter) {
-	// 	this.#stpLogic.kickout(loginId, logoutParameter);
+	// 	this.stpLogic.kickout(loginId, logoutParameter);
 	// }
 
 
@@ -433,7 +433,7 @@ class StpUtil {
 	 * @param {String|SaLogoutParameter} [arg] 可选参数：设备类型或注销参数对象
 	 */
 	static replaced(loginId, arg) {
-		this.#stpLogic.replaced(loginId, arg);
+		this.stpLogic.replaced(loginId, arg);
 	}
 
 
@@ -444,7 +444,7 @@ class StpUtil {
 	//  * @param {Object} loginId 账号id
 	//  */
 	// static replaced(loginId) {
-	// 	this.#stpLogic.replaced(loginId);
+	// 	this.stpLogic.replaced(loginId);
 	// }
 
 	// /**
@@ -455,7 +455,7 @@ class StpUtil {
 	//  * @param {String} deviceType 设备类型 （填 null 代表顶替该账号的所有设备类型）
 	//  */
 	// static replaced(loginId, deviceType) {
-	// 	this.#stpLogic.replaced(loginId, deviceType);
+	// 	this.stpLogic.replaced(loginId, deviceType);
 	// }
 
 	// /**
@@ -466,7 +466,7 @@ class StpUtil {
 	//  * @param {SaLogoutParameter} logoutParameter 注销参数
 	//  */
 	// static replaced(loginId, logoutParameter) {
-	// 	this.#stpLogic.replaced(loginId, logoutParameter);
+	// 	this.stpLogic.replaced(loginId, logoutParameter);
 	// }
 
 	// --- 注销 (会话管理辅助方法)
@@ -477,7 +477,7 @@ class StpUtil {
 	 * @param {SaTerminalInfo} terminal /
 	 */
 	static removeTerminalByLogout(session, terminal) {
-		this.#stpLogic.removeTerminalByLogout(session, terminal);
+		this.stpLogic.removeTerminalByLogout(session, terminal);
 	}
 
 	/**
@@ -486,7 +486,7 @@ class StpUtil {
 	 * @param {SaTerminalInfo} terminal /
 	 */
 	static removeTerminalByKickout(session, terminal) {
-		this.#stpLogic.removeTerminalByKickout(session, terminal);
+		this.stpLogic.removeTerminalByKickout(session, terminal);
 	}
 
 	/**
@@ -495,7 +495,7 @@ class StpUtil {
 	 * @param {SaTerminalInfo} terminal /
 	 */
 	static removeTerminalByReplaced(session, terminal) {
-		this.#stpLogic.removeTerminalByReplaced(session, terminal);
+		this.stpLogic.removeTerminalByReplaced(session, terminal);
 	}
 
 
@@ -507,7 +507,7 @@ class StpUtil {
 	//  * @return {boolean} 已登录返回 true，未登录返回 false
 	//  */
 	// static isLogin() {
-	// 	return this.#stpLogic.isLogin();
+	// 	return this.stpLogic.isLogin();
 	// }
 
 	/**
@@ -516,14 +516,14 @@ class StpUtil {
 	 * @return {boolean} 已登录返回 true，未登录返回 false
 	 */
 	static isLogin(loginId) {
-		return this.#stpLogic.isLogin(loginId);
+		return this.stpLogic.isLogin(loginId);
 	}
 
 	/**
 	 * 检验当前会话是否已经登录，如未登录，则抛出异常
 	 */
  	static checkLogin() {
- 		this.#stpLogic.checkLogin();
+ 		this.stpLogic.checkLogin();
  	}
 
 	// /**
@@ -532,7 +532,7 @@ class StpUtil {
 	//  * @return {Object} 账号id
 	//  */
 	// static getLoginId() {
-	// 	return this.#stpLogic.getLoginId();
+	// 	return this.stpLogic.getLoginId();
 	// }
 
 	/**
@@ -543,7 +543,7 @@ class StpUtil {
 	 * @return {<T> T} 登录id
 	 */
 	static getLoginId(defaultValue) {
-		return this.#stpLogic.getLoginId(defaultValue);
+		return this.stpLogic.getLoginId(defaultValue);
 	}
 
 	/**
@@ -552,7 +552,7 @@ class StpUtil {
 	 * @return {Object} 账号id
 	 */
 	static getLoginIdDefaultNull() {
-		return this.#stpLogic.getLoginIdDefaultNull();
+		return this.stpLogic.getLoginIdDefaultNull();
  	}
 
 	/**
@@ -561,7 +561,7 @@ class StpUtil {
 	 * @return {String} 账号id
 	 */
 	static getLoginIdAsString() {
-		return this.#stpLogic.getLoginIdAsString();
+		return this.stpLogic.getLoginIdAsString();
 	}
 
 	/**
@@ -570,7 +570,7 @@ class StpUtil {
 	 * @return {int} 账号id
 	 */
 	static getLoginIdAsInt() {
-		return this.#stpLogic.getLoginIdAsInt();
+		return this.stpLogic.getLoginIdAsInt();
 	}
 
 	/**
@@ -579,7 +579,7 @@ class StpUtil {
 	 * @return {long} 账号id
 	 */
 	static getLoginIdAsLong() {
-		return this.#stpLogic.getLoginIdAsLong();
+		return this.stpLogic.getLoginIdAsLong();
 	}
 
 	/**
@@ -589,7 +589,7 @@ class StpUtil {
 	 * @return {Object} 账号id
 	 */
  	static getLoginIdByToken(tokenValue) {
- 		return this.#stpLogic.getLoginIdByToken(tokenValue);
+ 		return this.stpLogic.getLoginIdByToken(tokenValue);
  	}
 
 	/**
@@ -599,7 +599,7 @@ class StpUtil {
 	 * @return {Object} 账号id
 	 */
 	static getLoginIdByTokenNotThinkFreeze(tokenValue) {
-		return this.#stpLogic.getLoginIdByTokenNotThinkFreeze(tokenValue);
+		return this.stpLogic.getLoginIdByTokenNotThinkFreeze(tokenValue);
 	}
 
 	// /**
@@ -609,7 +609,7 @@ class StpUtil {
 	//  * @return {Object} 对应的扩展数据
 	//  */
 	// static getExtra(key) {
-	// 	return this.#stpLogic.getExtra(key);
+	// 	return this.stpLogic.getExtra(key);
 	// }
 
 	/**
@@ -620,7 +620,7 @@ class StpUtil {
 	 * @return {Object} 对应的扩展数据
 	 */
 	static getExtra(tokenValueOrKey, key) {
-		return this.#stpLogic.getExtra(tokenValueOrKey, key);
+		return this.stpLogic.getExtra(tokenValueOrKey, key);
 	}
  	
  	
@@ -634,7 +634,7 @@ class StpUtil {
 	 * @return {SaSession} SaSession 对象
 	 */
 	static getSessionByLoginId(loginId, isCreate) {
-		return this.#stpLogic.getSessionByLoginId(loginId, isCreate);
+		return this.stpLogic.getSessionByLoginId(loginId, isCreate);
 	}
 
 	/**
@@ -644,7 +644,7 @@ class StpUtil {
 	 * @return {SaSession} Session对象
 	 */
 	static getSessionBySessionId(sessionId) {
-		return this.#stpLogic.getSessionBySessionId(sessionId);
+		return this.stpLogic.getSessionBySessionId(sessionId);
 	}
 
 	// /**
@@ -654,7 +654,7 @@ class StpUtil {
 	//  * @return {SaSession} SaSession 对象
 	//  */
 	// static getSessionByLoginId(loginId) {
-	// 	return this.#stpLogic.getSessionByLoginId(loginId);
+	// 	return this.stpLogic.getSessionByLoginId(loginId);
 	// }
 
 	/**
@@ -664,7 +664,7 @@ class StpUtil {
 	 * @return {SaSession} Session对象
 	 */
 	static getSession(isCreate) {
-		return this.#stpLogic.getSession(isCreate);
+		return this.stpLogic.getSession(isCreate);
 	}
 
 	// /**
@@ -673,7 +673,7 @@ class StpUtil {
 	//  * @return {SaSession} Session对象
 	//  */
 	// static getSession() {
-	// 	return this.#stpLogic.getSession();
+	// 	return this.stpLogic.getSession();
 	// }
 
 	
@@ -686,7 +686,7 @@ class StpUtil {
 	 * @return {SaSession} Session对象
 	 */
 	static getTokenSessionByToken(tokenValue) {
-		return this.#stpLogic.getTokenSessionByToken(tokenValue);
+		return this.stpLogic.getTokenSessionByToken(tokenValue);
 	}
 
 	/**
@@ -695,7 +695,7 @@ class StpUtil {
 	 * @return {SaSession} Session对象
 	 */
 	static getTokenSession() {
-		return this.#stpLogic.getTokenSession();
+		return this.stpLogic.getTokenSession();
 	}
 
 	/**
@@ -704,7 +704,7 @@ class StpUtil {
 	 * @return {SaSession} Token-Session 对象
 	 */
 	static getAnonTokenSession() {
-		return this.#stpLogic.getAnonTokenSession();
+		return this.stpLogic.getAnonTokenSession();
 	}
 	
 
@@ -718,14 +718,14 @@ class StpUtil {
 	 * </h2>
 	 */
 	static updateLastActiveToNow() {
-		this.#stpLogic.updateLastActiveToNow();
+		this.stpLogic.updateLastActiveToNow();
 	}
 
 	/**
 	 * 检查当前 token 是否已被冻结，如果是则抛出异常
 	 */
  	static checkActiveTimeout() {
- 		this.#stpLogic.checkActiveTimeout();
+ 		this.stpLogic.checkActiveTimeout();
  	}
 
 	/**
@@ -734,7 +734,7 @@ class StpUtil {
 	 * @return {long} /
 	 */
 	static getTokenLastActiveTime() {
-		return this.#stpLogic.getTokenLastActiveTime();
+		return this.stpLogic.getTokenLastActiveTime();
 	}
 
 
@@ -746,7 +746,7 @@ class StpUtil {
 	//  * @return {long} token剩余有效时间
 	//  */
  	// static getTokenTimeout() {
- 	// 	return this.#stpLogic.getTokenTimeout();
+ 	// 	return this.stpLogic.getTokenTimeout();
  	// }
 
 	/**
@@ -756,7 +756,7 @@ class StpUtil {
 	 * @return {long} token剩余有效时间
 	 */
 	static getTokenTimeout(token) {
-		return this.#stpLogic.getTokenTimeout(token);
+		return this.stpLogic.getTokenTimeout(token);
 	}
 
 	/**
@@ -765,7 +765,7 @@ class StpUtil {
 	 * @return {long} token剩余有效时间
 	 */
  	static getSessionTimeout() {
- 		return this.#stpLogic.getSessionTimeout();
+ 		return this.stpLogic.getSessionTimeout();
  	}
 
 	/**
@@ -774,7 +774,7 @@ class StpUtil {
 	 * @return {long} token剩余有效时间
 	 */
  	static getTokenSessionTimeout() {
- 		return this.#stpLogic.getTokenSessionTimeout();
+ 		return this.stpLogic.getTokenSessionTimeout();
  	}
 
 	/**
@@ -783,7 +783,7 @@ class StpUtil {
 	 * @return {long} /
 	 */
  	static getTokenActiveTimeout() {
- 		return this.#stpLogic.getTokenActiveTimeout();
+ 		return this.stpLogic.getTokenActiveTimeout();
  	}
 
 	// /**
@@ -792,7 +792,7 @@ class StpUtil {
 	//  * @param {long} timeout 要修改成为的有效时间 (单位: 秒)
 	//  */
  	// static renewTimeout(timeout) {
- 	// 	this.#stpLogic.renewTimeout(timeout);
+ 	// 	this.stpLogic.renewTimeout(timeout);
  	// }
 
 	/**
@@ -802,7 +802,7 @@ class StpUtil {
 	 * @param {long} timeout 要修改成为的有效时间 (单位: 秒，填 -1 代表要续为永久有效)
 	 */
  	static renewTimeout(tokenValueOrTimeout, timeout) {
- 		this.#stpLogic.renewTimeout(tokenValueOrTimeout, timeout);
+ 		this.stpLogic.renewTimeout(tokenValueOrTimeout, timeout);
  	}
  	
  	
@@ -814,7 +814,7 @@ class StpUtil {
 	//  * @return {List<String>} /
 	//  */
 	// static getRoleList() {
-	// 	return this.#stpLogic.getRoleList();
+	// 	return this.stpLogic.getRoleList();
 	// }
 
 	/**
@@ -824,7 +824,7 @@ class StpUtil {
 	 * @return {List<String>} /
 	 */
 	static getRoleList(loginId) {
-		return this.#stpLogic.getRoleList(loginId);
+		return this.stpLogic.getRoleList(loginId);
 	}
 
 	// /**
@@ -834,7 +834,7 @@ class StpUtil {
 	//  * @return {boolean} /
 	//  */
  	// static hasRole(role) {
- 	// 	return this.#stpLogic.hasRole(role);
+ 	// 	return this.stpLogic.hasRole(role);
  	// }
 
 	/**
@@ -845,7 +845,7 @@ class StpUtil {
 	 * @return {boolean} 是否含有指定角色标识
 	 */
  	static hasRole(loginIdOrRole, role) {
- 		return this.#stpLogic.hasRole(loginIdOrRole, role);
+ 		return this.stpLogic.hasRole(loginIdOrRole, role);
  	}
 
 	/**
@@ -855,7 +855,7 @@ class StpUtil {
 	 * @return {boolean} true或false
 	 */
  	static hasRoleAnd(...roleArray){
- 		return this.#stpLogic.hasRoleAnd(...roleArray);
+ 		return this.stpLogic.hasRoleAnd(...roleArray);
  	}
 
 	/**
@@ -865,7 +865,7 @@ class StpUtil {
 	 * @return {boolean} true或false
 	 */
  	static hasRoleOr(...roleArray){
- 		return this.#stpLogic.hasRoleOr(...roleArray);
+ 		return this.stpLogic.hasRoleOr(...roleArray);
  	}
 
 	/**
@@ -874,7 +874,7 @@ class StpUtil {
 	 * @param {String} role 角色标识
 	 */
  	static checkRole(role) {
- 		this.#stpLogic.checkRole(role);
+ 		this.stpLogic.checkRole(role);
  	}
 
 	/**
@@ -883,7 +883,7 @@ class StpUtil {
 	 * @param {String...} roleArray 角色标识数组
 	 */
  	static checkRoleAnd(...roleArray){
- 		this.#stpLogic.checkRoleAnd(...roleArray);
+ 		this.stpLogic.checkRoleAnd(...roleArray);
  	}
 
 	/**
@@ -892,7 +892,7 @@ class StpUtil {
 	 * @param {String...} roleArray 角色标识数组
 	 */
  	static checkRoleOr(...roleArray){
- 		this.#stpLogic.checkRoleOr(...roleArray);
+ 		this.stpLogic.checkRoleOr(...roleArray);
  	}
 
 	
@@ -904,7 +904,7 @@ class StpUtil {
 	//  * @return {List<String>} /
 	//  */
 	// static getPermissionList() {
-	// 	return this.#stpLogic.getPermissionList();
+	// 	return this.stpLogic.getPermissionList();
 	// }
 
 	/**
@@ -914,7 +914,7 @@ class StpUtil {
 	 * @return {List<String>} /
 	 */
 	static getPermissionList(loginId) {
-		return this.#stpLogic.getPermissionList(loginId);
+		return this.stpLogic.getPermissionList(loginId);
 	}
 
 	// /**
@@ -924,7 +924,7 @@ class StpUtil {
 	//  * @return {boolean} 是否含有指定权限
 	//  */
 	// static hasPermission(permission) {
-	// 	return this.#stpLogic.hasPermission(permission);
+	// 	return this.stpLogic.hasPermission(permission);
 	// }
 
 	/**
@@ -935,7 +935,7 @@ class StpUtil {
 	 * @return {boolean} 是否含有指定权限
 	 */
 	static hasPermission(loginIdOrPermission, permission) {
-		return this.#stpLogic.hasPermission(loginIdOrPermission, permission);
+		return this.stpLogic.hasPermission(loginIdOrPermission, permission);
 	}
 
 	/**
@@ -945,7 +945,7 @@ class StpUtil {
 	 * @return {boolean} true 或 false
 	 */
  	static hasPermissionAnd(...permissionArray){
- 		return this.#stpLogic.hasPermissionAnd(...permissionArray);
+ 		return this.stpLogic.hasPermissionAnd(...permissionArray);
  	}
 
 	/**
@@ -955,7 +955,7 @@ class StpUtil {
 	 * @return {boolean} true 或 false
 	 */
  	static hasPermissionOr(...permissionArray){
- 		return this.#stpLogic.hasPermissionOr(...permissionArray);
+ 		return this.stpLogic.hasPermissionOr(...permissionArray);
  	}
 
 	/**
@@ -964,7 +964,7 @@ class StpUtil {
 	 * @param {String} permission 权限码
 	 */
 	static checkPermission(permission) {
-		this.#stpLogic.checkPermission(permission);
+		this.stpLogic.checkPermission(permission);
 	}
 
 	/**
@@ -973,7 +973,7 @@ class StpUtil {
 	 * @param {String...} permissionArray 权限码数组
 	 */
 	static checkPermissionAnd(...permissionArray) {
-		this.#stpLogic.checkPermissionAnd(...permissionArray);
+		this.stpLogic.checkPermissionAnd(...permissionArray);
 	}
 
 	/**
@@ -982,7 +982,7 @@ class StpUtil {
 	 * @param {String...} permissionArray 权限码数组
 	 */
 	static checkPermissionOr(...permissionArray) {
-		this.#stpLogic.checkPermissionOr(...permissionArray);
+		this.stpLogic.checkPermissionOr(...permissionArray);
 	}
 
 
@@ -999,7 +999,7 @@ class StpUtil {
 	//  * @return {String} token值
 	//  */
 	// static getTokenValueByLoginId(loginId) {
-	// 	return this.#stpLogic.getTokenValueByLoginId(loginId);
+	// 	return this.stpLogic.getTokenValueByLoginId(loginId);
 	// }
 
 	/**
@@ -1014,7 +1014,7 @@ class StpUtil {
 	 * @return {String} token值
 	 */
 	static getTokenValueByLoginId(loginId, deviceType) {
-		return this.#stpLogic.getTokenValueByLoginId(loginId, deviceType);
+		return this.stpLogic.getTokenValueByLoginId(loginId, deviceType);
 	}
 
 	// /**
@@ -1024,7 +1024,7 @@ class StpUtil {
 	//  * @return {List<String>} 此 loginId 的所有相关 token
 	//  */
 	// static getTokenValueListByLoginId(loginId) {
-	// 	return this.#stpLogic.getTokenValueListByLoginId(loginId);
+	// 	return this.stpLogic.getTokenValueListByLoginId(loginId);
 	// }
 
 	/**
@@ -1035,7 +1035,7 @@ class StpUtil {
 	 * @return {List<String>} 此 loginId 的所有登录 token
 	 */
 	static getTokenValueListByLoginId(loginId, deviceType) {
-		return this.#stpLogic.getTokenValueListByLoginId(loginId, deviceType);
+		return this.stpLogic.getTokenValueListByLoginId(loginId, deviceType);
 	}
 
 	// /**
@@ -1045,7 +1045,7 @@ class StpUtil {
 	//  * @return {List<SaTerminalInfo>} 此 loginId 的所有登录 token
 	//  */
 	// static getTerminalListByLoginId(loginId) {
-	// 	return this.#stpLogic.getTerminalListByLoginId(loginId);
+	// 	return this.stpLogic.getTerminalListByLoginId(loginId);
 	// }
 
 	/**
@@ -1056,7 +1056,7 @@ class StpUtil {
 	 * @return {List<SaTerminalInfo>} 此 loginId 的所有登录设备信息
 	 */
 	static getTerminalListByLoginId(loginId, deviceType) {
-		return this.#stpLogic.getTerminalListByLoginId(loginId, deviceType);
+		return this.stpLogic.getTerminalListByLoginId(loginId, deviceType);
 	}
 
 	/**
@@ -1066,7 +1066,7 @@ class StpUtil {
 	 * @param {SaTwoParamFunction<SaSession, SaTerminalInfo>} function 需要执行的函数
 	 */
 	static forEachTerminalList(loginId, func) {
-		this.#stpLogic.forEachTerminalList(loginId, func);
+		this.stpLogic.forEachTerminalList(loginId, func);
 	}
 
 	/**
@@ -1075,7 +1075,7 @@ class StpUtil {
 	 * @return {SaTerminalInfo} /
 	 */
 	static getTerminalInfo() {
-		return this.#stpLogic.getTerminalInfo();
+		return this.stpLogic.getTerminalInfo();
 	}
 
 	/**
@@ -1085,7 +1085,7 @@ class StpUtil {
 	 * @return {SaTerminalInfo} /
 	 */
 	static getTerminalInfoByToken(tokenValue) {
-		return this.#stpLogic.getTerminalInfoByToken(tokenValue);
+		return this.stpLogic.getTerminalInfoByToken(tokenValue);
 	}
 
 	/**
@@ -1094,7 +1094,7 @@ class StpUtil {
 	 * @return {String} 当前令牌的登录设备类型
 	 */
 	static getLoginDeviceType() {
-		return this.#stpLogic.getLoginDeviceType();
+		return this.stpLogic.getLoginDeviceType();
 	}
 
 	/**
@@ -1104,7 +1104,7 @@ class StpUtil {
 	 * @return {String} 当前令牌的登录设备类型
 	 */
 	static getLoginDeviceTypeByToken(tokenValue) {
-		return this.#stpLogic.getLoginDeviceTypeByToken(tokenValue);
+		return this.stpLogic.getLoginDeviceTypeByToken(tokenValue);
 	}
 
 	/**
@@ -1113,7 +1113,7 @@ class StpUtil {
 	 * @return {String} /
 	 */
 	static getLoginDeviceId() {
-		return this.#stpLogic.getLoginDeviceId();
+		return this.stpLogic.getLoginDeviceId();
 	}
 
 	/**
@@ -1123,7 +1123,7 @@ class StpUtil {
 	 * @return {String} /
 	 */
 	static getLoginDeviceIdByToken(tokenValue) {
-		return this.#stpLogic.getLoginDeviceIdByToken(tokenValue);
+		return this.stpLogic.getLoginDeviceIdByToken(tokenValue);
 	}
 
 	/**
@@ -1133,7 +1133,7 @@ class StpUtil {
 	 * @return {boolean} /
 	 */
 	static isTrustDeviceId(userId, deviceId) {
-		return this.#stpLogic.isTrustDeviceId(userId, deviceId);
+		return this.stpLogic.isTrustDeviceId(userId, deviceId);
 	}
 
 
@@ -1151,7 +1151,7 @@ class StpUtil {
 	 * @return {List<String>} token集合
 	 */
 	static searchTokenValue(keyword, start, size, sortType) {
-		return this.#stpLogic.searchTokenValue(keyword, start, size, sortType);
+		return this.stpLogic.searchTokenValue(keyword, start, size, sortType);
 	}
 
 	/**
@@ -1165,7 +1165,7 @@ class StpUtil {
 	 * @return {List<String>} sessionId集合
 	 */
 	static searchSessionId(keyword, start, size, sortType) {
-		return this.#stpLogic.searchSessionId(keyword, start, size, sortType);
+		return this.stpLogic.searchSessionId(keyword, start, size, sortType);
 	}
 
 	/**
@@ -1179,7 +1179,7 @@ class StpUtil {
 	 * @return {List<String>} sessionId集合
 	 */
 	static searchTokenSessionId(keyword, start, size, sortType) {
-		return this.#stpLogic.searchTokenSessionId(keyword, start, size, sortType);
+		return this.stpLogic.searchTokenSessionId(keyword, start, size, sortType);
 	}
 
 	
@@ -1193,7 +1193,7 @@ class StpUtil {
 	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	//  */
 	// static disable(loginId, time) {
-	// 	this.#stpLogic.disable(loginId, time);
+	// 	this.stpLogic.disable(loginId, time);
 	// }
 
 	// /**
@@ -1203,7 +1203,7 @@ class StpUtil {
 	//  * @return {boolean} /
 	//  */
 	// static isDisable(loginId) {
-	// 	return this.#stpLogic.isDisable(loginId);
+	// 	return this.stpLogic.isDisable(loginId);
 	// }
 
 	// /**
@@ -1212,7 +1212,7 @@ class StpUtil {
 	//  * @param {Object} loginId 账号id
 	//  */
 	// static checkDisable(loginId) {
-	// 	this.#stpLogic.checkDisable(loginId);
+	// 	this.stpLogic.checkDisable(loginId);
 	// }
 
 	// /**
@@ -1222,7 +1222,7 @@ class StpUtil {
 	//  * @return {long} /
 	//  */
 	// static getDisableTime(loginId) {
-	// 	return this.#stpLogic.getDisableTime(loginId);
+	// 	return this.stpLogic.getDisableTime(loginId);
 	// }
 
 	// /**
@@ -1231,7 +1231,7 @@ class StpUtil {
 	//  * @param {Object} loginId 账号id
 	//  */
 	// static untieDisable(loginId) {
-	// 	this.#stpLogic.untieDisable(loginId);
+	// 	this.stpLogic.untieDisable(loginId);
 	// }
 
 	
@@ -1246,7 +1246,7 @@ class StpUtil {
 	 * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	 */
 	static disable(loginId, serviceOrTime, time) {
-		this.#stpLogic.disable(loginId, serviceOrTime, time);
+		this.stpLogic.disable(loginId, serviceOrTime, time);
 	}
 
 	/**
@@ -1257,7 +1257,7 @@ class StpUtil {
 	 * @return {boolean} /
 	 */
 	static isDisable(loginId, service) {
-		return this.#stpLogic.isDisable(loginId, service);
+		return this.stpLogic.isDisable(loginId, service);
 	}
 
 	/**
@@ -1267,7 +1267,7 @@ class StpUtil {
 	 * @param {String...} services 指定服务，可以指定多个
 	 */
 	static checkDisable(loginId, ...services) {
-		this.#stpLogic.checkDisable(loginId, ...services);
+		this.stpLogic.checkDisable(loginId, ...services);
 	}
 
 	/**
@@ -1278,7 +1278,7 @@ class StpUtil {
 	 * @return {long} /
 	 */
 	static getDisableTime(loginId, service) {
-		return this.#stpLogic.getDisableTime(loginId, service);
+		return this.stpLogic.getDisableTime(loginId, service);
 	}
 
 	/**
@@ -1288,7 +1288,7 @@ class StpUtil {
 	 * @param {String...} services 指定服务，可以指定多个
 	 */
 	static untieDisable(loginId, ...services) {
-		this.#stpLogic.untieDisable(loginId, ...services);
+		this.stpLogic.untieDisable(loginId, ...services);
 	}
 
 
@@ -1304,7 +1304,7 @@ class StpUtil {
 	 * @param {Number} [time] 封禁时间(单位：秒,-1=永久封禁)
 	 */
 	static disableLevel(loginId, serviceOrLevel, levelOrTime, time) {
-		this.#stpLogic.disableLevel(loginId, serviceOrLevel, levelOrTime, time);
+		this.stpLogic.disableLevel(loginId, serviceOrLevel, levelOrTime, time);
 	}
  
 
@@ -1316,7 +1316,7 @@ class StpUtil {
 	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	//  */
 	// static disableLevel(loginId, level, time) {
-	// 	this.#stpLogic.disableLevel(loginId, level, time);
+	// 	this.stpLogic.disableLevel(loginId, level, time);
 	// }
 
 	// /**
@@ -1328,7 +1328,7 @@ class StpUtil {
 	//  * @param {long} time 封禁时间, 单位: 秒 （-1=永久封禁）
 	//  */
 	// static disableLevel(loginId, service, level, time) {
-	// 	this.#stpLogic.disableLevel(loginId, service, level, time);
+	// 	this.stpLogic.disableLevel(loginId, service, level, time);
 	// }
 
 
@@ -1342,7 +1342,7 @@ class StpUtil {
 	 * @return {boolean} 是否已被封禁到指定等级
 	 */
 	static isDisableLevel(loginId, serviceOrLevel, level) {
-		return this.#stpLogic.isDisableLevel(loginId, serviceOrLevel, level);
+		return this.stpLogic.isDisableLevel(loginId, serviceOrLevel, level);
 	}
 
 	// /**
@@ -1353,7 +1353,7 @@ class StpUtil {
 	//  * @return {boolean} /
 	//  */
 	// static isDisableLevel(loginId, level) {
-	// 	return this.#stpLogic.isDisableLevel(loginId, level);
+	// 	return this.stpLogic.isDisableLevel(loginId, level);
 	// }
 
 	// /**
@@ -1365,7 +1365,7 @@ class StpUtil {
 	//  * @return {boolean} /
 	//  */
 	// static isDisableLevel(loginId, service, level) {
-	// 	return this.#stpLogic.isDisableLevel(loginId, service, level);
+	// 	return this.stpLogic.isDisableLevel(loginId, service, level);
 	// }
 
 
@@ -1378,7 +1378,7 @@ class StpUtil {
 	 * @throws {DisableServiceException} 如果已被封禁则抛出异常
 	 */
 	static checkDisableLevel(loginId, serviceOrLevel, level) {
-		this.#stpLogic.checkDisableLevel(loginId, serviceOrLevel, level);
+		this.stpLogic.checkDisableLevel(loginId, serviceOrLevel, level);
 	}
 
 	// /**
@@ -1388,7 +1388,7 @@ class StpUtil {
 	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
 	//  */
 	// static checkDisableLevel(loginId, level) {
-	// 	this.#stpLogic.checkDisableLevel(loginId, level);
+	// 	this.stpLogic.checkDisableLevel(loginId, level);
 	// }
 
 	// /**
@@ -1399,7 +1399,7 @@ class StpUtil {
 	//  * @param {int} level 封禁等级 （只有 封禁等级 ≥ 此值 才会抛出异常）
 	//  */
 	// static checkDisableLevel(loginId, service, level) {
-	// 	this.#stpLogic.checkDisableLevel(loginId, service, level);
+	// 	this.stpLogic.checkDisableLevel(loginId, service, level);
 	// }
 
 	// /**
@@ -1409,7 +1409,7 @@ class StpUtil {
 	//  * @return {int} /
 	//  */
 	// static getDisableLevel(loginId) {
-	// 	return this.#stpLogic.getDisableLevel(loginId);
+	// 	return this.stpLogic.getDisableLevel(loginId);
 	// }
 
 	/**
@@ -1420,7 +1420,7 @@ class StpUtil {
 	 * @return {int} /
 	 */
 	static getDisableLevel(loginId, service) {
-		return this.#stpLogic.getDisableLevel(loginId, service);
+		return this.stpLogic.getDisableLevel(loginId, service);
 	}
 	
 	
@@ -1432,14 +1432,14 @@ class StpUtil {
 	//  * @param {Object} loginId 指定loginId
 	//  */
 	// static switchTo(loginId) {
-	// 	this.#stpLogic.switchTo(loginId);
+	// 	this.stpLogic.switchTo(loginId);
 	// }
 
 	/**
 	 * 结束临时切换身份
 	 */
 	static endSwitch() {
-		this.#stpLogic.endSwitch();
+		this.stpLogic.endSwitch();
 	}
 
 	/**
@@ -1448,7 +1448,7 @@ class StpUtil {
 	 * @return {boolean} /
 	 */
 	static isSwitch() {
-		return this.#stpLogic.isSwitch();
+		return this.stpLogic.isSwitch();
 	}
 
 	/**
@@ -1458,7 +1458,7 @@ class StpUtil {
 	 * @param {SaFunction} function 要执行的方法
 	 */
 	static switchTo(loginId, func) {
-		this.#stpLogic.switchTo(loginId, func);
+		this.stpLogic.switchTo(loginId, func);
 	}
 	
 
@@ -1472,7 +1472,7 @@ class StpUtil {
 	 * @param {Number} [safeTime] 维持时间(单位:秒,当第一个参数为业务标识时使用)
 	 */
 	static openSafe(serviceOrSafeTime, safeTime) {
-		this.#stpLogic.openSafe(serviceOrSafeTime, safeTime);
+		this.stpLogic.openSafe(serviceOrSafeTime, safeTime);
 	}
 
 
@@ -1482,7 +1482,7 @@ class StpUtil {
 	//  * @param {long} safeTime 维持时间 (单位: 秒) 
 	//  */
 	// static openSafe(safeTime) {
-	// 	this.#stpLogic.openSafe(safeTime);
+	// 	this.stpLogic.openSafe(safeTime);
 	// }
 
 	// /**
@@ -1492,7 +1492,7 @@ class StpUtil {
 	//  * @param {long} safeTime 维持时间 (单位: 秒)
 	//  */
 	// static openSafe(service, safeTime) {
-	// 	this.#stpLogic.openSafe(service, safeTime);
+	// 	this.stpLogic.openSafe(service, safeTime);
 	// }
 
 
@@ -1504,7 +1504,7 @@ class StpUtil {
 	 * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	 */
 	static isSafe(serviceOrTokenValue, service) {
-		return this.#stpLogic.isSafe(serviceOrTokenValue, service);
+		return this.stpLogic.isSafe(serviceOrTokenValue, service);
 	}
 
 
@@ -1514,7 +1514,7 @@ class StpUtil {
 	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	//  */
 	// static isSafe() {
-	// 	return this.#stpLogic.isSafe();
+	// 	return this.stpLogic.isSafe();
 	// }
 
 	// /**
@@ -1524,7 +1524,7 @@ class StpUtil {
 	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	//  */
 	// static isSafe(service) {
-	// 	return this.#stpLogic.isSafe(service);
+	// 	return this.stpLogic.isSafe(service);
 	// }
 
 	// /**
@@ -1535,14 +1535,14 @@ class StpUtil {
 	//  * @return {boolean} true=二级认证已通过, false=尚未进行二级认证或认证已超时
 	//  */
 	// static isSafe(tokenValue, service) {
-	// 	return this.#stpLogic.isSafe(tokenValue, service);
+	// 	return this.stpLogic.isSafe(tokenValue, service);
 	// }
 
 	// /**
 	//  * 校验：当前会话是否已通过二级认证，如未通过则抛出异常
 	//  */
 	// static checkSafe() {
-	// 	this.#stpLogic.checkSafe();
+	// 	this.stpLogic.checkSafe();
 	// }
 
 	/**
@@ -1551,7 +1551,7 @@ class StpUtil {
 	 * @param {String} service 业务标识
 	 */
 	static checkSafe(service) {
-		this.#stpLogic.checkSafe(service);
+		this.stpLogic.checkSafe(service);
 	}
 
 	// /**
@@ -1560,7 +1560,7 @@ class StpUtil {
 	//  * @return {long} 剩余有效时间
 	//  */
 	// static getSafeTime() {
-	// 	return this.#stpLogic.getSafeTime();
+	// 	return this.stpLogic.getSafeTime();
 	// }
 
 	/**
@@ -1570,14 +1570,14 @@ class StpUtil {
 	 * @return {long} 剩余有效时间
 	 */
 	static getSafeTime(service) {
-		return this.#stpLogic.getSafeTime(service);
+		return this.stpLogic.getSafeTime(service);
 	}
 
 	// /**
 	//  * 在当前会话 结束二级认证 
 	//  */
 	// static closeSafe() {
-	// 	this.#stpLogic.closeSafe();
+	// 	this.stpLogic.closeSafe();
 	// }
 
 	/**
@@ -1586,7 +1586,7 @@ class StpUtil {
 	 * @param {String} service 业务标识
 	 */
 	static closeSafe(service) {
-		this.#stpLogic.closeSafe(service);
+		this.stpLogic.closeSafe(service);
 	}
 
 
@@ -1598,7 +1598,7 @@ class StpUtil {
 	 * @return {SaLoginParameter} /
 	 */
 	static createSaLoginParameter() {
-		return this.#stpLogic.createSaLoginParameter();
+		return this.stpLogic.createSaLoginParameter();
 	}
 
 
@@ -1612,7 +1612,7 @@ class StpUtil {
 	 */
 	// @Deprecated
 	static getLoginDevice() {
-		return this.#stpLogic.getLoginDevice();
+		return this.stpLogic.getLoginDevice();
 	}
 
 	/**
@@ -1624,7 +1624,7 @@ class StpUtil {
 	 */
 	// @Deprecated
 	static getLoginDeviceByToken(tokenValue) {
-		return this.#stpLogic.getLoginDeviceByToken(tokenValue);
+		return this.stpLogic.getLoginDeviceByToken(tokenValue);
 	}
 
 }

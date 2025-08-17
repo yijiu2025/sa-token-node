@@ -24,7 +24,7 @@ import SaTokenContext from "./SaTokenContext.js";
 /**
  * Sa-Token 上下文处理器次级实现：只读上下文
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.42.0
  */
 

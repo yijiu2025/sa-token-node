@@ -20,7 +20,7 @@ import SaTokenDaoBySessionFollowObject from "./SaTokenDaoBySessionFollowObject";
 /**
  * SaTokenDao 次级实现，Object 读写跟随 String 读写 (推荐中间件型缓存实现 implements 此接口)
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 

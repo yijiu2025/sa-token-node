@@ -22,7 +22,7 @@
 /**
  * Sa-Token Cookie写入 相关配置
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.27.0
  */
 class SaCookieConfig {

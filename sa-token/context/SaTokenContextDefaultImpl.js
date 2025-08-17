@@ -29,7 +29,7 @@ import SaTokenContextException from "../exception/SaTokenContextException.js";
  * 	说明你引入的依赖有问题或者错误的调用了 Sa-Token 的API， 请在 [ 在线开发文档 → 附录 → 常见问题排查 ] 中按照提示进行排查
  * </p>
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

@@ -21,7 +21,7 @@ import SaSerializerTemplate from "../SaSerializerTemplate.js";
 /**
  * 序列化器: 使用 json 转换器
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 class SaSerializerTemplateForJson extends SaSerializerTemplate {

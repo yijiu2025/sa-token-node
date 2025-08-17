@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException";
 /**
  * 一个异常：代表会话未能通过 Http Digest 认证校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.38.0
  */
 

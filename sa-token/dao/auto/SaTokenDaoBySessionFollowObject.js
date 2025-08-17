@@ -15,14 +15,14 @@
  */
 
 
-import SaTokenDao from "../../dao/SaTokenDao.js";
+import SaTokenDao from "../SaTokenDao.js";
 import SaSession from "../../session/SaSession.js";
 import SaStrategy from "../../strategy/SaStrategy.js";
 
 /**
  * SaTokenDao 次级实现：SaSession 读写跟随 Object 读写
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.41.0
  */
 

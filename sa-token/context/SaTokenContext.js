@@ -24,7 +24,7 @@ import SaTokenContextModelBox from "./model/SaTokenContextModelBox.js";
  *
  * <p> 上下文处理器封装了当前应用环境的底层操作，是 Sa-Token 对接不同 web 框架的关键，详细可参考在线文档 “自定义 SaTokenContext 指南”章节 </p>
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.16.0
  */
 

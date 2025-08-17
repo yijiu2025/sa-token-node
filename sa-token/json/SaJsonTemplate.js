@@ -17,7 +17,7 @@
 /**
  * JSON 转换器 
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.30.0
  */
 

@@ -19,7 +19,7 @@ import FirewallCheckException from "./FirewallCheckException.js";
 /**
  * 一个异常：代表请求 path 无效或非法
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.37.0
  */
 

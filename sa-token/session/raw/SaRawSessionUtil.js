@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import SaManager from "../SaManager.js";
+import SaManager from "../../SaManager.js";
 import SaSession from "../SaSession.js";
 import SaStrategy from "../../strategy/SaStrategy.js";
 

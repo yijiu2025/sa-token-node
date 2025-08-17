@@ -18,7 +18,7 @@
 /**
  * Sa-Token 全局过滤器 - 认证策略封装，方便 lambda 表达式风格调用
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.17.0
  */
 

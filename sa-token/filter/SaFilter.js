@@ -22,7 +22,7 @@ import SaFilterErrorStrategy from "./SaFilterErrorStrategy";
  *  1、封装共同代码。
  *  2、定义统一的行为接口。
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.34.0
  */
 

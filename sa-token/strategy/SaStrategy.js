@@ -67,9 +67,9 @@ class SaStrategy {
 	/**
 	 * 创建 Token 的策略
 	 */
-	createToken = (loginId, loginType) => {
+	createToken = async (loginId, loginType) => {
 		// 根据配置的tokenStyle生成不同风格的token
-		const tokenStyle = SaManager.getStpLogic(loginType).getConfigOrGlobal().getTokenStyle();
+		const tokenStyle = (await SaManager.getStpLogic(loginType).getConfigOrGlobal()).getTokenStyle();
 
 		switch (tokenStyle) {
 			// uuid
@@ -109,8 +109,8 @@ class SaStrategy {
      * 
      * @return {SaCreateSessionFunction} 一个Session对象
 	 */
-	createSession = (sessionId) => {
-        return new SaSession(sessionId);
+	createSession = async (sessionId) => {
+        return await new SaSession(sessionId);
     };
 
 	/**
@@ -149,14 +149,15 @@ class SaStrategy {
 	 * 生成唯一式 token 的算法
      * @return {SaGenerateUniqueTokenFunction} 生成唯一 token 的算法
 	 */
-	generateUniqueToken = (elementName, maxTryTimes, createTokenFunction, checkTokenFunction) => {
+	generateUniqueToken = async (elementName, maxTryTimes, createTokenFunction, checkTokenFunction) => {
 
 		// 为方便叙述，以下代码注释均假设在处理生成 token 的场景，但实际上本方法也可能被用于生成 code、ticket 等
 
 		// 循环生成
 		for (let i = 1; ; i++) {
 			// 生成 token
-			let token = createTokenFunction.get();
+			let token = await createTokenFunction();
+			//console.log(`生成的 token: ${token}`);
 
 			// 如果 maxTryTimes == -1，表示不做唯一性验证，直接返回
 			if (maxTryTimes == -1) {

@@ -358,15 +358,43 @@ class SaResult extends Map {
 	 * @return {String} 转换后的值
 	 */
 	transValue(value) {
+		console.log(value)
 		if(value == null) {
 			return null;
 		}
 		if(typeof value === 'string') {
 			return "\"" + value + "\"";
 		}
-		return String(value);
+		return this.toObject(value);
 	}
+
+	/* 转换为普通对象 */
+    toObject(value) {
+        // 深度克隆对象，避免引用问题
+        const result = JSON.parse(JSON.stringify(value));
+        
+        // 特殊处理 Date 对象
+        Object.keys(result).forEach(key => {
+            if (result[key] instanceof Date) {
+                result[key] = result[key].toISOString();
+            }
+        });
+        console.log(result);
+        return result;
+    }
+	toJSON() {
+        const obj = {};
+        for (const [key, value] of this) {
+            obj[key] = value;
+        }
+        return obj;
+    }
 	
 }
 
 export default SaResult;
+
+// module.exports = {
+//     SaResult,
+//     // saResultMiddleware
+// };

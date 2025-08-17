@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import SaTokenException from "./SaTokenException";
-import SaFoxUtil from "../util/SaFoxUtil";
+import SaTokenException from "./SaTokenException.js";
+import SaFoxUtil from "../util/SaFoxUtil.js";
 
 /**
  * 一个异常：代表会话未能通过登录认证校验
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.10.0
  */
 

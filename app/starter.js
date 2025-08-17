@@ -1,13 +1,29 @@
 'use strict';
 import fs from 'fs';
 import path from 'path';
+
+//import createApp from './app.js';
 // const fs = require('fs');
 // const path = require('path');
+//import SaManager from '../sa-token/SaManager.js';
+import StpUtil from '../sa-token/stp/StpUtil.js';
+import SaManager from '../sa-token/SaManager.js';
+import SaResult from '../sa-token/util/SaResult.js';
+global.SaResult = SaResult;
 
-import SaSecureUtil from '../sa-token/secure/SaSecureUtil.js';
-import SaTotpTemplate from '../sa-token/secure/totp/SaTotpTemplate.js';
+// global.StpUtil = StpUtil;
+// global.SaManager = SaManager;
+// SaManager.getConfig();
+// SaManager.setConfig(await SaManager.getConfig());
+// StpUtil.login(1111111); 
+//SaManager.getConfig();
+//SaManager.getLog()
+// import StpUtil from '../sa-token/stp/StpUtil.js';
+// import SaManager from '../sa-token/SaManager.js';
+// import SaSecureUtil from '../sa-token/secure/SaSecureUtil.js';
+// import SaTotpTemplate from '../sa-token/secure/totp/SaTotpTemplate.js';
 
-import SaHexUtil from '../sa-token/util/SaHexUtil.js';
+// import SaHexUtil from '../sa-token/util/SaHexUtil.js';
 // import SaSession from '../sa-token/session/SaSession.js';
 // import SaTokenConsts from '../sa-token/util/SaTokenConsts.js';
 
@@ -31,8 +47,8 @@ import SaHexUtil from '../sa-token/util/SaHexUtil.js';
 
 // abc("aa");
 //import { randomUUID } from 'crypto';
-import SaFoxUtil from '../sa-token/util/SaFoxUtil.js';
-console.log(SaFoxUtil.valueToString("{true: 3, aa: 1}"));
+// import SaFoxUtil from '../sa-token/util/SaFoxUtil.js';
+// console.log(SaFoxUtil.valueToString("{true: 3, aa: 1}"));
 //const uniqueId = randomUUID();
 	// randomTempToken(value) {
 	// 	return randomUUID().replace(/-/g, "");
@@ -59,15 +75,8 @@ console.log(SaFoxUtil.valueToString("{true: 3, aa: 1}"));
 
 
 
-
-
-
-
-
-
-
 function applyConfig () {
-    // // 获取工作目录
+    // 获取工作目录
     // const baseDir = path.resolve(__dirname, '../');
     // config.init(baseDir);
     // const files = fs.readdirSync(path.resolve(`${baseDir}/app/config`));
@@ -77,18 +86,18 @@ function applyConfig () {
     //   config.getConfigFromFile(`app/config/${file}`);
     // }
   
-    // // 加载其它配置文件
+    // 加载其它配置文件
     // config.getConfigFromFile('app/extension/file/config.js');
     // config.getConfigFromFile('app/extension/socket/config.js');
   }
 
 
 // const run = async () => {
-//     applyConfig();
-//     const { createApp } = require('./app');
+//     //applyConfig();
+//     //const { createApp } = require('./app');
 //     const app = await createApp();
-//     const port = config.getItem('port');
-//     app.listen(port, () => {
+//     const port = 8080;
+//     app.listen(8080, () => {
 //       console.log(`listening at http://localhost:${port}`);
 //     });
 //   };

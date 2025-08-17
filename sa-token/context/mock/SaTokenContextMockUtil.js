@@ -23,7 +23,7 @@ import SaStorageForMock from './SaStorageForMock';
 /**
  * Sa-Token Mock 上下文 操作工具类
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.42.0
  */
 
@@ -31,11 +31,12 @@ class SaTokenContextMockUtil {
     /**
      * 写入 Mock 上下文
      */
-    static setMockContext() {
-        const request = new SaRequestForMock();
-        const response = new SaResponseForMock();
-        const storage = new SaStorageForMock();
-        SaManager.getSaTokenContext().setContext(request, response, storage);
+    static async setMockContext() {
+        const request = await new SaRequestForMock();
+        const response = await new SaResponseForMock();
+        const storage = await new SaStorageForMock();
+        const context = await SaManager.getSaTokenContext();
+        context.setContext(request, response, storage);
     }
 
     /**

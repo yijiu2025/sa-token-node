@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException.js";
 /**
  * 一个异常：代表组件或方法未被提供有效的实现
  * 
- * @author click33
+ * @author click33 qirly
  * @since 1.33.0
  */
 

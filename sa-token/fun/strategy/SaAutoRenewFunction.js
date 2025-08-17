@@ -23,7 +23,7 @@ import StpLogic from "../../stp/StpLogic.js";
  * <p>  参数：StpLogic 实例  </p>
  * <p>  返回：Boolean 是否续期  </p>
  *
- * @author fangzhengjin
+ * @author fangzhengjin qirly
  * @since 1.41.0
  */
 // @FunctionalInterface

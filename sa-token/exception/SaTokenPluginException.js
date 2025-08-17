@@ -19,7 +19,7 @@ import SaTokenException from "./SaTokenException";
 /**
  * 一个异常：代表插件安装过程中出现异常
  *
- * @author click33
+ * @author click33 qirly
  * @since 1.28.0
  */
 

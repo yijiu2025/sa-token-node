@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import SaAnnotationHandlerInterface from '../annotation/handler/SaAnnotationHandlerInterface.js'
-import SaTokenConfig from '../config/SaTokenConfig.js'
-import SaLoginParameter from '../stp/parameter/SaLoginParameter.js'
-import StpLogic from '../stp/StpLogic.js'
+// import SaAnnotationHandlerInterface from '../annotation/handler/SaAnnotationHandlerInterface.js'
+// import SaTokenConfig from '../config/SaTokenConfig.js'
+// import SaLoginParameter from '../stp/parameter/SaLoginParameter.js'
+// import StpLogic from '../stp/StpLogic.js'
 
 /**
  * Sa-Token 侦听器
