@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import StpUtil from '../sa-token/stp/StpUtil.js';
+
 //import StpUtil from "./stp/StpUtil.js";
 import StpLogic from "./stp/StpLogic.js";
 import SaTokenConfig from "./config/SaTokenConfig.js";
@@ -88,7 +88,7 @@ class SaManager {
      * 内部方法 - 设置配置
      * @param {SaTokenConfig} config 配置对象
      */
-    static setConfigMethod(config) {
+    static async setConfigMethod(config) {
         this.config = config;
     }
 
@@ -98,9 +98,8 @@ class SaManager {
      */
     static async getConfig() {
         if (this.config === null) {
-            this.setConfigMethod(await SaTokenConfigFactory.createConfig());
+            await this.setConfigMethod( await SaTokenConfigFactory.createConfig());
         }
-        // console.log(this.config.getDynamicActiveTimeout());
         return this.config;
     }
 
@@ -142,9 +141,8 @@ class SaManager {
      */
     static async getSaTokenDao() {
         if (this.saTokenDao == null) {
-            this.setSaTokenDaoMethod(await new SaTokenDaoDefaultImpl());
+            await this.setSaTokenDaoMethod(await new SaTokenDaoDefaultImpl());
         }
-        // console.log("aaa",this.saTokenDao);
         return this.saTokenDao;
     }
 

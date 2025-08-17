@@ -65,7 +65,7 @@ class SaTokenConfigFactory {
             // 如果找不到配置文件，返回默认配置而不是抛出异常
             throw new SaTokenException("配置文件(" + path + ")加载失败").setCode(SaErrorCode.CODE_10021);
         }
-        return Object.assign(new SaTokenConfig(), config || {});
+        return await Object.assign(new SaTokenConfig(), config || {});
         //return this.initPropByMap(map, new SaTokenConfig());
     }
 

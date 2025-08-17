@@ -31,9 +31,9 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {any}
      */
-    get(key) {
-        throw new Error('Method get() must be implemented');
-    }
+    // get(key) {
+    //     throw new Error('Method get() must be implemented');
+    // }
 
     /**
      * 取值 (指定默认值)
@@ -41,8 +41,8 @@ class SaGetValueInterface {
      * @param {T} defaultValue 
      * @returns {T}
      */
-    get(key, defaultValue) {
-        return this.getValueByDefaultValue(this.get(key), defaultValue);
+    async get(key, defaultValue) {
+        return await this.getValueByDefaultValue(await this.get(key), defaultValue);
     }
 
     /**
@@ -50,8 +50,8 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {string|null}
      */
-    getString(key) {
-        const value = this.get(key);
+    async getString(key) {
+        const value = await this.get(key);
         return value === null ? null : String(value);
     }
 
@@ -60,8 +60,8 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {number}
      */
-    getInt(key) {
-        return this.getValueByDefaultValue(this.get(key), 0);
+    async getInt(key) {
+        return await this.getValueByDefaultValue(await this.get(key), 0);
     }
 
     /**
@@ -69,8 +69,8 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {bigint}
      */
-    getLong(key) {
-        return this.getValueByDefaultValue(this.get(key), 0n);
+    async getLong(key) {
+        return await this.getValueByDefaultValue(await this.get(key), 0n);
     }
 
     /**
@@ -78,8 +78,8 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {number}
      */
-    getDouble(key) {
-        return this.getValueByDefaultValue(this.get(key), 0.0);
+    async getDouble(key) {
+        return await this.getValueByDefaultValue(await this.get(key), 0.0);
     }
 
     /**
@@ -87,19 +87,19 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {number}
      */
-    getFloat(key) {
-        return this.getValueByDefaultValue(this.get(key), 0.0);
+    async getFloat(key) {
+        return await this.getValueByDefaultValue(await this.get(key), 0.0);
     }
 
-    /**
-     * 取值 (指定转换类型)
-     * @param {string} key 
-     * @param {Function} cs 类型构造函数
-     * @returns {T}
-     */
-    getModel(key, cs) {
-        return SaFoxUtil.getValueByType(this.get(key), cs);
-    }
+    // /**
+    //  * 取值 (指定转换类型)
+    //  * @param {string} key 
+    //  * @param {Function} cs 类型构造函数
+    //  * @returns {T}
+    //  */
+    // async getModel(key, cs) {
+    //     return SaFoxUtil.getValueByType(await this.get(key), cs);
+    // }
 
     /**
      * 取值 (指定转换类型, 并指定默认值)
@@ -108,9 +108,12 @@ class SaGetValueInterface {
      * @param {any} defaultValue 
      * @returns {T}
      */
-    getModel(key, cs, defaultValue) {
-        const model = this.getModel(key, cs);
-        return this.valueIsNull(model) ? defaultValue : model;
+    async getModel(key, cs, defaultValue = undefined) {
+        const value = await this.get(key);
+        if (this.valueIsNull(value)) {
+            return defaultValue;
+        }
+        return SaFoxUtil.getValueByType(value, cs);
     }
 
     /**
@@ -118,8 +121,8 @@ class SaGetValueInterface {
      * @param {string} key 
      * @returns {boolean}
      */
-    has(key) {
-        return !this.valueIsNull(this.get(key));
+    async has(key) {
+        return !this.valueIsNull(await this.get(key));
     }
 
     /**
@@ -137,11 +140,11 @@ class SaGetValueInterface {
      * @param {T} defaultValue 
      * @returns {T}
      */
-    getValueByDefaultValue(value, defaultValue) {
+    async getValueByDefaultValue(value, defaultValue) {
         if (this.valueIsNull(value)) {
             return defaultValue;
         }
-        return SaFoxUtil.getValueByType(value, defaultValue?.constructor);
+        return await SaFoxUtil.getValueByType(value, defaultValue?.constructor);
     }
 }
 

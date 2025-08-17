@@ -44,27 +44,29 @@ class SaApplication extends SaSetValueInterface {
      * @param {string} key 键名
      * @returns {any} 存储的值
      */
-    get(key) {
-        return SaManager.getSaTokenDao().getObject(this.splicingDataKey(key));
+    async get(key) {
+        const saTokenDao = await SaManager.getSaTokenDao();
+        return saTokenDao.getObject(await this.splicingDataKey(key));
     }
 
-    /**
-     * 写值（永不过期）
-     * @param {string} key 键名
-     * @param {any} value 值
-     * @returns {SaApplication} 对象自身（链式调用）
-     */
-    set(key, value) {
-        return this.set(key, value, SaTokenDao.NEVER_EXPIRE);  // -1 表示永不过期
-    }
+    // /**
+    //  * 写值（永不过期）
+    //  * @param {string} key 键名
+    //  * @param {any} value 值
+    //  * @returns {SaApplication} 对象自身（链式调用）
+    //  */
+    // set(key, value) {
+    //     return this.set(key, value, SaTokenDao.NEVER_EXPIRE);  // -1 表示永不过期
+    // }
 
     /**
      * 删值
      * @param {string} key 键名
      * @returns {SaApplication} 对象自身（链式调用）
      */
-    delete(key) {
-        SaManager.getSaTokenDao().deleteObject(this.splicingDataKey(key));
+    async delete(key) {
+        const saTokenDao = await SaManager.getSaTokenDao();
+        saTokenDao.deleteObject(await this.splicingDataKey(key));
         return this;
     }
 
@@ -77,8 +79,9 @@ class SaApplication extends SaSetValueInterface {
      * @param {number} ttl 有效时间（单位：秒）
      * @returns {SaApplication} 对象自身（链式调用）
      */
-    set(key, value, ttl) {
-        SaManager.getSaTokenDao().setObject(this.splicingDataKey(key), value, ttl);
+    async set(key, value, ttl = SaTokenDao.NEVER_EXPIRE) {  //SaTokenDao.NEVER_EXPIRE  // -1 表示永不过期
+        const saTokenDao = await SaManager.getSaTokenDao();
+        await saTokenDao.setObject(await this.splicingDataKey(key), value, ttl);
         return this;
     }
 
@@ -86,10 +89,10 @@ class SaApplication extends SaSetValueInterface {
      * 返回当前存入的所有 key
      * @returns {string[]} key 列表
      */
-    keys() {
+    async keys() {
         // 从缓存中查询出所有此前缀的 key
-        const prefix = this.splicingDataKey("");
-        const list = SaManager.getSaTokenDao().searchData(prefix, "", 0, -1, true);
+        const prefix = await this.splicingDataKey("");
+        const list = await (await SaManager.getSaTokenDao()).searchData(prefix, "", 0, -1, true);
         
         // 裁减掉固定前缀，保留 key 名称
         const prefixLength = prefix.length;
@@ -106,10 +109,10 @@ class SaApplication extends SaSetValueInterface {
     /**
      * 清空当前存入的所有 key
      */
-    clear() {
-        const keys = this.keys();
+    async clear() {
+        const keys = await this.keys();
         for (const key of keys) {
-            this.delete(key);
+            await this.delete(key);
         }
     }
 
@@ -118,8 +121,9 @@ class SaApplication extends SaSetValueInterface {
      * @param {string} key 原始 key
      * @returns {string} 拼接后的 key 值
      */
-    splicingDataKey(key) {
-        return `${SaManager.getConfig().getTokenName()}:var:${key}`;
+    async splicingDataKey(key) {
+        const config = await SaManager.getConfig();
+        return `${config.getTokenName()}:var:${key}`;
     }
 
 

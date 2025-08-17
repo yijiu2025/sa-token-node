@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import ApplicationInfo from "../../application/ApplicationInfo";
-import SaRequest from "../model/SaRequest";
+import ApplicationInfo from "../../application/ApplicationInfo.js";
+import SaRequest from "../model/SaRequest.js";
 
 /**
  * 对 SaRequest 包装类的实现（Mock 版）

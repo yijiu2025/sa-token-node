@@ -175,28 +175,29 @@ class SaTimedCache {
     async initRefreshThread() {
         // 如果开发者配置了 <=0 的值，则不启动定时清理 // 休眠N秒 
         const config = await SaManager.getConfig();
-        const refreshPeriod = config.getDataRefreshPeriod();
+        const refreshPeriod = await config.getDataRefreshPeriod();
         if (refreshPeriod <= 0) {
             return;
         }
 
         // 启动定时刷新
         this.refreshFlag = true;
-        const refreshTask = () => {
+        const refreshTask = async () => {
             if (!this.refreshFlag) return;
             // 执行清理
             try {
-                this.refreshDataMap();
+                await this.refreshDataMap();
             } catch (e) {
                 console.error('定时清理出错:', e);
             }
 
-            refreshPeriod = SaManager.getConfig().getDataRefreshPeriod();
+            const config = await SaManager.getConfig();
+            refreshPeriod = await config.getDataRefreshPeriod();
             if(refreshPeriod <= 0) {
 				refreshPeriod = 1;
             }
             
-            setTimeout(refreshTask, refreshPeriod * 1000);
+            //setTimeout(refreshTask, refreshPeriod * 1000);
         };
 
         this.refreshTimer = setTimeout(refreshTask, refreshPeriod * 1000);

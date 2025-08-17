@@ -52,10 +52,10 @@ class SaSetValueInterface extends SaGetValueInterface {
      * @param {Function} fun 
      * @returns {T}
      */
-    get(key, fun) {
-        let value = this.get(key);
-        if (value === null) {
-            value = fun();
+    async get(key, fun) {
+        let value = await this.get(key);
+        if (value == null) {
+            value =  await fun();
             this.set(key, value);
         }
         return value;
@@ -67,9 +67,9 @@ class SaSetValueInterface extends SaGetValueInterface {
      * @param {any} value 
      * @returns {SaSetValueInterface}
      */
-    setByNull(key, value) {
-        if (!this.has(key)) {
-            this.set(key, value);
+    async setByNull(key, value) {
+        if (!await this.has(key)) {
+            await this.set(key, value);
         }
         return this;
     }
